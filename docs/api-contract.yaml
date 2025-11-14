@@ -1,0 +1,1706 @@
+openapi: 3.1.0
+info:
+  title: System Zarządzania Biblioteką - API
+  version: 1.0.0
+  description: |
+    REST API dla systemu zarządzania biblioteką zgodnie z wymaganiami projektu.
+
+    **Serwisy:**
+    - Auth Service (port 8001) - Autoryzacja i użytkownicy
+    - Catalog Service (port 8002) - Książki i egzemplarze
+    - Loan Service (port 8003) - Wypożyczenia i rezerwacje
+
+    **Role (RBAC):**
+    - READER - Czytelnik
+    - LIBRARIAN - Bibliotekarz
+    - ADMIN - Administrator
+
+  contact:
+    name: Zespół projektowy
+    email: kontakt@biblioteka.pl
+
+servers:
+  - url: http://localhost:8000
+    description: API Gateway (wszystkie serwisy)
+  - url: http://localhost:8001
+    description: Auth Service
+  - url: http://localhost:8002
+    description: Catalog Service
+  - url: http://localhost:8003
+    description: Loan Service
+
+tags:
+  - name: Auth
+    description: Autoryzacja i uwierzytelnianie (F1-F3, F2a)
+  - name: Profile
+    description: Profil użytkownika (F20)
+  - name: Users
+    description: Zarządzanie użytkownikami (F19, F26-F28)
+  - name: Catalog
+    description: Katalog książek - przeglądanie (F4-F7)
+  - name: Books
+    description: Zarządzanie książkami (F15)
+  - name: Copies
+    description: Zarządzanie egzemplarzami (F16)
+  - name: Reservations
+    description: Rezerwacje (F8-F10, F18)
+  - name: Loans
+    description: Wypożyczenia (F11-F14, F17)
+  - name: Notifications
+    description: Powiadomienia (F21 - DODATEK)
+  - name: Audit
+    description: Logi audytowe (F24 - DODATEK)
+  - name: Settings
+    description: Ustawienia systemowe (F29 - OPCJONALNIE)
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Token JWT otrzymany po zalogowaniu (F2)
+
+  schemas:
+    # Odpowiedzi błędów
+    ErrorResponse:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code:
+              type: string
+              example: "VALIDATION_ERROR"
+            message:
+              type: string
+              example: "Nieprawidłowe dane wejściowe"
+            details:
+              type: object
+              additionalProperties: true
+
+    # Paginacja
+    PaginationMeta:
+      type: object
+      required: [page, size, total, pages]
+      properties:
+        page:
+          type: integer
+          example: 1
+          description: Aktualna strona
+        size:
+          type: integer
+          example: 20
+          description: Liczba elementów na stronę
+        total:
+          type: integer
+          example: 150
+          description: Łączna liczba elementów
+        pages:
+          type: integer
+          example: 8
+          description: Łączna liczba stron
+
+    # Użytkownik
+    UserRole:
+      type: string
+      enum: [READER, LIBRARIAN, ADMIN]
+      example: READER
+
+    UserStatus:
+      type: string
+      enum: [ACTIVE, BLOCKED]
+      example: ACTIVE
+
+    UserResponse:
+      type: object
+      required: [id, email, first_name, last_name, role, is_active, created_at]
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        first_name:
+          type: string
+        last_name:
+          type: string
+        phone:
+          type: string
+          nullable: true
+        role:
+          $ref: "#/components/schemas/UserRole"
+        is_active:
+          type: boolean
+        blocked_at:
+          type: string
+          format: date-time
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+
+    # Książka
+    BookResponse:
+      type: object
+      required: [id, isbn, title, authors, publisher, year]
+      properties:
+        id:
+          type: string
+          format: uuid
+        isbn:
+          type: string
+          example: "978-83-246-8234-5"
+        title:
+          type: string
+        authors:
+          type: array
+          items:
+            type: string
+        publisher:
+          type: string
+        year:
+          type: integer
+        pages:
+          type: integer
+          nullable: true
+        genre:
+          type: string
+          nullable: true
+        description:
+          type: string
+          nullable: true
+        cover_url:
+          type: string
+          nullable: true
+        available_copies:
+          type: integer
+          description: Liczba dostępnych egzemplarzy
+        total_copies:
+          type: integer
+          description: Łączna liczba egzemplarzy
+
+    # Egzemplarz
+    CopyStatus:
+      type: string
+      enum: [AVAILABLE, RESERVED, LOANED, MAINTENANCE, DAMAGED, LOST]
+      example: AVAILABLE
+
+    CopyCondition:
+      type: string
+      enum: [GOOD, WORN, DAMAGED, LOST]
+      example: GOOD
+
+    CopyResponse:
+      type: object
+      required: [id, book_id, inventory_number, status, condition]
+      properties:
+        id:
+          type: string
+          format: uuid
+        book_id:
+          type: string
+          format: uuid
+        inventory_number:
+          type: string
+        status:
+          $ref: "#/components/schemas/CopyStatus"
+        condition:
+          $ref: "#/components/schemas/CopyCondition"
+        notes:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+
+    # Rezerwacja
+    ReservationStatus:
+      type: string
+      enum: [ACTIVE, CANCELLED, EXPIRED, COMPLETED]
+      example: ACTIVE
+
+    ReservationResponse:
+      type: object
+      required: [id, user_id, book_copy_id, status, reserved_at, expires_at]
+      properties:
+        id:
+          type: string
+          format: uuid
+        user_id:
+          type: string
+          format: uuid
+        book_copy_id:
+          type: string
+          format: uuid
+        status:
+          $ref: "#/components/schemas/ReservationStatus"
+        reserved_at:
+          type: string
+          format: date-time
+        expires_at:
+          type: string
+          format: date-time
+        cancelled_at:
+          type: string
+          format: date-time
+          nullable: true
+        cancellation_reason:
+          type: string
+          nullable: true
+        book:
+          $ref: "#/components/schemas/BookResponse"
+
+    # Wypożyczenie
+    LoanStatus:
+      type: string
+      enum: [ACTIVE, RETURNED, OVERDUE]
+      example: ACTIVE
+
+    LoanResponse:
+      type: object
+      required:
+        [
+          id,
+          user_id,
+          book_copy_id,
+          loaned_at,
+          due_date,
+          status,
+          fine_amount,
+          fine_paid,
+        ]
+      properties:
+        id:
+          type: string
+          format: uuid
+        user_id:
+          type: string
+          format: uuid
+        book_copy_id:
+          type: string
+          format: uuid
+        reservation_id:
+          type: string
+          format: uuid
+          nullable: true
+        loaned_at:
+          type: string
+          format: date-time
+        due_date:
+          type: string
+          format: date-time
+        returned_at:
+          type: string
+          format: date-time
+          nullable: true
+        extended_at:
+          type: string
+          format: date-time
+          nullable: true
+        status:
+          $ref: "#/components/schemas/LoanStatus"
+        fine_amount:
+          type: number
+          format: decimal
+          minimum: 0
+          maximum: 100
+        fine_paid:
+          type: boolean
+        fine_paid_at:
+          type: string
+          format: date-time
+          nullable: true
+        book:
+          $ref: "#/components/schemas/BookResponse"
+
+# ============================================
+# ENDPOINTY
+# ============================================
+paths:
+  # ==========================================
+  # AUTH SERVICE (Port 8001)
+  # ==========================================
+
+  /api/auth/register:
+    post:
+      tags: [Auth]
+      summary: UC1 - Rejestracja (F1)
+      operationId: registerUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password, first_name, last_name]
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  format: password
+                  minLength: 8
+                  description: Min. 8 znaków, wielka litera, cyfra
+                first_name:
+                  type: string
+                  minLength: 2
+                  maxLength: 100
+                last_name:
+                  type: string
+                  minLength: 2
+                  maxLength: 100
+                phone:
+                  type: string
+                  nullable: true
+      responses:
+        "201":
+          description: Użytkownik zarejestrowany
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  access_token:
+                    type: string
+                  refresh_token:
+                    type: string
+                  token_type:
+                    type: string
+                    example: "Bearer"
+                  user:
+                    $ref: "#/components/schemas/UserResponse"
+        "400":
+          description: Błąd walidacji
+        "409":
+          description: Email już istnieje
+
+  /api/auth/login:
+    post:
+      tags: [Auth]
+      summary: UC2 - Logowanie (F2)
+      operationId: loginUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  format: password
+      responses:
+        "200":
+          description: Logowanie pomyślne
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [access_token, refresh_token, token_type, user]
+                properties:
+                  access_token:
+                    type: string
+                    description: Token ważny 30 minut
+                  refresh_token:
+                    type: string
+                    description: Token ważny 14 dni
+                  token_type:
+                    type: string
+                    example: "Bearer"
+                  user:
+                    $ref: "#/components/schemas/UserResponse"
+        "401":
+          description: Nieprawidłowe dane logowania
+        "403":
+          description: Konto zablokowane
+
+  /api/auth/refresh:
+    post:
+      tags: [Auth]
+      summary: UC4 - Odświeżanie tokenu (F2a)
+      operationId: refreshToken
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Token odświeżony
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  access_token:
+                    type: string
+                  token_type:
+                    type: string
+                    example: "Bearer"
+        "401":
+          description: Nieprawidłowy refresh token
+
+  /api/auth/logout:
+    post:
+      tags: [Auth]
+      summary: UC3 - Wylogowanie (F3)
+      operationId: logoutUser
+      security:
+        - BearerAuth: []
+      responses:
+        "204":
+          description: Wylogowano pomyślnie
+        "401":
+          description: Brak autoryzacji
+
+  /api/auth/me:
+    get:
+      tags: [Profile]
+      summary: UC5 - Pobranie własnego profilu
+      operationId: getMyProfile
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Dane użytkownika
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+        "401":
+          description: Brak autoryzacji
+
+  /api/auth/profile:
+    patch:
+      tags: [Profile]
+      summary: UC5 - Edycja profilu (F20)
+      operationId: updateProfile
+      security:
+        - BearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                first_name:
+                  type: string
+                last_name:
+                  type: string
+                phone:
+                  type: string
+      responses:
+        "200":
+          description: Profil zaktualizowany
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+        "400":
+          description: Błąd walidacji
+        "401":
+          description: Brak autoryzacji
+
+  /api/auth/password:
+    patch:
+      tags: [Profile]
+      summary: UC6 - Zmiana hasła (F20)
+      operationId: changePassword
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [old_password, new_password]
+              properties:
+                old_password:
+                  type: string
+                  format: password
+                new_password:
+                  type: string
+                  format: password
+                  minLength: 8
+      responses:
+        "204":
+          description: Hasło zmienione
+        "400":
+          description: Błąd walidacji
+        "401":
+          description: Nieprawidłowe stare hasło
+
+  # ==========================================
+  # USERS (Admin) - Auth Service
+  # ==========================================
+
+  /api/users:
+    get:
+      tags: [Users]
+      summary: UC31/UC19 - Lista użytkowników (F19)
+      operationId: listUsers
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 20
+            maximum: 50
+        - name: role
+          in: query
+          schema:
+            $ref: "#/components/schemas/UserRole"
+        - name: is_active
+          in: query
+          schema:
+            type: boolean
+        - name: search
+          in: query
+          schema:
+            type: string
+          description: Wyszukiwanie po email/imieniu/nazwisku
+      responses:
+        "200":
+          description: Lista użytkowników
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/UserResponse"
+                  meta:
+                    $ref: "#/components/schemas/PaginationMeta"
+        "403":
+          description: Brak uprawnień (tylko Librarian/Admin)
+
+  /api/users/{user_id}/role:
+    patch:
+      tags: [Users]
+      summary: UC33 - Zmiana roli (F26)
+      operationId: changeUserRole
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [role]
+              properties:
+                role:
+                  $ref: "#/components/schemas/UserRole"
+      responses:
+        "200":
+          description: Rola zmieniona
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+        "400":
+          description: Nie można zmienić własnej roli
+        "403":
+          description: Brak uprawnień (tylko Admin)
+        "404":
+          description: Użytkownik nie znaleziony
+
+  /api/users/{user_id}/block:
+    post:
+      tags: [Users]
+      summary: UC34 - Blokowanie użytkownika (F27)
+      operationId: blockUser
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason:
+                  type: string
+                  maxLength: 500
+      responses:
+        "200":
+          description: Użytkownik zablokowany
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+        "400":
+          description: Nie można zablokować siebie/innego admina
+        "403":
+          description: Brak uprawnień (tylko Admin)
+
+  /api/users/{user_id}/unblock:
+    post:
+      tags: [Users]
+      summary: UC35 - Odblokowanie użytkownika (F27a)
+      operationId: unblockUser
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Użytkownik odblokowany
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+        "403":
+          description: Brak uprawnień (tylko Admin)
+
+  /api/users/{user_id}:
+    delete:
+      tags: [Users]
+      summary: UC36 - Usunięcie użytkownika (F28 - DODATEK)
+      operationId: deleteUser
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "204":
+          description: Użytkownik usunięty (GDPR)
+        "400":
+          description: Użytkownik ma aktywne wypożyczenia
+        "403":
+          description: Brak uprawnień (tylko Admin)
+
+  # ==========================================
+  # CATALOG SERVICE (Port 8002)
+  # ==========================================
+
+  /api/catalog/books:
+    get:
+      tags: [Catalog]
+      summary: UC4/UC7 - Przeglądanie katalogu (F4)
+      operationId: browseBooks
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 20
+            maximum: 50
+        - name: search
+          in: query
+          schema:
+            type: string
+          description: UC8 - Wyszukiwanie (F5) w tytule/autorze/ISBN
+        - name: genre
+          in: query
+          schema:
+            type: string
+          description: UC9 - Filtrowanie po gatunku (F6)
+        - name: available_only
+          in: query
+          schema:
+            type: boolean
+          description: Tylko dostępne książki
+        - name: sort
+          in: query
+          schema:
+            type: string
+            enum: [title, author, year, created_at]
+            default: title
+          description: UC10 - Sortowanie (F6)
+        - name: order
+          in: query
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: asc
+      responses:
+        "200":
+          description: Lista książek
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/BookResponse"
+                  meta:
+                    $ref: "#/components/schemas/PaginationMeta"
+
+  /api/catalog/books/{book_id}:
+    get:
+      tags: [Catalog]
+      summary: UC14 - Szczegóły książki (F7)
+      operationId: getBookDetails
+      parameters:
+        - name: book_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Szczegóły książki
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/BookResponse"
+                  - type: object
+                    properties:
+                      copies:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/CopyResponse"
+        "404":
+          description: Książka nie znaleziona
+
+  /api/books:
+    post:
+      tags: [Books]
+      summary: UC11 - Dodawanie książki (F15)
+      operationId: createBook
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [isbn, title, authors, publisher, year]
+              properties:
+                isbn:
+                  type: string
+                title:
+                  type: string
+                authors:
+                  type: array
+                  items:
+                    type: string
+                publisher:
+                  type: string
+                year:
+                  type: integer
+                pages:
+                  type: integer
+                genre:
+                  type: string
+                description:
+                  type: string
+      responses:
+        "201":
+          description: Książka dodana
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BookResponse"
+        "400":
+          description: Błąd walidacji
+        "403":
+          description: Brak uprawnień (tylko Librarian/Admin)
+        "409":
+          description: ISBN już istnieje
+
+  /api/books/{book_id}:
+    patch:
+      tags: [Books]
+      summary: UC13 - Edycja książki (F15)
+      operationId: updateBook
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: book_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                authors:
+                  type: array
+                  items:
+                    type: string
+                publisher:
+                  type: string
+                year:
+                  type: integer
+                pages:
+                  type: integer
+                genre:
+                  type: string
+                description:
+                  type: string
+      responses:
+        "200":
+          description: Książka zaktualizowana
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BookResponse"
+        "403":
+          description: Brak uprawnień
+        "404":
+          description: Książka nie znaleziona
+
+    delete:
+      tags: [Books]
+      summary: UC15 - Usunięcie książki (F15)
+      operationId: deleteBook
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: book_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "204":
+          description: Książka usunięta (soft delete)
+        "400":
+          description: Książka ma aktywne wypożyczenia/rezerwacje
+        "403":
+          description: Brak uprawnień (tylko Admin)
+        "404":
+          description: Książka nie znaleziona
+
+  /api/books/{book_id}/copies:
+    post:
+      tags: [Copies]
+      summary: UC17 - Dodawanie egzemplarza (F16)
+      operationId: createCopy
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: book_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [condition]
+              properties:
+                inventory_number:
+                  type: string
+                  description: Opcjonalnie (auto-generowany)
+                condition:
+                  $ref: "#/components/schemas/CopyCondition"
+                notes:
+                  type: string
+      responses:
+        "201":
+          description: Egzemplarz dodany
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CopyResponse"
+        "403":
+          description: Brak uprawnień (tylko Librarian/Admin)
+        "404":
+          description: Książka nie znaleziona
+
+  /api/copies/{copy_id}/status:
+    patch:
+      tags: [Copies]
+      summary: UC18 - Zmiana statusu egzemplarza (F16)
+      operationId: updateCopyStatus
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: copy_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status:
+                  $ref: "#/components/schemas/CopyStatus"
+                notes:
+                  type: string
+      responses:
+        "200":
+          description: Status zmieniony
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CopyResponse"
+        "400":
+          description: Nie można zmienić statusu (np. wypożyczony)
+        "403":
+          description: Brak uprawnień
+
+  /api/copies/{copy_id}/condition:
+    patch:
+      tags: [Copies]
+      summary: UC19 - Zmiana stanu egzemplarza (F16)
+      operationId: updateCopyCondition
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: copy_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [condition]
+              properties:
+                condition:
+                  $ref: "#/components/schemas/CopyCondition"
+                notes:
+                  type: string
+      responses:
+        "200":
+          description: Stan zmieniony
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CopyResponse"
+        "403":
+          description: Brak uprawnień
+
+  /api/copies/{copy_id}:
+    delete:
+      tags: [Copies]
+      summary: UC20 - Usunięcie egzemplarza (F16)
+      operationId: deleteCopy
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: copy_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "204":
+          description: Egzemplarz usunięty (soft delete)
+        "400":
+          description: Egzemplarz jest wypożyczony/zarezerwowany
+        "403":
+          description: Brak uprawnień (tylko Librarian/Admin)
+
+  # ==========================================
+  # LOAN SERVICE (Port 8003)
+  # ==========================================
+
+  /api/reservations:
+    post:
+      tags: [Reservations]
+      summary: UC21/UC22 - Rezerwacja (F8)
+      operationId: createReservation
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [book_copy_id]
+              properties:
+                book_copy_id:
+                  type: string
+                  format: uuid
+                user_id:
+                  type: string
+                  format: uuid
+                  description: Opcjonalnie (Librarian/Admin może rezerwować dla innych)
+      responses:
+        "201":
+          description: Rezerwacja utworzona
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReservationResponse"
+        "400":
+          description: |
+            Błędy:
+            - Użytkownik ma już 3 aktywne rezerwacje
+            - Użytkownik ma nieopłacone kary
+            - Egzemplarz niedostępny
+        "403":
+          description: Brak uprawnień
+
+    get:
+      tags: [Reservations]
+      summary: UC23 - Moje rezerwacje (F10)
+      operationId: getMyReservations
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: status
+          in: query
+          schema:
+            $ref: "#/components/schemas/ReservationStatus"
+      responses:
+        "200":
+          description: Lista rezerwacji użytkownika
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/ReservationResponse"
+
+  /api/reservations/all:
+    get:
+      tags: [Reservations]
+      summary: UC24 - Wszystkie rezerwacje (F18)
+      operationId: getAllReservations
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: size
+          in: query
+          schema:
+            type: integer
+        - name: status
+          in: query
+          schema:
+            $ref: "#/components/schemas/ReservationStatus"
+        - name: user_id
+          in: query
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Lista wszystkich rezerwacji
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/ReservationResponse"
+                  meta:
+                    $ref: "#/components/schemas/PaginationMeta"
+        "403":
+          description: Brak uprawnień (tylko Librarian/Admin)
+          /api/reservations/{reservation_id}:
+    delete:
+      tags: [Reservations]
+      summary: UC22 - Anulowanie rezerwacji (F9)
+      operationId: cancelReservation
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: reservation_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason:
+                  type: string
+                  maxLength: 500
+                  description: Powód anulowania (opcjonalnie dla użytkownika, wymagane dla staff)
+      responses:
+        "200":
+          description: Rezerwacja anulowana
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReservationResponse"
+        "400":
+          description: Nie można anulować (niewłaściwy status)
+        "403":
+          description: Brak uprawnień (tylko własna rezerwacja lub staff)
+        "404":
+          description: Rezerwacja nie znaleziona
+
+  # Wypożyczenia
+  /api/loans:
+    post:
+      tags: [Loans]
+      summary: UC25/UC28 - Checkout/Wypożyczenie (F11)
+      operationId: createLoan
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [user_id, book_copy_id]
+              properties:
+                user_id:
+                  type: string
+                  format: uuid
+                  description: Identyfikator czytelnika
+                book_copy_id:
+                  type: string
+                  format: uuid
+                  description: Identyfikator egzemplarza
+                reservation_id:
+                  type: string
+                  format: uuid
+                  nullable: true
+                  description: Powiązana rezerwacja (jeśli była)
+      responses:
+        "201":
+          description: Wypożyczenie utworzone
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoanResponse"
+        "400":
+          description: |
+            Błędy:
+            - Użytkownik przekroczył limit 5 wypożyczeń
+            - Egzemplarz niedostępny
+            - Użytkownik ma przeterminowane wypożyczenia
+        "403":
+          description: |
+            Błędy:
+            - Brak uprawnień (tylko Librarian/Admin)
+            - Użytkownik ma nieopłacone kary
+
+    get:
+      tags: [Loans]
+      summary: UC30 - Moje wypożyczenia (F13)
+      operationId: getMyLoans
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: status
+          in: query
+          schema:
+            $ref: "#/components/schemas/LoanStatus"
+      responses:
+        "200":
+          description: Lista wypożyczeń użytkownika
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/LoanResponse"
+
+  /api/loans/all:
+    get:
+      tags: [Loans]
+      summary: UC30 - Wszystkie wypożyczenia (F17)
+      operationId: getAllLoans
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: size
+          in: query
+          schema:
+            type: integer
+        - name: status
+          in: query
+          schema:
+            $ref: "#/components/schemas/LoanStatus"
+        - name: user_id
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: overdue_only
+          in: query
+          schema:
+            type: boolean
+          description: Tylko przeterminowane
+      responses:
+        "200":
+          description: Lista wszystkich wypożyczeń
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/LoanResponse"
+                  meta:
+                    $ref: "#/components/schemas/PaginationMeta"
+        "403":
+          description: Brak uprawnień (tylko Librarian/Admin)
+
+  /api/loans/{loan_id}/return:
+    post:
+      tags: [Loans]
+      summary: UC28 - Zwrot książki (F12)
+      operationId: returnLoan
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: loan_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                condition:
+                  $ref: "#/components/schemas/CopyCondition"
+                  description: Stan egzemplarza po zwrocie
+                notes:
+                  type: string
+                  description: Uwagi dotyczące zwrotu
+      responses:
+        "200":
+          description: Książka zwrócona
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoanResponse"
+        "403":
+          description: Brak uprawnień (tylko Librarian/Admin)
+        "404":
+          description: Wypożyczenie nie znalezione
+
+  /api/loans/{loan_id}/extend:
+    post:
+      tags: [Loans]
+      summary: UC29 - Przedłużenie wypożyczenia (F14 - DODATEK)
+      operationId: extendLoan
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: loan_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Wypożyczenie przedłużone o 14 dni
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoanResponse"
+        "400":
+          description: |
+            Nie można przedłużyć:
+            - Wypożyczenie już było przedłużane
+            - Książka zarezerwowana przez innego użytkownika
+            - Wypożyczenie przeterminowane
+        "403":
+          description: Użytkownik ma nieopłacone kary
+        "404":
+          description: Wypożyczenie nie znalezione
+
+  /api/loans/{loan_id}/pay-fine:
+    post:
+      tags: [Loans]
+      summary: UC27 - Opłacenie kary (F12a)
+      operationId: payFine
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: loan_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [amount]
+              properties:
+                amount:
+                  type: number
+                  format: decimal
+                  description: Kwota opłacanej kary
+                payment_method:
+                  type: string
+                  enum: [CASH, CARD, TRANSFER]
+                  description: Metoda płatności (opcjonalnie)
+      responses:
+        "200":
+          description: Kara opłacona
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoanResponse"
+        "400":
+          description: Nieprawidłowa kwota
+        "403":
+          description: Brak uprawnień (tylko Librarian/Admin)
+        "404":
+          description: Wypożyczenie nie znalezione
+
+  # ==========================================
+  # NOTIFICATIONS (DODATEK)
+  # ==========================================
+
+  /api/notifications:
+    get:
+      tags: [Notifications]
+      summary: F21 - Lista powiadomień (DODATEK)
+      operationId: getNotifications
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: unread_only
+          in: query
+          schema:
+            type: boolean
+          description: Tylko nieprzeczytane
+      responses:
+        "200":
+          description: Lista powiadomień
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          format: uuid
+                        type:
+                          type: string
+                          enum:
+                            [
+                              LOAN_EXPIRING,
+                              LOAN_OVERDUE,
+                              RESERVATION_READY,
+                              RESERVATION_CANCELLED,
+                              RESERVATION_EXPIRED,
+                            ]
+                        title:
+                          type: string
+                        message:
+                          type: string
+                        read:
+                          type: boolean
+                        created_at:
+                          type: string
+                          format: date-time
+
+  /api/notifications/{notification_id}/read:
+    post:
+      tags: [Notifications]
+      summary: Oznacz powiadomienie jako przeczytane
+      operationId: markNotificationRead
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: notification_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "204":
+          description: Powiadomienie oznaczone jako przeczytane
+
+  # ==========================================
+  # AUDIT LOGS (DODATEK)
+  # ==========================================
+
+  /api/audit-logs:
+    get:
+      tags: [Audit]
+      summary: UC41/F24 - Logi audytowe (DODATEK)
+      operationId: getAuditLogs
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: size
+          in: query
+          schema:
+            type: integer
+        - name: user_id
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: action
+          in: query
+          schema:
+            type: string
+          description: Typ akcji (USER_LOGIN, BOOK_CREATED, etc.)
+        - name: entity_type
+          in: query
+          schema:
+            type: string
+          description: Typ encji (User, Book, Loan, etc.)
+        - name: from_date
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: to_date
+          in: query
+          schema:
+            type: string
+            format: date-time
+      responses:
+        "200":
+          description: Lista logów audytowych
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          format: uuid
+                        user_id:
+                          type: string
+                          format: uuid
+                          nullable: true
+                        action:
+                          type: string
+                        entity_type:
+                          type: string
+                        entity_id:
+                          type: string
+                          format: uuid
+                        metadata:
+                          type: object
+                        ip_address:
+                          type: string
+                        created_at:
+                          type: string
+                          format: date-time
+                  meta:
+                    $ref: "#/components/schemas/PaginationMeta"
+        "403":
+          description: Brak uprawnień (tylko Admin)
+
+  # ==========================================
+  # SETTINGS (OPCJONALNIE)
+  # ==========================================
+
+  /api/settings:
+    get:
+      tags: [Settings]
+      summary: UC42/F29 - Pobranie ustawień (OPCJONALNIE)
+      operationId: getSettings
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Ustawienia systemowe
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  reservation_duration_days:
+                    type: integer
+                    example: 3
+                  loan_duration_days:
+                    type: integer
+                    example: 14
+                  max_reservations_per_user:
+                    type: integer
+                    example: 3
+                  max_loans_per_user:
+                    type: integer
+                    example: 5
+                  fine_per_day:
+                    type: number
+                    format: decimal
+                    example: 1.00
+                  max_fine_amount:
+                    type: number
+                    format: decimal
+                    example: 100.00
+        "403":
+          description: Brak uprawnień
+
+  /api/settings/{key}:
+    patch:
+      tags: [Settings]
+      summary: Aktualizacja ustawienia (F29)
+      operationId: updateSetting
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: key
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [value]
+              properties:
+                value:
+                  type: string
+                  description: Nowa wartość (jako string, będzie skonwertowana)
+      responses:
+        "200":
+          description: Ustawienie zaktualizowane
+        "400":
+          description: Nieprawidłowa wartość
+        "403":
+          description: Brak uprawnień (tylko Admin)
+        "404":
+          description: Ustawienie nie znalezione
+
+  # ==========================================
+  # HEALTH CHECK
+  # ==========================================
+
+  /health:
+    get:
+      tags: [Health]
+      summary: Health check (NF28)
+      operationId: healthCheck
+      responses:
+        "200":
+          description: Serwis działa poprawnie
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "healthy"
+                  database:
+                    type: string
+                    example: "connected"
+                  response_time_ms:
+                    type: integer
+                    example: 45
+                  version:
+                    type: string
+                    example: "1.0.0"
+                  service:
+                    type: string
+                    example: "auth-service"
+
+# ==========================================
+# BEZPIECZEŃSTWO
+# ==========================================
+security:
+  - BearerAuth: []
