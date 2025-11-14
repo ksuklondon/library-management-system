@@ -1,0 +1,44 @@
+# ==========================================
+# AUTH SERVICE - Zależności Python
+# ==========================================
+# Instalacja: pip install -r requirements.txt
+
+# ==========================================
+# FRAMEWORK - FastAPI
+# ==========================================
+fastapi==0.115.3
+uvicorn[standard]==0.30.6
+
+# ==========================================
+# BAZA DANYCH - PostgreSQL + ORM
+# ==========================================
+sqlalchemy==2.0.34
+pydantic==2.9.2
+pydantic-settings==2.5.2
+passlib[bcrypt]==1.7.4
+python-multipart==0.0.9
+alembic==1.13.2
+
+# ==========================================
+# DODATKOWE - JWT i HTTP (NOWE!)
+# ==========================================
+# JWT - tokeny autoryzacyjne
+python-jose[cryptography]==3.3.0
+bcrypt==4.1.2
+
+# PostgreSQL driver
+psycopg2-binary==2.9.9
+
+# Email validation
+email-validator==2.1.0
+
+# HTTP Client - komunikacja między serwisami
+httpx==0.26.0
+requests==2.31.0
+
+# ==========================================
+# TESTOWANIE (NOWE!)
+# ==========================================
+pytest==7.4.3
+pytest-asyncio==0.21.1
+pytest-cov==4.1.0

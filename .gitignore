@@ -37,6 +37,8 @@ htmlcov/
 coverage.xml
 *.cover
 .hypothesis/
+.mypy_cache/
+.pytype/
 
 # ============================================
 # NODE.JS / REACT / FRONTEND
@@ -121,3 +123,17 @@ logs/
 .cache/
 tmp/
 temp/
+
+# ============================================
+# UPLOADS & MEDIA (user-uploaded files)
+# ============================================
+uploads/
+media/
+staticfiles/
+static_collected/
+
+# ============================================
+# BACKUPS
+# ============================================
+*.backup
+backups/
