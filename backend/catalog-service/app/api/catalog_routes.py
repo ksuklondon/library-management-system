@@ -1,8 +1,17 @@
 """
-Catalog Routes - endpointy dla przeglądania i wyszukiwania katalogu.
+Trasy API katalogu (Catalog Routes) – endpointy do przeglądania i wyszukiwania książek.
 
-Wymagania: F4, F5, F6, F7
-Dostępne dla wszystkich użytkowników (READER, LIBRARIAN, ADMIN).
+Realizowane wymagania funkcjonalne:
+- F4: Przeglądanie katalogu
+- F5: Wyszukiwanie książek
+- F6: Filtrowanie katalogu
+- F7: Szczegóły książki
+
+Realizowane wymagania niefunkcjonalne:
+- NF20: Paginacja wyników (limit do 50 pozycji na stronę)
+
+Dostęp:
+- otwarte dla wszystkich zalogowanych ról (READER, LIBRARIAN, ADMIN).
 """
 
 from typing import Optional
@@ -35,9 +44,12 @@ def browse_catalog(
     """
     Przeglądanie katalogu książek z filtrowaniem i paginacją.
 
-    Wymaganie F4: Przeglądanie katalogu
-    Wymaganie F6: Filtrowanie według autora, gatunku, języka
-    Wymaganie NF20: Paginacja (max 50 na stronę)
+    Wymaganie F4: Przeglądanie katalogu.
+    Wymaganie F6: Filtrowanie według autora, gatunku, języka, wydawcy.
+    Wymaganie NF20: Paginacja (maks. 50 wyników na stronę).
+
+    Parametr available_only pozwala wyświetlić tylko te pozycje,
+    które mają co najmniej jeden egzemplarz o statusie AVAILABLE.
     """
     query = db.query(Book).filter(Book.is_deleted == False)
 
@@ -111,7 +123,14 @@ def search_books(
     """
     Wyszukiwanie książek według tytułu, autora lub ISBN.
 
-    Wymaganie F5: Wyszukiwanie książek
+    Wymaganie F5: Wyszukiwanie książek.
+
+    Pole search.search_in określa, w którym polu szukać:
+    - 'title'   – tylko tytuł,
+    - 'authors' – tylko autorzy,
+    - 'isbn'    – tylko ISBN,
+    - inne / brak – wyszukiwanie we wszystkich trzech polach jednocześnie.
+    Wyniki są paginowane (NF20) tak jak w przeglądaniu katalogu.
     """
     query = db.query(Book).filter(Book.is_deleted == False)
 
@@ -173,7 +192,9 @@ def get_book_details(book_id: UUID, db: Session = Depends(get_db)):
     """
     Szczegóły konkretnej książki.
 
-    Wymaganie F7: Szczegóły książki (tytuł, autor, dostępność)
+    Wymaganie F7: Szczegóły książki (tytuł, autor, dane wydawnicze, dostępność).
+    Zwracane są m.in. liczby dostępnych egzemplarzy (available_copies)
+    oraz wszystkich egzemplarzy danej książki (total_copies).
     """
     book = (
         db.query(Book)

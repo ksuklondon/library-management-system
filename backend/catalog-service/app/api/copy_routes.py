@@ -1,8 +1,13 @@
 """
 Book Copy Management Routes - zarządzanie egzemplarzami książek.
 
-Wymagania: F16
-Dostępne tylko dla LIBRARIAN i ADMIN.
+Realizowane wymagania:
+- F16: Zarządzanie egzemplarzami książek (dodawanie, edycja, przeglądanie, usuwanie)
+- NF19: Soft delete dla egzemplarzy (zachowanie danych do audytu)
+
+Dostęp:
+- LIBRARIAN, ADMIN – dodawanie, edycja, zmiana statusu egzemplarzy
+- tylko ADMIN – usuwanie egzemplarzy
 """
 
 from typing import List
@@ -35,7 +40,11 @@ def create_book_copy(
     """
     Dodawanie nowego egzemplarza książki.
 
-    Wymaganie F16: Dodawanie egzemplarzy (LIBRARIAN/ADMIN)
+    Wymaganie F16: Dodawanie egzemplarzy (LIBRARIAN/ADMIN).
+    Sprawdzane jest:
+    - czy książka istnieje i nie została usunięta,
+    - czy numer inwentarzowy jest unikalny w systemie.
+    Nowy egzemplarz domyślnie otrzymuje status AVAILABLE.
     """
     book = (
         db.query(Book)
@@ -90,7 +99,9 @@ def get_copies_by_book(
     """
     Lista egzemplarzy konkretnej książki.
 
-    Wymaganie F16: Wyświetlanie egzemplarzy książki
+    Wymaganie F16: Wyświetlanie egzemplarzy książki.
+    Parametr include_deleted pozwala zdecydować, czy zwracać również egzemplarze
+    oznaczone jako usunięte (soft delete), co jest przydatne np. do audytu.
     """
     book = db.query(Book).filter(Book.id == book_id).first()
 
@@ -126,9 +137,11 @@ def get_copies_by_book(
 @router.get("/{copy_id}", response_model=BookCopyResponse)
 def get_copy_details(copy_id: UUID, db: Session = Depends(get_db)):
     """
-    Szczegóły konkretnego egzemplarza.
+    Szczegóły konkretnego egzemplarza książki.
 
-    Wymaganie F16: Wyświetlanie szczegółów egzemplarza
+    Wymaganie F16: Wyświetlanie szczegółów egzemplarza.
+    Zwraca m.in. status egzemplarza (AVAILABLE, BORROWED, DAMAGED itd.)
+    oraz tytuł powiązanej książki.
     """
     copy = (
         db.query(BookCopy)
@@ -163,9 +176,11 @@ def update_book_copy(
     current_user: User = Depends(require_role([UserRole.LIBRARIAN, UserRole.ADMIN])),
 ):
     """
-    Aktualizacja informacji o egzemplarzu.
+    Aktualizacja informacji o egzemplarzu (np. lokalizacja, numer inwentarzowy).
 
-    Wymaganie F16: Edycja egzemplarzy (LIBRARIAN/ADMIN)
+    Wymaganie F16: Edycja egzemplarzy (LIBRARIAN/ADMIN).
+    Przy zmianie numeru inwentarzowego sprawdzana jest jego unikalność
+    wśród innych egzemplarzy.
     """
     copy = (
         db.query(BookCopy)
@@ -223,9 +238,13 @@ def update_copy_status(
     current_user: User = Depends(require_role([UserRole.LIBRARIAN, UserRole.ADMIN])),
 ):
     """
-    Zmiana statusu egzemplarza (AVAILABLE, DAMAGED, LOST, etc.).
+    Zmiana statusu egzemplarza (AVAILABLE, DAMAGED, LOST, BORROWED, RESERVED itd.).
 
-    Wymaganie F16: Zmiana statusu egzemplarza
+    Wymaganie F16: Zmiana statusu egzemplarza.
+    Logika biznesowa:
+    - egzemplarz, który jest BORROWED lub RESERVED, nie może zostać
+      zmieniony na status typu LOST/DAMAGED bezpośrednio, z pominięciem
+      procesu obsługi wypożyczeń (loan-service).
     """
     copy = (
         db.query(BookCopy)
@@ -279,8 +298,11 @@ def delete_book_copy(
     """
     Usuwanie egzemplarza (soft delete).
 
-    Wymaganie F16: Usuwanie egzemplarzy (tylko ADMIN)
-    Wymaganie NF19: Soft delete
+    Wymaganie F16: Usuwanie egzemplarzy (tylko ADMIN).
+    Wymaganie NF19: Soft delete – egzemplarz nie jest usuwany fizycznie z bazy,
+    a jedynie oznaczany jako usunięty (is_deleted = True).
+    Dodatkowe ograniczenie: nie można usunąć egzemplarza o statusie BORROWED
+    lub RESERVED (wypożyczony / zarezerwowany).
     """
     copy = (
         db.query(BookCopy)

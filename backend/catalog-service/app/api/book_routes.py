@@ -1,8 +1,13 @@
 """
-Book Management Routes - zarządzanie książkami.
+Trasy API do zarządzania książkami (Book Management Routes).
 
-Wymagania: F15
-Dostępne tylko dla LIBRARIAN i ADMIN.
+Realizowane wymagania:
+- F15: Zarządzanie książkami (dodawanie, edycja, usuwanie, lista)
+- NF19: Soft delete dla książek (wsparcie dla audytu)
+
+Dostęp:
+- LIBRARIAN, ADMIN – tworzenie i edycja książek
+- tylko ADMIN – usuwanie książek
 """
 
 from typing import List
@@ -29,7 +34,8 @@ def create_book(
     """
     Dodawanie nowej książki do katalogu.
 
-    Wymaganie F15: Dodawanie książek (LIBRARIAN/ADMIN)
+    Wymaganie F15: Dodawanie książek (LIBRARIAN/ADMIN).
+    Jeśli podano ISBN, endpoint sprawdza, czy książka z takim ISBN nie istnieje już w systemie.
     """
     if book_data.isbn:
         existing_book = db.query(Book).filter(Book.isbn == book_data.isbn).first()
@@ -83,7 +89,9 @@ def update_book(
     """
     Aktualizacja informacji o książce.
 
-    Wymaganie F15: Edycja książek (LIBRARIAN/ADMIN)
+    Wymaganie F15: Edycja książek (LIBRARIAN/ADMIN).
+    Dodatkowo pilnowana jest unikalność ISBN – nie można przypisać ISBN
+    już używanego przez inną książkę.
     """
     book = db.query(Book).filter(Book.id == book_id, Book.is_deleted == False).first()
 
@@ -140,7 +148,10 @@ def delete_book(
     Usuwanie książki (soft delete).
 
     Wymaganie F15: Usuwanie książek (tylko ADMIN)
-    Wymaganie NF19: Soft delete (audyt)
+    Wymaganie NF19: Soft delete (audyt) – rekord książki i jej egzemplarzy
+    jest oznaczany jako usunięty, ale pozostaje w bazie.
+    Dodatkowo książka nie może zostać usunięta, jeśli istnieją wypożyczone
+    lub zarezerwowane egzemplarze.
     """
     book = db.query(Book).filter(Book.id == book_id, Book.is_deleted == False).first()
 
@@ -182,9 +193,11 @@ def get_all_books_management(
     current_user: User = Depends(require_role([UserRole.LIBRARIAN, UserRole.ADMIN])),
 ):
     """
-    Lista wszystkich książek (dla zarządzania).
+    Lista wszystkich książek (dla panelu zarządzania).
 
-    Wymaganie F15: Zarządzanie książkami
+    Wymaganie F15: Zarządzanie książkami.
+    Parametr include_deleted pozwala opcjonalnie uwzględnić książki
+    oznaczone jako usunięte (soft delete), co ułatwia przegląd historii.
     """
     query = db.query(Book)
 
