@@ -1,44 +1,29 @@
-# ==========================================
-# AUTH SERVICE - Zależności Python
-# ==========================================
-# Instalacja: pip install -r requirements.txt
+# --- Framework webowy i serwer ASGI ---
+fastapi==0.115.3              # Główny framework do budowy API (Auth Service)
+uvicorn[standard]==0.30.6     # Lekki serwer ASGI do uruchamiania FastAPI
 
-# ==========================================
-# FRAMEWORK - FastAPI
-# ==========================================
-fastapi==0.115.3
-uvicorn[standard]==0.30.6
+# --- Warstwa bazy danych (ORM + migracje + sterownik PostgreSQL) ---
+sqlalchemy==2.0.34            # ORM do mapowania modeli (User, itd.) na tabele w DB
+psycopg2-binary==2.9.9        # Sterownik PostgreSQL (połączenie z bazą danych)
+alembic==1.13.2               # Narzędzie do migracji schematu bazy (wersjonowanie DB)
 
-# ==========================================
-# BAZA DANYCH - PostgreSQL + ORM
-# ==========================================
-sqlalchemy==2.0.34
-pydantic==2.9.2
-pydantic-settings==2.5.2
-passlib[bcrypt]==1.7.4
-python-multipart==0.0.9
-alembic==1.13.2
+# --- Walidacja i konfiguracja ---
+pydantic==2.9.2               # Walidacja danych (schematy request/response w FastAPI)
+pydantic-settings==2.5.2      # Obsługa konfiguracji przez zmienne środowiskowe (Settings)
 
-# ==========================================
-# DODATKOWE - JWT i HTTP (NOWE!)
-# ==========================================
-# JWT - tokeny autoryzacyjne
-python-jose[cryptography]==3.3.0
-bcrypt==4.1.2
+# --- Bezpieczeństwo i JWT ---
+passlib[bcrypt]==1.7.4        # Haszowanie haseł użytkowników (bcrypt)
+python-jose[cryptography]==3.3.0  # Generowanie i weryfikacja tokenów JWT (auth)
 
-# PostgreSQL driver
-psycopg2-binary==2.9.9
+# --- Komunikacja HTTP (np. z innymi mikroserwisami) ---
+httpx==0.26.0                 # Asynchroniczny klient HTTP (możliwe wywołania między serwisami)
+requests==2.31.0              # Popularna biblioteka do wykonywania zapytań HTTP (synchron.)
 
-# Email validation
-email-validator==2.1.0
+# --- Obsługa multipart/form-data (np. formularze, upload plików) ---
+python-multipart==0.0.9       # Parser multipart/form-data dla FastAPI
 
-# HTTP Client - komunikacja między serwisami
-httpx==0.26.0
-requests==2.31.0
+# --- Testy jednostkowe i pokrycie kodu ---
+pytest==7.4.3                 # Główne narzędzie do testów jednostkowych
+pytest-asyncio==0.21.1        # Wsparcie dla testowania funkcji asynchronicznych (async/await)
+pytest-cov==4.1.0             # Raportowanie pokrycia testami (code coverage)
 
-# ==========================================
-# TESTOWANIE (NOWE!)
-# ==========================================
-pytest==7.4.3
-pytest-asyncio==0.21.1
-pytest-cov==4.1.0
