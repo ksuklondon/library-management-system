@@ -1,3 +1,251 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/**
+ * Global styles - Tailwind CSS i style globalne.
+ *
+ * Zgodność z wymaganiami:
+ * - NF10: Responsywny design (Tailwind)
+ * - NF11: Intuicyjny interfejs (dark mode, smooth scrolling)
+ */
+
+ @tailwind base;
+ @tailwind components;
+ @tailwind utilities;
+
+ /* Global styles */
+ @layer base {
+   /* Smooth scrolling */
+   html {
+     scroll-behavior: smooth;
+   }
+
+   /* Body styles */
+   body {
+     @apply bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white;
+     @apply transition-colors duration-200;
+   }
+
+   /* Focus styles dla accessibility (NF11) */
+   *:focus {
+     @apply outline-none ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-gray-900;
+   }
+
+   /* Disabled states */
+   button:disabled,
+   input:disabled,
+   textarea:disabled,
+   select:disabled {
+     @apply opacity-50 cursor-not-allowed;
+   }
+ }
+
+ /* Custom utilities */
+ @layer utilities {
+   /* Gradient text */
+   .text-gradient {
+     @apply bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600;
+   }
+
+   /* Glass effect */
+   .glass {
+     @apply bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg;
+   }
+
+   /* Hide scrollbar ale zachowaj funkcjonalność */
+   .scrollbar-hide {
+     -ms-overflow-style: none;
+     scrollbar-width: none;
+   }
+
+   .scrollbar-hide::-webkit-scrollbar {
+     display: none;
+   }
+
+   /* Custom scrollbar */
+   .scrollbar-custom::-webkit-scrollbar {
+     width: 8px;
+     height: 8px;
+   }
+
+   .scrollbar-custom::-webkit-scrollbar-track {
+     @apply bg-gray-100 dark:bg-gray-800;
+   }
+
+   .scrollbar-custom::-webkit-scrollbar-thumb {
+     @apply bg-gray-300 dark:bg-gray-600 rounded-full;
+   }
+
+   .scrollbar-custom::-webkit-scrollbar-thumb:hover {
+     @apply bg-gray-400 dark:bg-gray-500;
+   }
+ }
+
+ /* Component styles */
+ @layer components {
+   /* Link styles */
+   .link {
+     @apply text-blue-600 dark:text-blue-400 hover:underline transition-colors;
+   }
+
+   /* Card styles */
+   .card {
+     @apply bg-white dark:bg-gray-800 rounded-lg shadow-md p-6;
+     @apply transition-shadow hover:shadow-lg;
+   }
+
+   /* Badge styles */
+   .badge {
+     @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+   }
+
+   .badge-primary {
+     @apply bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200;
+   }
+
+   .badge-success {
+     @apply bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200;
+   }
+
+   .badge-warning {
+     @apply bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200;
+   }
+
+   .badge-error {
+     @apply bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200;
+   }
+
+   /* Alert styles */
+   .alert {
+     @apply rounded-md p-4 border;
+   }
+
+   .alert-info {
+     @apply bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800 text-blue-800 dark:text-blue-200;
+   }
+
+   .alert-success {
+     @apply bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800 text-green-800 dark:text-green-200;
+   }
+
+   .alert-warning {
+     @apply bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800 text-yellow-800 dark:text-yellow-200;
+   }
+
+   .alert-error {
+     @apply bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800 text-red-800 dark:text-red-200;
+   }
+ }
+
+ /* Animation utilities */
+ @layer utilities {
+   /* Fade in animation */
+   .fade-in {
+     animation: fadeIn 0.3s ease-in;
+   }
+
+   @keyframes fadeIn {
+     from {
+       opacity: 0;
+     }
+     to {
+       opacity: 1;
+     }
+   }
+
+   /* Slide up animation */
+   .slide-up {
+     animation: slideUp 0.3s ease-out;
+   }
+
+   @keyframes slideUp {
+     from {
+       transform: translateY(10px);
+       opacity: 0;
+     }
+     to {
+       transform: translateY(0);
+       opacity: 1;
+     }
+   }
+
+   /* Pulse animation */
+   .pulse-slow {
+     animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+   }
+ }
+
+ /* Loading spinner */
+ .spinner {
+   border: 3px solid rgba(0, 0, 0, 0.1);
+   border-left-color: currentColor;
+   border-radius: 50%;
+   width: 24px;
+   height: 24px;
+   animation: spin 1s linear infinite;
+ }
+
+ @keyframes spin {
+   to {
+     transform: rotate(360deg);
+   }
+ }
+
+ /* Dark mode transitions */
+ * {
+   @apply transition-colors duration-200;
+ }
+
+ /* Print styles */
+ @media print {
+   .no-print {
+     display: none !important;
+   }
+
+   body {
+     @apply bg-white text-black;
+   }
+ }
+
+ /* Accessibility improvements */
+ .sr-only {
+   position: absolute;
+   width: 1px;
+   height: 1px;
+   padding: 0;
+   margin: -1px;
+   overflow: hidden;
+   clip: rect(0, 0, 0, 0);
+   white-space: nowrap;
+   border-width: 0;
+ }
+
+ /* Mobile responsive improvements (NF10) */
+ @media (max-width: 640px) {
+   /* Smaller text on mobile */
+   h1 {
+     @apply text-2xl;
+   }
+
+   h2 {
+     @apply text-xl;
+   }
+
+   /* Reduce padding on mobile */
+   .card {
+     @apply p-4;
+   }
+ }
+
+ /* Custom focus styles for better accessibility */
+ input:focus,
+ textarea:focus,
+ select:focus {
+   @apply ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-gray-900;
+ }
+
+ /* Smooth transitions for interactive elements */
+ button,
+ a,
+ input,
+ textarea,
+ select {
+   @apply transition-all duration-200;
+ }
