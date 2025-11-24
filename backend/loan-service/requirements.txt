@@ -1,0 +1,20 @@
+fastapi==0.115.3               # Główny framework backendowy – API, routing, walidacja danych
+uvicorn[standard]==0.30.6      # Serwer ASGI do uruchamiania aplikacji FastAPI
+
+sqlalchemy==2.0.34             # ORM i narzędzia do pracy z bazą danych
+psycopg2-binary==2.9.9         # Sterownik PostgreSQL dla Pythona
+alembic==1.13.2                # Migracje bazy danych (integrowane z SQLAlchemy)
+
+pydantic==2.9.2                # Walidacja i serializacja danych (modele API)
+pydantic-settings==2.5.2       # Obsługa ustawień konfiguracyjnych (.env) z Pydantic
+
+httpx==0.26.0                  # Klient HTTP (asynchroniczny i synchroniczny)
+requests==2.31.0               # Popularny klient HTTP (synchroniczny)
+
+python-multipart==0.0.9        # Obsługa multipart/form-data (upload plików)
+
+apscheduler==3.10.4            # Harmonogram zadań (cron, interwały, jednorazowe joby)
+
+pytest==7.4.3                  # Framework do testów jednostkowych
+pytest-asyncio==0.21.1         # Wsparcie dla testów asynchronicznych (async/await)
+pytest-cov==4.1.0              # Pokrycie kodu testami (coverage)
