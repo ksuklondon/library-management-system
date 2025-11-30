@@ -8,16 +8,30 @@ Endpointy związane z uwierzytelnianiem użytkowników:
 - /me       – pobranie informacji o aktualnie zalogowanym użytkowniku.
 """
 
+from datetime import timedelta
+from typing import Any, Dict
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from datetime import timedelta
 
-from backend.shared.database import get_db
-from backend.shared.dependencies import get_current_user
-from app.schemas.auth import LoginRequest, LoginResponse, RefreshTokenRequest, TokenResponse, RegisterRequest
-from app.schemas.user import UserResponse
+from app.core.security import (
+    ACCESS_TOKEN_EXPIRE_MINUTES,
+    create_access_token,
+    hash_password,
+    verify_password,
+    verify_token,
+)
 from app.models.user import User
-from app.core.security import verify_password, hash_password, create_access_token, verify_token, ACCESS_TOKEN_EXPIRE_MINUTES
+from app.schemas.auth import (
+    LoginRequest,
+    LoginResponse,
+    RefreshTokenRequest,
+    RegisterRequest,
+    TokenResponse,
+)
+from app.schemas.user import UserResponse
+from backend.shared.database import get_db
+from backend.shared.dependencies import get_current_user_payload  # ZMIANA!
 
 router = APIRouter()
 
@@ -25,7 +39,9 @@ router = APIRouter()
 REFRESH_TOKEN_EXPIRE_DAYS = 7
 
 
-@router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED
+)
 def register(user_data: RegisterRequest, db: Session = Depends(get_db)):
     """
     Rejestracja nowego użytkownika w systemie.
@@ -39,13 +55,13 @@ def register(user_data: RegisterRequest, db: Session = Depends(get_db)):
     if existing_user:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Email już istnieje w systemie"
+            detail="Email już istnieje w systemie",
         )
 
     new_user = User(
         email=user_data.email,
         hashed_password=hash_password(user_data.password),
-        full_name=user_data.full_name
+        full_name=user_data.full_name,
     )
 
     db.add(new_user)
@@ -71,25 +87,23 @@ def login(credentials: LoginRequest, db: Session = Depends(get_db)):
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Nieprawidłowy email lub hasło"
+            detail="Nieprawidłowy email lub hasło",
         )
 
     if not verify_password(credentials.password, user.hashed_password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Nieprawidłowy email lub hasło"
+            detail="Nieprawidłowy email lub hasło",
         )
 
     if not user.is_active:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Konto nieaktywne"
+            status_code=status.HTTP_403_FORBIDDEN, detail="Konto nieaktywne"
         )
 
     if user.is_blocked:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Konto zablokowane"
+            status_code=status.HTTP_403_FORBIDDEN, detail="Konto zablokowane"
         )
 
     # Tworzymy access token zawierający podstawowe dane użytkownika.
@@ -100,7 +114,7 @@ def login(credentials: LoginRequest, db: Session = Depends(get_db)):
     # Refresh token służy tylko do odświeżania access tokenu.
     refresh_token = create_access_token(
         data={"sub": str(user.id), "type": "refresh"},
-        expires_delta=timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
+        expires_delta=timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS),
     )
 
     return LoginResponse(
@@ -109,7 +123,7 @@ def login(credentials: LoginRequest, db: Session = Depends(get_db)):
         token_type="bearer",
         user_id=str(user.id),
         email=user.email,
-        role=user.role
+        role=user.role.value,
     )
 
 
@@ -128,31 +142,29 @@ def refresh_token(request: RefreshTokenRequest):
         if payload.get("type") != "refresh":
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Nieprawidłowy refresh token"
+                detail="Nieprawidłowy refresh token",
             )
 
         user_id = payload.get("sub")
 
-        access_token = create_access_token(
-            data={"sub": user_id}
-        )
+        access_token = create_access_token(data={"sub": user_id})
 
         return TokenResponse(
             access_token=access_token,
             token_type="bearer",
-            expires_in=ACCESS_TOKEN_EXPIRE_MINUTES * 60
+            expires_in=ACCESS_TOKEN_EXPIRE_MINUTES * 60,
         )
 
     except Exception:
         # W przypadku dowolnego błędu traktujemy token jako nieważny.
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Nieprawidłowy lub wygasły refresh token"
+            detail="Nieprawidłowy lub wygasły refresh token",
         )
 
 
 @router.post("/logout", status_code=status.HTTP_200_OK)
-def logout(current_user: User = Depends(get_current_user)):
+def logout(user_payload: Dict[str, Any] = Depends(get_current_user_payload)):  # ZMIANA!
     """
     "Wylogowanie" użytkownika.
 
@@ -163,8 +175,20 @@ def logout(current_user: User = Depends(get_current_user)):
 
 
 @router.get("/me", response_model=UserResponse)
-def get_current_user_info(current_user: User = Depends(get_current_user)):
+def get_current_user_info(
+    user_payload: Dict[str, Any] = Depends(get_current_user_payload),  # ZMIANA!
+    db: Session = Depends(get_db),
+):
     """
     Zwraca dane aktualnie zalogowanego użytkownika na podstawie tokenu JWT.
     """
-    return current_user
+    user_id = user_payload.get("sub")
+
+    user = db.query(User).filter(User.id == user_id).first()
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Użytkownik nie istnieje"
+        )
+
+    return user

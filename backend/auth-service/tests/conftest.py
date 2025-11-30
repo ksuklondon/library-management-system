@@ -1,14 +1,13 @@
 import pytest
+from app.core.security import hash_password
+from app.main import app
+from app.models.user import User, UserRole
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
-from backend.shared.database import Base
-from backend.shared.dependencies import get_db
-from app.main import app
-from app.models.user import User, UserRole
-from app.core.security import hash_password
+from backend.shared.database import Base, get_db  # ZMIANA: dodano get_db tutaj
 
 # Adres testowej bazy danych — tutaj używamy SQLite w pamięci (szybka, izolowana dla testów)
 SQLALCHEMY_TEST_DATABASE_URL = "sqlite:///:memory:"
@@ -52,6 +51,7 @@ def client(db_session):
     Nadpisuje zależność get_db → tak, aby aplikacja używała testowej sesji bazy danych
     zamiast prawdziwej bazy PostgreSQL.
     """
+
     def override_get_db():
         try:
             yield db_session
@@ -70,6 +70,15 @@ def client(db_session):
 
 
 @pytest.fixture
+def app_fixture():  # DODANO nową fixture dla app
+    """
+    Fixture zwracający instancję aplikacji FastAPI.
+    Używana w testach do nadpisywania dependencies.
+    """
+    return app
+
+
+@pytest.fixture
 def sample_user(db_session):
     """
     Tworzy przykładowego użytkownika typu READER w testowej bazie danych.
@@ -78,7 +87,7 @@ def sample_user(db_session):
         email="test@example.com",
         hashed_password=hash_password("TestPassword123"),
         full_name="Test User",
-        role=UserRole.READER
+        role=UserRole.READER,
     )
     db_session.add(user)
     db_session.commit()
@@ -95,7 +104,7 @@ def sample_librarian(db_session):
         email="librarian@example.com",
         hashed_password=hash_password("LibPassword123"),
         full_name="Test Librarian",
-        role=UserRole.LIBRARIAN
+        role=UserRole.LIBRARIAN,
     )
     db_session.add(user)
     db_session.commit()
@@ -112,12 +121,44 @@ def sample_admin(db_session):
         email="admin@example.com",
         hashed_password=hash_password("AdminPassword123"),
         full_name="Test Admin",
-        role=UserRole.ADMIN
+        role=UserRole.ADMIN,
     )
     db_session.add(user)
     db_session.commit()
     db_session.refresh(user)
     return user
+
+
+@pytest.fixture
+def mock_admin(db_session):  # DODANO fixture dla mock_admin
+    """
+    Mock użytkownika ADMIN dla testów dependency overrides.
+    """
+    from unittest.mock import Mock
+
+    mock = Mock()
+    mock.id = "admin-mock-id"
+    mock.email = "admin@example.com"
+    mock.role = UserRole.ADMIN
+    mock.is_active = True
+    mock.is_blocked = False
+    return mock
+
+
+@pytest.fixture
+def mock_librarian(db_session):  # DODANO fixture dla mock_librarian
+    """
+    Mock użytkownika LIBRARIAN dla testów dependency overrides.
+    """
+    from unittest.mock import Mock
+
+    mock = Mock()
+    mock.id = "librarian-mock-id"
+    mock.email = "librarian@example.com"
+    mock.role = UserRole.LIBRARIAN
+    mock.is_active = True
+    mock.is_blocked = False
+    return mock
 
 
 @pytest.fixture
@@ -132,10 +173,7 @@ def auth_headers(client, sample_user):
     """
     response = client.post(
         "/api/auth/login",
-        json={
-            "email": "test@example.com",
-            "password": "TestPassword123"
-        }
+        json={"email": "test@example.com", "password": "TestPassword123"},
     )
     token = response.json()["access_token"]
     return {"Authorization": f"Bearer {token}"}

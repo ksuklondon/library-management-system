@@ -1,13 +1,19 @@
-from logging.config import fileConfig
-from sqlalchemy import engine_from_config
-from sqlalchemy import pool
-from alembic import context
 import os
 import sys
+from logging.config import fileConfig
+
+from alembic import context
+from sqlalchemy import engine_from_config, pool
 
 # Dodajemy katalog nadrzędny do sys.path, żeby można było poprawnie importować
 # moduły z projektu (backend.shared, app.models, itp.) w czasie migracji.
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+# Importujemy bazową klasę modeli (Base) oraz modele, które mają być śledzone
+# przez Alembica przy generowaniu migracji (autogenerate).
+from app.models.user import User  # noqa: E402, F401
+
+from backend.shared.database import Base  # noqa: E402
 
 # Obiekt konfiguracji Alembica – wczytywany z pliku alembic.ini.
 config = context.config
@@ -16,18 +22,15 @@ config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-# Importujemy bazową klasę modeli (Base) oraz modele, które mają być śledzone
-# przez Alembica przy generowaniu migracji (autogenerate).
-from backend.shared.database import Base
-from app.models.user import User  # import side-effect: rejestruje model w Base.metadata
-
 # Metadane wszystkich modeli – Alembic używa ich do porównywania schematu bazy
 # z aktualnymi modelami ORM (autogenerate).
 target_metadata = Base.metadata
 
 # Odczytujemy URL bazy danych z zmiennej środowiskowej DATABASE_URL.
 # Jeśli nie jest ustawiona, używamy wartości domyślnej (np. dla lokalnego Dockera).
-database_url = os.getenv("DATABASE_URL", "postgresql://admin:admin123@postgres:5432/biblioteka")
+database_url = os.getenv(
+    "DATABASE_URL", "postgresql://admin:admin123@postgres:5432/biblioteka"
+)
 config.set_main_option("sqlalchemy.url", database_url)
 
 
@@ -44,8 +47,8 @@ def run_migrations_offline() -> None:
         target_metadata=target_metadata,
         literal_binds=True,  # wartości parametrów są wstawiane bezpośrednio w SQL
         dialect_opts={"paramstyle": "named"},
-        compare_type=True,           # porównywanie typów kolumn
-        compare_server_default=True, # porównywanie domyślnych wartości po stronie serwera
+        compare_type=True,  # porównywanie typów kolumn
+        compare_server_default=True,  # porównywanie domyślnych wartości po stronie serwera
     )
 
     with context.begin_transaction():
@@ -69,8 +72,8 @@ def run_migrations_online() -> None:
         context.configure(
             connection=connection,
             target_metadata=target_metadata,
-            compare_type=True,           # porównywanie typów kolumn
-            compare_server_default=True, # porównywanie domyślnych wartości
+            compare_type=True,  # porównywanie typów kolumn
+            compare_server_default=True,  # porównywanie domyślnych wartości
         )
 
         with context.begin_transaction():

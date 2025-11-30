@@ -4,11 +4,12 @@ Moduł odpowiedzialny za logikę bezpieczeństwa w auth-service:
 - generowanie i weryfikacja tokenów JWT.
 """
 
-from passlib.context import CryptContext
+import os
 from datetime import datetime, timedelta
 from typing import Optional
+
 from jose import jwt
-import os
+from passlib.context import CryptContext
 
 # Konfiguracja kontekstu do haszowania haseł.
 # Używamy algorytmu bcrypt, a stare schematy są oznaczone jako przestarzałe.

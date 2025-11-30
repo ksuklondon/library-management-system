@@ -1,3 +1,5 @@
+from unittest.mock import Mock
+
 import pytest
 from fastapi import status
 
@@ -31,7 +33,7 @@ class TestCompleteAuthFlow:
         user_data = {
             "email": "flowtest@example.com",
             "password": "FlowTest123",
-            "full_name": "Flow Test User"
+            "full_name": "Flow Test User",
         }
 
         register_response = client.post("/api/auth/register", json=user_data)
@@ -41,10 +43,7 @@ class TestCompleteAuthFlow:
         # 2. Logowanie nowo zarejestrowanego użytkownika
         login_response = client.post(
             "/api/auth/login",
-            json={
-                "email": "flowtest@example.com",
-                "password": "FlowTest123"
-            }
+            json={"email": "flowtest@example.com", "password": "FlowTest123"},
         )
         assert login_response.status_code == status.HTTP_200_OK
         access_token = login_response.json()["access_token"]
@@ -72,18 +71,23 @@ class TestUserManagementFlow:
     - LIBRARIAN blokuje zwykłego czytelnika (READER).
     """
 
-    def test_admin_creates_librarian_librarian_blocks_reader(self, client, db_session, mock_admin, sample_user):
-        from backend.shared.dependencies import require_role
+    def test_admin_creates_librarian_librarian_blocks_reader(
+        self, client, db_session, mock_admin, sample_user, app
+    ):  # DODANO app
         from app.models.user import UserRole
 
+        from backend.shared.dependencies import require_role
+
         # Nadpisanie zależności require_role tak, aby "udawać" zalogowanego ADMINA
-        app.dependency_overrides[require_role([UserRole.ADMIN])] = lambda: mock_admin
+        app.dependency_overrides[require_role([UserRole.ADMIN.value])] = (
+            lambda: mock_admin
+        )
 
         # ADMIN tworzy nowego bibliotekarza
         librarian_data = {
             "email": "newlibrarian@example.com",
             "password": "LibrarianPass123",
-            "full_name": "New Librarian"
+            "full_name": "New Librarian",
         }
 
         create_response = client.post("/api/users/", json=librarian_data)
@@ -94,7 +98,6 @@ class TestUserManagementFlow:
         app.dependency_overrides.clear()
 
         # Tworzymy mocka reprezentującego nowego bibliotekarza
-        from unittest.mock import Mock
         mock_librarian = Mock()
         mock_librarian.id = librarian_id
         mock_librarian.email = "newlibrarian@example.com"
@@ -103,12 +106,14 @@ class TestUserManagementFlow:
         mock_librarian.is_blocked = False
 
         # Teraz wymagamy roli ADMIN lub LIBRARIAN i podstawiamy mock_librarian
-        app.dependency_overrides[require_role([UserRole.ADMIN, UserRole.LIBRARIAN])] = lambda: mock_librarian
+        app.dependency_overrides[
+            require_role([UserRole.ADMIN.value, UserRole.LIBRARIAN.value])
+        ] = lambda: mock_librarian
 
         # Bibliotekarz blokuje użytkownika-czytelnika
         block_response = client.post(f"/api/users/{sample_user.id}/block")
         assert block_response.status_code == status.HTTP_200_OK
-        assert block_response.json()["is_blocked"] == True
+        assert block_response.json()["is_blocked"] is True  # ZMIANA: == True → is True
 
         app.dependency_overrides.clear()
 
@@ -128,10 +133,7 @@ class TestTokenRefreshFlow:
         # 1. Logowanie istniejącego użytkownika
         login_response = client.post(
             "/api/auth/login",
-            json={
-                "email": "test@example.com",
-                "password": "TestPassword123"
-            }
+            json={"email": "test@example.com", "password": "TestPassword123"},
         )
         assert login_response.status_code == status.HTTP_200_OK
 
@@ -145,8 +147,7 @@ class TestTokenRefreshFlow:
 
         # 3. Odświeżenie tokenu
         refresh_response = client.post(
-            "/api/auth/refresh",
-            json={"refresh_token": refresh_token}
+            "/api/auth/refresh", json={"refresh_token": refresh_token}
         )
         assert refresh_response.status_code == status.HTTP_200_OK
         new_access_token = refresh_response.json()["access_token"]
@@ -167,14 +168,20 @@ class TestPasswordChangeFlow:
     - logowanie nowym hasłem działa.
     """
 
-    def test_user_changes_password_and_logs_in(self, client, db_session, sample_user):
-        from backend.shared.dependencies import get_current_user
-        # Udajemy, że aktualnie zalogowany użytkownik to sample_user
-        app.dependency_overrides[get_current_user] = lambda: sample_user
+    def test_user_changes_password_and_logs_in(
+        self, client, db_session, sample_user, app
+    ):  # DODANO app
+        from backend.shared.dependencies import get_current_user_payload
 
-        update_data = {
-            "password": "NewPassword123"
+        # Udajemy, że aktualnie zalogowany użytkownik to sample_user
+        mock_payload = {
+            "sub": str(sample_user.id),
+            "email": sample_user.email,
+            "role": sample_user.role.value,
         }
+        app.dependency_overrides[get_current_user_payload] = lambda: mock_payload
+
+        update_data = {"password": "NewPassword123"}
 
         # 1. Zmiana hasła użytkownika
         update_response = client.put(f"/api/users/{sample_user.id}", json=update_data)
@@ -185,20 +192,14 @@ class TestPasswordChangeFlow:
         # 2. Próba logowania starym hasłem – powinna się nie udać
         login_old_response = client.post(
             "/api/auth/login",
-            json={
-                "email": "test@example.com",
-                "password": "TestPassword123"
-            }
+            json={"email": "test@example.com", "password": "TestPassword123"},
         )
         assert login_old_response.status_code == status.HTTP_401_UNAUTHORIZED
 
         # 3. Logowanie nowym hasłem – powinno się udać
         login_new_response = client.post(
             "/api/auth/login",
-            json={
-                "email": "test@example.com",
-                "password": "NewPassword123"
-            }
+            json={"email": "test@example.com", "password": "NewPassword123"},
         )
         assert login_new_response.status_code == status.HTTP_200_OK
 
@@ -213,22 +214,24 @@ class TestBlockedUserFlow:
     - po blokadzie użytkownik nie może się już zalogować.
     """
 
-    def test_user_gets_blocked_cannot_login(self, client, db_session, sample_user, mock_librarian):
-        from backend.shared.dependencies import require_role
+    def test_user_gets_blocked_cannot_login(
+        self, client, db_session, sample_user, mock_librarian, app
+    ):  # DODANO app
         from app.models.user import UserRole
+
+        from backend.shared.dependencies import require_role
 
         # 1. Upewniamy się, że przed blokadą logowanie działa
         login_before = client.post(
             "/api/auth/login",
-            json={
-                "email": "test@example.com",
-                "password": "TestPassword123"
-            }
+            json={"email": "test@example.com", "password": "TestPassword123"},
         )
         assert login_before.status_code == status.HTTP_200_OK
 
         # 2. Nadpisujemy require_role, aby udawać LIBRARIAN/ADMIN podczas blokady
-        app.dependency_overrides[require_role([UserRole.ADMIN, UserRole.LIBRARIAN])] = lambda: mock_librarian
+        app.dependency_overrides[
+            require_role([UserRole.ADMIN.value, UserRole.LIBRARIAN.value])
+        ] = lambda: mock_librarian
 
         # 3. Blokujemy użytkownika
         block_response = client.post(f"/api/users/{sample_user.id}/block")
@@ -239,9 +242,6 @@ class TestBlockedUserFlow:
         # 4. Po blokadzie logowanie tym samym kontem powinno zwracać 403 FORBIDDEN
         login_after = client.post(
             "/api/auth/login",
-            json={
-                "email": "test@example.com",
-                "password": "TestPassword123"
-            }
+            json={"email": "test@example.com", "password": "TestPassword123"},
         )
         assert login_after.status_code == status.HTTP_403_FORBIDDEN

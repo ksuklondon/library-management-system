@@ -1,37 +1,6 @@
-import pytest
+from app.main import app
+from app.models.user import UserRole
 from fastapi import status
-from unittest.mock import Mock
-from app.models.user import User, UserRole
-
-
-@pytest.fixture
-def mock_librarian():
-    """
-    Fixture tworząca mockowanego użytkownika z rolą LIBRARIAN.
-    Używane do testowania endpointów wymagających uprawnień bibliotekarza.
-    """
-    user = Mock(spec=User)
-    user.id = "librarian-uuid-1234"
-    user.email = "librarian@library.com"
-    user.role = UserRole.LIBRARIAN
-    user.is_active = True
-    user.is_blocked = False
-    return user
-
-
-@pytest.fixture
-def mock_admin():
-    """
-    Fixture tworząca mockowanego użytkownika z rolą ADMIN.
-    Używane do testowania endpointów wymagających uprawnień administratora.
-    """
-    user = Mock(spec=User)
-    user.id = "admin-uuid-5678"
-    user.email = "admin@library.com"
-    user.role = UserRole.ADMIN
-    user.is_active = True
-    user.is_blocked = False
-    return user
 
 
 class TestGetAllUsers:
@@ -39,7 +8,9 @@ class TestGetAllUsers:
     Testy endpointu pobierającego listę użytkowników (/api/users/).
     """
 
-    def test_get_all_users_as_librarian(self, client, db_session, sample_librarian, sample_user, mock_librarian):
+    def test_get_all_users_as_librarian(
+        self, client, db_session, sample_librarian, sample_user, mock_librarian
+    ):
         """
         Bibliotekarz (LIBRARIAN) powinien móc pobrać listę wszystkich użytkowników.
 
@@ -49,7 +20,10 @@ class TestGetAllUsers:
         - że w odpowiedzi jest co najmniej 2 użytkowników (sample_librarian + sample_user).
         """
         from backend.shared.dependencies import require_role
-        app.dependency_overrides[require_role([UserRole.ADMIN, UserRole.LIBRARIAN])] = lambda: mock_librarian
+
+        app.dependency_overrides[
+            require_role([UserRole.ADMIN.value, UserRole.LIBRARIAN.value])
+        ] = lambda: mock_librarian
 
         response = client.get("/api/users/")
 
@@ -64,7 +38,10 @@ class TestGetAllUsers:
         Sprawdzamy, czy endpoint poprawnie obsługuje parametry paginacji (skip, limit).
         """
         from backend.shared.dependencies import require_role
-        app.dependency_overrides[require_role([UserRole.ADMIN, UserRole.LIBRARIAN])] = lambda: mock_librarian
+
+        app.dependency_overrides[
+            require_role([UserRole.ADMIN.value, UserRole.LIBRARIAN.value])
+        ] = lambda: mock_librarian
 
         response = client.get("/api/users/?skip=0&limit=10")
 
@@ -78,13 +55,18 @@ class TestGetUserById:
     Testy endpointu pobierającego użytkownika po ID (/api/users/{user_id}).
     """
 
-    def test_get_user_by_id_success(self, client, db_session, sample_user, mock_librarian):
+    def test_get_user_by_id_success(
+        self, client, db_session, sample_user, mock_librarian
+    ):
         """
         Powinno się udać pobranie istniejącego użytkownika po ID,
         jeśli dzwoni LIBRARIAN (ma odpowiednie uprawnienia).
         """
         from backend.shared.dependencies import require_role
-        app.dependency_overrides[require_role([UserRole.ADMIN, UserRole.LIBRARIAN])] = lambda: mock_librarian
+
+        app.dependency_overrides[
+            require_role([UserRole.ADMIN.value, UserRole.LIBRARIAN.value])
+        ] = lambda: mock_librarian
 
         response = client.get(f"/api/users/{sample_user.id}")
 
@@ -102,7 +84,10 @@ class TestGetUserById:
         fake_uuid = "00000000-0000-0000-0000-000000000000"
 
         from backend.shared.dependencies import require_role
-        app.dependency_overrides[require_role([UserRole.ADMIN, UserRole.LIBRARIAN])] = lambda: mock_librarian
+
+        app.dependency_overrides[
+            require_role([UserRole.ADMIN.value, UserRole.LIBRARIAN.value])
+        ] = lambda: mock_librarian
 
         response = client.get(f"/api/users/{fake_uuid}")
 
@@ -126,11 +111,14 @@ class TestCreateUser:
         user_data = {
             "email": "created@example.com",
             "password": "CreatedPass123",
-            "full_name": "Created User"
+            "full_name": "Created User",
         }
 
         from backend.shared.dependencies import require_role
-        app.dependency_overrides[require_role([UserRole.ADMIN])] = lambda: mock_admin
+
+        app.dependency_overrides[require_role([UserRole.ADMIN.value])] = (
+            lambda: mock_admin
+        )
 
         response = client.post("/api/users/", json=user_data)
 
@@ -145,13 +133,13 @@ class TestCreateUser:
         Próba utworzenia użytkownika z istniejącym adresem email
         powinna zakończyć się błędem 400 BAD REQUEST.
         """
-        user_data = {
-            "email": "test@example.com",
-            "password": "Password123"
-        }
+        user_data = {"email": "test@example.com", "password": "Password123"}
 
         from backend.shared.dependencies import require_role
-        app.dependency_overrides[require_role([UserRole.ADMIN])] = lambda: mock_admin
+
+        app.dependency_overrides[require_role([UserRole.ADMIN.value])] = (
+            lambda: mock_admin
+        )
 
         response = client.post("/api/users/", json=user_data)
 
@@ -169,12 +157,16 @@ class TestUpdateUser:
         """
         Użytkownik powinien móc zaktualizować własny profil (np. full_name).
         """
-        update_data = {
-            "full_name": "Updated Name"
-        }
+        update_data = {"full_name": "Updated Name"}
 
-        from backend.shared.dependencies import get_current_user
-        app.dependency_overrides[get_current_user] = lambda: sample_user
+        from backend.shared.dependencies import get_current_user_payload
+
+        mock_payload = {
+            "sub": str(sample_user.id),
+            "email": sample_user.email,
+            "role": sample_user.role.value,
+        }
+        app.dependency_overrides[get_current_user_payload] = lambda: mock_payload
 
         response = client.put(f"/api/users/{sample_user.id}", json=update_data)
 
@@ -189,12 +181,16 @@ class TestUpdateUser:
         Zwykły użytkownik nie powinien móc edytować profilu innej osoby.
         Oczekujemy 403 FORBIDDEN.
         """
-        update_data = {
-            "full_name": "Hacked Name"
-        }
+        update_data = {"full_name": "Hacked Name"}
 
-        from backend.shared.dependencies import get_current_user
-        app.dependency_overrides[get_current_user] = lambda: sample_user
+        from backend.shared.dependencies import get_current_user_payload
+
+        mock_payload = {
+            "sub": str(sample_user.id),
+            "email": sample_user.email,
+            "role": sample_user.role.value,
+        }
+        app.dependency_overrides[get_current_user_payload] = lambda: mock_payload
 
         response = client.put(f"/api/users/{sample_librarian.id}", json=update_data)
 
@@ -202,17 +198,23 @@ class TestUpdateUser:
 
         app.dependency_overrides.clear()
 
-    def test_update_user_email_conflict(self, client, db_session, sample_user, sample_librarian):
+    def test_update_user_email_conflict(
+        self, client, db_session, sample_user, sample_librarian
+    ):
         """
         Próba zmiany emaila na adres już zajęty przez innego użytkownika
         powinna zakończyć się błędem 400 BAD REQUEST.
         """
-        update_data = {
-            "email": "librarian@example.com"
-        }
+        update_data = {"email": "librarian@example.com"}
 
-        from backend.shared.dependencies import get_current_user
-        app.dependency_overrides[get_current_user] = lambda: sample_user
+        from backend.shared.dependencies import get_current_user_payload
+
+        mock_payload = {
+            "sub": str(sample_user.id),
+            "email": sample_user.email,
+            "role": sample_user.role.value,
+        }
+        app.dependency_overrides[get_current_user_payload] = lambda: mock_payload
 
         response = client.put(f"/api/users/{sample_user.id}", json=update_data)
 
@@ -231,7 +233,10 @@ class TestDeleteUser:
         ADMIN powinien móc usunąć (soft-delete) innego użytkownika.
         """
         from backend.shared.dependencies import require_role
-        app.dependency_overrides[require_role([UserRole.ADMIN])] = lambda: mock_admin
+
+        app.dependency_overrides[require_role([UserRole.ADMIN.value])] = (
+            lambda: mock_admin
+        )
 
         response = client.delete(f"/api/users/{sample_user.id}")
 
@@ -245,7 +250,10 @@ class TestDeleteUser:
         przypadkowym usunięciem ostatniego administratora.
         """
         from backend.shared.dependencies import require_role
-        app.dependency_overrides[require_role([UserRole.ADMIN])] = lambda: mock_admin
+
+        app.dependency_overrides[require_role([UserRole.ADMIN.value])] = (
+            lambda: mock_admin
+        )
 
         response = client.delete(f"/api/users/{mock_admin.id}")
 
@@ -266,7 +274,10 @@ class TestBlockUser:
         Po operacji pole is_blocked w odpowiedzi powinno być True.
         """
         from backend.shared.dependencies import require_role
-        app.dependency_overrides[require_role([UserRole.ADMIN, UserRole.LIBRARIAN])] = lambda: mock_librarian
+
+        app.dependency_overrides[
+            require_role([UserRole.ADMIN.value, UserRole.LIBRARIAN.value])
+        ] = lambda: mock_librarian
 
         response = client.post(f"/api/users/{sample_user.id}/block")
 
@@ -282,7 +293,10 @@ class TestBlockUser:
         Oczekiwany wynik: 400 BAD REQUEST.
         """
         from backend.shared.dependencies import require_role
-        app.dependency_overrides[require_role([UserRole.ADMIN, UserRole.LIBRARIAN])] = lambda: mock_librarian
+
+        app.dependency_overrides[
+            require_role([UserRole.ADMIN.value, UserRole.LIBRARIAN.value])
+        ] = lambda: mock_librarian
 
         response = client.post(f"/api/users/{mock_librarian.id}/block")
 
@@ -296,7 +310,9 @@ class TestUnblockUser:
     Testy odblokowywania użytkowników (/api/users/{user_id}/unblock - POST).
     """
 
-    def test_unblock_user_success(self, client, db_session, sample_user, mock_librarian):
+    def test_unblock_user_success(
+        self, client, db_session, sample_user, mock_librarian
+    ):
         """
         LIBRARIAN powinien móc odblokować wcześniej zablokowanego użytkownika.
         Sprawdzamy, że po wywołaniu endpointu is_blocked == False.
@@ -305,7 +321,10 @@ class TestUnblockUser:
         db_session.commit()
 
         from backend.shared.dependencies import require_role
-        app.dependency_overrides[require_role([UserRole.ADMIN, UserRole.LIBRARIAN])] = lambda: mock_librarian
+
+        app.dependency_overrides[
+            require_role([UserRole.ADMIN.value, UserRole.LIBRARIAN.value])
+        ] = lambda: mock_librarian
 
         response = client.post(f"/api/users/{sample_user.id}/unblock")
 

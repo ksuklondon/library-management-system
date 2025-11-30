@@ -1,4 +1,3 @@
-import pytest
 from fastapi import status
 
 
@@ -18,7 +17,7 @@ class TestRegister:
         user_data = {
             "email": "newuser@example.com",
             "password": "NewPassword123",
-            "full_name": "New User"
+            "full_name": "New User",
         }
 
         response = client.post("/api/auth/register", json=user_data)
@@ -43,7 +42,7 @@ class TestRegister:
         user_data = {
             "email": "test@example.com",  # email istnieje dzięki fixture sample_user
             "password": "Password123",
-            "full_name": "Duplicate User"
+            "full_name": "Duplicate User",
         }
 
         response = client.post("/api/auth/register", json=user_data)
@@ -61,7 +60,7 @@ class TestRegister:
         user_data = {
             "email": "test@example.com",
             "password": "weak",  # za krótkie / zbyt słabe
-            "full_name": "Test User"
+            "full_name": "Test User",
         }
 
         response = client.post("/api/auth/register", json=user_data)
@@ -74,9 +73,7 @@ class TestRegister:
         - brak wymaganego pola email w żądaniu,
         - Pydantic zwróci błąd 422 (brak wymaganych pól).
         """
-        user_data = {
-            "password": "Password123"
-        }
+        user_data = {"password": "Password123"}
 
         response = client.post("/api/auth/register", json=user_data)
 
@@ -96,10 +93,7 @@ class TestLogin:
         - zwracany jest access_token i refresh_token,
         - poprawne dane użytkownika w odpowiedzi.
         """
-        credentials = {
-            "email": "test@example.com",
-            "password": "TestPassword123"
-        }
+        credentials = {"email": "test@example.com", "password": "TestPassword123"}
 
         response = client.post("/api/auth/login", json=credentials)
 
@@ -117,10 +111,7 @@ class TestLogin:
         - poprawny email, błędne hasło,
         - oczekiwany status 401 (nieautoryzowany).
         """
-        credentials = {
-            "email": "test@example.com",
-            "password": "WrongPassword123"
-        }
+        credentials = {"email": "test@example.com", "password": "WrongPassword123"}
 
         response = client.post("/api/auth/login", json=credentials)
 
@@ -132,10 +123,7 @@ class TestLogin:
         - próba logowania na nieistniejące konto,
         - oczekiwany status 401 (nieautoryzowany).
         """
-        credentials = {
-            "email": "nonexistent@example.com",
-            "password": "Password123"
-        }
+        credentials = {"email": "nonexistent@example.com", "password": "Password123"}
 
         response = client.post("/api/auth/login", json=credentials)
 
@@ -150,10 +138,7 @@ class TestLogin:
         sample_user.is_active = False
         db_session.commit()
 
-        credentials = {
-            "email": "test@example.com",
-            "password": "TestPassword123"
-        }
+        credentials = {"email": "test@example.com", "password": "TestPassword123"}
 
         response = client.post("/api/auth/login", json=credentials)
 
@@ -169,10 +154,7 @@ class TestLogin:
         sample_user.is_blocked = True
         db_session.commit()
 
-        credentials = {
-            "email": "test@example.com",
-            "password": "TestPassword123"
-        }
+        credentials = {"email": "test@example.com", "password": "TestPassword123"}
 
         response = client.post("/api/auth/login", json=credentials)
 
@@ -194,16 +176,12 @@ class TestRefreshToken:
         """
         login_response = client.post(
             "/api/auth/login",
-            json={
-                "email": "test@example.com",
-                "password": "TestPassword123"
-            }
+            json={"email": "test@example.com", "password": "TestPassword123"},
         )
         refresh_token = login_response.json()["refresh_token"]
 
         response = client.post(
-            "/api/auth/refresh",
-            json={"refresh_token": refresh_token}
+            "/api/auth/refresh", json={"refresh_token": refresh_token}
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -218,8 +196,7 @@ class TestRefreshToken:
         - oczekiwany status 401 (nieautoryzowany).
         """
         response = client.post(
-            "/api/auth/refresh",
-            json={"refresh_token": "invalid-token"}
+            "/api/auth/refresh", json={"refresh_token": "invalid-token"}
         )
 
         assert response.status_code == status.HTTP_401_UNAUTHORIZED

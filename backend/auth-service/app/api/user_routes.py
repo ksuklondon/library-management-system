@@ -9,16 +9,20 @@ Endpointy do zarządzania użytkownikami (moduł administracyjny):
 - blokowanie / odblokowywanie kont.
 """
 
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
-from typing import List
+from typing import Any, Dict, List
 from uuid import UUID
 
-from backend.shared.database import get_db
-from backend.shared.dependencies import get_current_user, require_role
-from app.schemas.user import UserResponse, UserUpdate, UserCreate
-from app.models.user import User, UserRole
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.orm import Session
+
 from app.core.security import hash_password
+from app.models.user import User, UserRole
+from app.schemas.user import UserCreate, UserResponse, UserUpdate
+from backend.shared.database import get_db
+from backend.shared.dependencies import (  # ZMIANA!
+    get_current_user_payload,
+    require_role,
+)
 
 router = APIRouter()
 
@@ -28,7 +32,9 @@ def get_all_users(
     skip: int = 0,
     limit: int = 100,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_role([UserRole.ADMIN, UserRole.LIBRARIAN]))
+    current_user: Dict[str, Any] = Depends(
+        require_role([UserRole.ADMIN.value, UserRole.LIBRARIAN.value])
+    ),  # ZMIANA!
 ):
     """
     Zwraca listę użytkowników z możliwością paginacji (skip/limit).
@@ -43,7 +49,9 @@ def get_all_users(
 def get_user_by_id(
     user_id: UUID,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_role([UserRole.ADMIN, UserRole.LIBRARIAN]))
+    current_user: Dict[str, Any] = Depends(
+        require_role([UserRole.ADMIN.value, UserRole.LIBRARIAN.value])
+    ),  # ZMIANA!
 ):
     """
     Zwraca szczegóły konkretnego użytkownika na podstawie jego UUID.
@@ -54,8 +62,7 @@ def get_user_by_id(
 
     if not user:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Użytkownik nie znaleziony"
+            status_code=status.HTTP_404_NOT_FOUND, detail="Użytkownik nie znaleziony"
         )
 
     return user
@@ -65,7 +72,9 @@ def get_user_by_id(
 def create_user(
     user_data: UserCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_role([UserRole.ADMIN]))
+    current_user: Dict[str, Any] = Depends(
+        require_role([UserRole.ADMIN.value])
+    ),  # ZMIANA!
 ):
     """
     Tworzenie nowego użytkownika przez administratora.
@@ -78,14 +87,13 @@ def create_user(
 
     if existing_user:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Email już istnieje"
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Email już istnieje"
         )
 
     new_user = User(
         email=user_data.email,
         hashed_password=hash_password(user_data.password),
-        full_name=user_data.full_name
+        full_name=user_data.full_name,
     )
 
     db.add(new_user)
@@ -100,7 +108,7 @@ def update_user(
     user_id: UUID,
     user_data: UserUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user_payload: Dict[str, Any] = Depends(get_current_user_payload),  # ZMIANA!
 ):
     """
     Aktualizacja danych użytkownika.
@@ -109,27 +117,35 @@ def update_user(
     - użytkownik może edytować tylko własne konto,
     - ADMIN i LIBRARIAN mogą edytować dowolne konto.
     """
-    if str(current_user.id) != str(user_id) and current_user.role not in [UserRole.ADMIN, UserRole.LIBRARIAN]:
+    current_user_id = current_user_payload.get("sub")
+    current_user_role = current_user_payload.get("role")
+
+    if str(current_user_id) != str(user_id) and current_user_role not in [
+        UserRole.ADMIN.value,
+        UserRole.LIBRARIAN.value,
+    ]:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Brak uprawnień do edycji tego użytkownika"
+            detail="Brak uprawnień do edycji tego użytkownika",
         )
 
     user = db.query(User).filter(User.id == user_id).first()
 
     if not user:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Użytkownik nie znaleziony"
+            status_code=status.HTTP_404_NOT_FOUND, detail="Użytkownik nie znaleziony"
         )
 
     # Sprawdzenie, czy nowy email nie koliduje z innym kontem.
     if user_data.email:
-        existing = db.query(User).filter(User.email == user_data.email, User.id != user_id).first()
+        existing = (
+            db.query(User)
+            .filter(User.email == user_data.email, User.id != user_id)
+            .first()
+        )
         if existing:
             raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Email już istnieje"
+                status_code=status.HTTP_400_BAD_REQUEST, detail="Email już istnieje"
             )
         user.email = user_data.email
 
@@ -150,7 +166,9 @@ def update_user(
 def delete_user(
     user_id: UUID,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_role([UserRole.ADMIN]))
+    current_user_payload: Dict[str, Any] = Depends(
+        require_role([UserRole.ADMIN.value])
+    ),  # ZMIANA!
 ):
     """
     Usuwanie użytkownika z systemu.
@@ -163,14 +181,15 @@ def delete_user(
 
     if not user:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Użytkownik nie znaleziony"
+            status_code=status.HTTP_404_NOT_FOUND, detail="Użytkownik nie znaleziony"
         )
 
-    if str(user.id) == str(current_user.id):
+    current_user_id = current_user_payload.get("sub")
+
+    if str(user.id) == str(current_user_id):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Nie możesz usunąć własnego konta"
+            detail="Nie możesz usunąć własnego konta",
         )
 
     db.delete(user)
@@ -183,7 +202,9 @@ def delete_user(
 def block_user(
     user_id: UUID,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_role([UserRole.ADMIN, UserRole.LIBRARIAN]))
+    current_user_payload: Dict[str, Any] = Depends(
+        require_role([UserRole.ADMIN.value, UserRole.LIBRARIAN.value])
+    ),  # ZMIANA!
 ):
     """
     Blokowanie konta użytkownika (np. za nadużycia).
@@ -194,14 +215,15 @@ def block_user(
 
     if not user:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Użytkownik nie znaleziony"
+            status_code=status.HTTP_404_NOT_FOUND, detail="Użytkownik nie znaleziony"
         )
 
-    if str(user.id) == str(current_user.id):
+    current_user_id = current_user_payload.get("sub")
+
+    if str(user.id) == str(current_user_id):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Nie możesz zablokować własnego konta"
+            detail="Nie możesz zablokować własnego konta",
         )
 
     user.is_blocked = True
@@ -215,7 +237,9 @@ def block_user(
 def unblock_user(
     user_id: UUID,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_role([UserRole.ADMIN, UserRole.LIBRARIAN]))
+    current_user_payload: Dict[str, Any] = Depends(
+        require_role([UserRole.ADMIN.value, UserRole.LIBRARIAN.value])
+    ),  # ZMIANA!
 ):
     """
     Odblokowanie wcześniej zablokowanego konta.
@@ -226,8 +250,7 @@ def unblock_user(
 
     if not user:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Użytkownik nie znaleziony"
+            status_code=status.HTTP_404_NOT_FOUND, detail="Użytkownik nie znaleziony"
         )
 
     user.is_blocked = False

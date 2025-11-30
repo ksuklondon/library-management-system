@@ -8,11 +8,14 @@ Model jest mapowany na tabelę "users" w bazie danych i służy do:
 - kontroli aktywności / blokady konta.
 """
 
-from sqlalchemy import Column, String, Boolean, DateTime, Enum
-from sqlalchemy.dialects.postgresql import UUID
-from datetime import datetime
-import uuid
 import enum
+import uuid
+from datetime import datetime
+
+from sqlalchemy import Boolean, DateTime, Enum, String
+from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import Mapped, mapped_column
+
 from backend.shared.database import Base
 
 
@@ -24,6 +27,7 @@ class UserRole(str, enum.Enum):
     LIBRARIAN – bibliotekarz (operacje na książkach i wypożyczeniach),
     READER    – zwykły czytelnik (przeglądanie katalogu, wypożyczenia).
     """
+
     ADMIN = "ADMIN"
     LIBRARIAN = "LIBRARIAN"
     READER = "READER"
@@ -37,31 +41,39 @@ class User(Base):
     __tablename__ = "users"
 
     # Identyfikator użytkownika typu UUID – generowany automatycznie.
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
 
     # Adres e-mail użytkownika (unikalny, indeksowany).
-    email = Column(String(255), unique=True, nullable=False, index=True)
+    email: Mapped[str] = mapped_column(
+        String(255), unique=True, nullable=False, index=True
+    )
 
     # Hasło przechowujemy w postaci hasha (nigdy w postaci jawnej!).
-    hashed_password = Column(String(255), nullable=False)
+    hashed_password: Mapped[str] = mapped_column(String(255), nullable=False)
 
     # Pełne imię i nazwisko użytkownika (pole opcjonalne).
-    full_name = Column(String(255), nullable=True)
+    full_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
 
     # Rola użytkownika w systemie (domyślnie READER).
-    role = Column(Enum(UserRole), default=UserRole.READER, nullable=False)
+    role: Mapped[UserRole] = mapped_column(
+        Enum(UserRole), default=UserRole.READER, nullable=False
+    )
 
     # Flaga oznaczająca, czy konto jest aktywne (np. po potwierdzeniu e-maila).
-    is_active = Column(Boolean, default=True, nullable=False)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
 
     # Flaga oznaczająca, czy konto zostało zablokowane przez administratora.
-    is_blocked = Column(Boolean, default=False, nullable=False)
+    is_blocked: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
 
     # Data utworzenia rekordu (ustawiana automatycznie).
-    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, default=datetime.utcnow, nullable=False
+    )
 
     # Data ostatniej aktualizacji rekordu (aktualizowana automatycznie).
-    updated_at = Column(
+    updated_at: Mapped[datetime] = mapped_column(
         DateTime,
         default=datetime.utcnow,
         onupdate=datetime.utcnow,
