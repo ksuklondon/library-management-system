@@ -11,13 +11,11 @@ Odpowiada za:
 - Dependency injection dla FastAPI endpoints
 
 Użycie w endpointach:
-```python
-from backend.shared.dependencies import get_current_user, require_role
+    from backend.shared.dependencies import get_current_user, require_role
 
-@app.get("/admin-only")
-def admin_endpoint(current_user = Depends(require_role(["ADMIN"]))):
-    return {"message": "Witaj adminie!"}
-```
+    @app.get("/admin-only")
+    def admin_endpoint(current_user = Depends(require_role(["ADMIN"]))):
+        return {"message": "Witaj adminie!"}
 """
 
 from datetime import datetime, timedelta
@@ -46,17 +44,16 @@ def create_access_token(
     data: Dict[str, Any], expires_delta: Optional[timedelta] = None
 ) -> str:
     """
-        Tworzy JWT access token.
+    Tworzy JWT access token.
 
-        Args:
-            data: Dane do zakodowania w tokenie (user_id, email, role, etc.)
-            expires_delta: Czas ważności tokenu (domyślnie z settings)
+    Args:
+        data: Dane do zakodowania w tokenie (user_id, email, role, etc.)
+        expires_delta: Czas ważności tokenu (domyślnie z settings)
 
-        Returns:
-            str: Zakodowany JWT token
+    Returns:
+        str: Zakodowany JWT token
 
-        Przykład:
-    ```python
+    Przykład:
         token = create_access_token(
             data={
                 "user_id": "uuid-here",
@@ -65,7 +62,6 @@ def create_access_token(
             }
         )
         # Zwraca: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-    ```
     """
     # Kopiujemy dane (żeby nie modyfikować oryginału)
     to_encode = data.copy()
@@ -92,20 +88,18 @@ def create_access_token(
 
 def create_refresh_token(data: Dict[str, Any]) -> str:
     """
-        Tworzy JWT refresh token (Wymaganie F2a).
+    Tworzy JWT refresh token (Wymaganie F2a).
 
-        Refresh token ma dłuższy czas ważności (14 dni).
+    Refresh token ma dłuższy czas ważności (14 dni).
 
-        Args:
-            data: Dane do zakodowania (zazwyczaj tylko user_id)
+    Args:
+        data: Dane do zakodowania (zazwyczaj tylko user_id)
 
-        Returns:
-            str: Zakodowany refresh token
+    Returns:
+        str: Zakodowany refresh token
 
-        Przykład:
-    ```python
+    Przykład:
         refresh = create_refresh_token({"user_id": "uuid-here"})
-    ```
     """
     to_encode = data.copy()
 
@@ -122,22 +116,20 @@ def create_refresh_token(data: Dict[str, Any]) -> str:
 
 def verify_token(token: str) -> Dict[str, Any]:
     """
-        Weryfikuje i dekoduje JWT token.
+    Weryfikuje i dekoduje JWT token.
 
-        Args:
-            token: JWT token do weryfikacji
+    Args:
+        token: JWT token do weryfikacji
 
-        Returns:
-            Dict: Payload tokenu (dane użytkownika)
+    Returns:
+        Dict: Payload tokenu (dane użytkownika)
 
-        Raises:
-            HTTPException: Jeśli token nieprawidłowy/wygasły
+    Raises:
+        HTTPException: Jeśli token nieprawidłowy/wygasły
 
-        Przykład:
-    ```python
+    Przykład:
         payload = verify_token("eyJhbGciOiJIUzI1NiI...")
         # {'user_id': 'uuid', 'email': 'jan@example.com', 'role': 'READER'}
-    ```
     """
     try:
         # Dekodujemy token
@@ -172,24 +164,22 @@ async def get_current_user_id(
     credentials: HTTPAuthorizationCredentials = Depends(security),
 ) -> str:
     """
-        Dependency - pobiera ID aktualnie zalogowanego użytkownika z tokenu JWT.
+    Dependency - pobiera ID aktualnie zalogowanego użytkownika z tokenu JWT.
 
-        Args:
-            credentials: Token Bearer z nagłówka Authorization
+    Args:
+        credentials: Token Bearer z nagłówka Authorization
 
-        Returns:
-            str: UUID użytkownika
+    Returns:
+        str: UUID użytkownika
 
-        Raises:
-            HTTPException 401: Jeśli brak tokenu lub token nieprawidłowy
+    Raises:
+        HTTPException 401: Jeśli brak tokenu lub token nieprawidłowy
 
-        Użycie w endpointach:
-    ```python
+    Użycie w endpointach:
         @app.get("/profile")
         def get_profile(user_id: str = Depends(get_current_user_id)):
             # user_id to UUID zalogowanego użytkownika
             return {"user_id": user_id}
-    ```
     """
     # Wyciągamy token z credentials
     token = credentials.credentials
@@ -198,30 +188,33 @@ async def get_current_user_id(
     payload = verify_token(token)
 
     # Zwracamy user_id
-    user_id: str = payload.get("user_id")
+    user_id = payload.get("user_id")
+    if not user_id:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token nieprawidłowy: brak user_id",
+        )
 
-    return user_id
+    return str(user_id)
 
 
 async def get_current_user_payload(
     credentials: HTTPAuthorizationCredentials = Depends(security),
 ) -> Dict[str, Any]:
     """
-        Dependency - pobiera pełny payload tokenu JWT (user_id, email, role).
+    Dependency - pobiera pełny payload tokenu JWT (user_id, email, role).
 
-        Args:
-            credentials: Token Bearer z nagłówka Authorization
+    Args:
+        credentials: Token Bearer z nagłówka Authorization
 
-        Returns:
-            Dict: Cały payload tokenu
+    Returns:
+        Dict: Cały payload tokenu
 
-        Użycie:
-    ```python
+    Użycie:
         @app.get("/profile")
         def get_profile(user: dict = Depends(get_current_user_payload)):
             # user = {"user_id": "...", "email": "...", "role": "READER"}
             return user
-    ```
     """
     token = credentials.credentials
     payload = verify_token(token)
@@ -236,18 +229,17 @@ async def get_current_user_payload(
 
 def require_role(allowed_roles: List[str]):
     """
-        Factory function - tworzy dependency sprawdzający rolę użytkownika.
+    Factory function - tworzy dependency sprawdzający rolę użytkownika.
 
-        Implementuje RBAC - Role-Based Access Control (Wymaganie NF5).
+    Implementuje RBAC - Role-Based Access Control (Wymaganie NF5).
 
-        Args:
-            allowed_roles: Lista dozwolonych ról (np. ["ADMIN", "LIBRARIAN"])
+    Args:
+        allowed_roles: Lista dozwolonych ról (np. ["ADMIN", "LIBRARIAN"])
 
-        Returns:
-            Dependency function
+    Returns:
+        Dependency function
 
-        Użycie:
-    ```python
+    Użycie:
         # Endpoint dostępny tylko dla ADMIN
         @app.delete("/users/{user_id}")
         def delete_user(
@@ -265,7 +257,6 @@ def require_role(allowed_roles: List[str]):
         ):
             # Admin i bibliotekarz mogą dodawać książki
             return {"message": "Book created"}
-    ```
     """
 
     async def role_checker(
@@ -309,26 +300,24 @@ async def verify_active_user(
     user_payload: Dict[str, Any] = Depends(get_current_user_payload),
 ) -> Dict[str, Any]:
     """
-        Dependency - sprawdza czy konto użytkownika jest aktywne (nie zablokowane).
+    Dependency - sprawdza czy konto użytkownika jest aktywne (nie zablokowane).
 
-        Implementuje Wymaganie F27 (blokowanie użytkowników).
+    Implementuje Wymaganie F27 (blokowanie użytkowników).
 
-        Args:
-            user_payload: Payload tokenu JWT
+    Args:
+        user_payload: Payload tokenu JWT
 
-        Returns:
-            Dict: Payload użytkownika (jeśli aktywny)
+    Returns:
+        Dict: Payload użytkownika (jeśli aktywny)
 
-        Raises:
-            HTTPException 403: Jeśli konto zablokowane
+    Raises:
+        HTTPException 403: Jeśli konto zablokowane
 
-        Użycie:
-    ```python
+    Użycie:
         @app.get("/books")
         def get_books(user = Depends(verify_active_user)):
             # Tylko aktywni użytkownicy mogą przeglądać książki
             return books
-    ```
     """
     # Sprawdzamy czy użytkownik jest aktywny
     is_active = user_payload.get("is_active", True)
@@ -352,17 +341,15 @@ async def get_active_user(
     user_payload: Dict[str, Any] = Depends(verify_active_user),
 ) -> Dict[str, Any]:
     """
-        Dependency - pobiera aktywnego użytkownika (zalogowany + nie zablokowany).
+    Dependency - pobiera aktywnego użytkownika (zalogowany + nie zablokowany).
 
-        To jest najczęściej używany dependency - łączy get_current_user + verify_active.
+    To jest najczęściej używany dependency - łączy get_current_user + verify_active.
 
-        Użycie:
-    ```python
+    Użycie:
         @app.get("/my-reservations")
         def get_my_reservations(user = Depends(get_active_user)):
             # user jest zalogowany i aktywny
             return reservations
-    ```
     """
     return user_payload
 
@@ -386,12 +373,11 @@ async def get_active_staff(
     user_payload: Dict[str, Any] = Depends(require_role(["LIBRARIAN", "ADMIN"])),
 ) -> Dict[str, Any]:
     """
-        Dependency - sprawdza czy użytkownik jest pracownikiem biblioteki.
+    Dependency - sprawdza czy użytkownik jest pracownikiem biblioteki.
 
-        Staff = LIBRARIAN lub ADMIN.
+    Staff = LIBRARIAN lub ADMIN.
 
-        Użycie:
-    ```python
+    Użycie:
         @app.post("/loans")
         def create_loan(
             loan: LoanCreate,
@@ -399,7 +385,6 @@ async def get_active_staff(
         ):
             # Tylko personel może wypożyczać książki
             return loan
-    ```
     """
     return await verify_active_user(user_payload)
 
@@ -409,10 +394,9 @@ async def get_active_admin(
     user_payload: Dict[str, Any] = Depends(require_role(["ADMIN"])),
 ) -> Dict[str, Any]:
     """
-        Dependency - sprawdza czy użytkownik jest administratorem.
+    Dependency - sprawdza czy użytkownik jest administratorem.
 
-        Użycie:
-    ```python
+    Użycie:
         @app.delete("/users/{user_id}")
         def delete_user(
             user_id: str,
@@ -420,7 +404,6 @@ async def get_active_admin(
         ):
             # Tylko admin może usuwać użytkowników
             return {"message": "deleted"}
-    ```
     """
     return await verify_active_user(user_payload)
 
@@ -434,19 +417,18 @@ async def get_optional_user(
     credentials: Optional[HTTPAuthorizationCredentials] = Depends(security),
 ) -> Optional[Dict[str, Any]]:
     """
-        Dependency - pobiera użytkownika jeśli jest zalogowany, None jeśli nie.
+    Dependency - pobiera użytkownika jeśli jest zalogowany, None jeśli nie.
 
-        Przydatne dla endpointów które są publiczne, ale zachowują się inaczej
-        dla zalogowanych użytkowników.
+    Przydatne dla endpointów które są publiczne, ale zachowują się inaczej
+    dla zalogowanych użytkowników.
 
-        Args:
-            credentials: Token Bearer (opcjonalny)
+    Args:
+        credentials: Token Bearer (opcjonalny)
 
-        Returns:
-            Dict lub None: Payload użytkownika jeśli zalogowany, None jeśli nie
+    Returns:
+        Dict lub None: Payload użytkownika jeśli zalogowany, None jeśli nie
 
-        Użycie:
-    ```python
+    Użycie:
         @app.get("/books")
         def get_books(user: Optional[dict] = Depends(get_optional_user)):
             if user:
@@ -455,7 +437,6 @@ async def get_optional_user(
             else:
                 # Gość - tylko podstawowe info
                 return {"books": books}
-    ```
     """
     if credentials is None:
         return None
