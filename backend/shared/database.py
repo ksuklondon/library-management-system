@@ -11,11 +11,12 @@ Odpowiada za:
 - Transakcje ACID (Wymaganie NF15)
 """
 
-from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
 import os
 from typing import Generator
+
+from sqlalchemy import create_engine, text
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
 
 # ==========================================
 # KONFIGURACJA POŁĄCZENIA
@@ -87,12 +88,10 @@ def get_db() -> Generator:
     Dependency dla FastAPI - dostarcza sesję bazodanową.
 
     Użycie w endpointach:
-```python
-    @app.get("/users")
-    def get_users(db: Session = Depends(get_db)):
-        users = db.query(User).all()
-        return users
-```
+        @app.get("/users")
+        def get_users(db: Session = Depends(get_db)):
+            users = db.query(User).all()
+            return users
 
     Zalety:
     - Automatyczne otwieranie sesji
@@ -126,12 +125,10 @@ def init_db() -> None:
     Ta funkcja przydatna tylko do testów.
 
     Użycie:
-```python
-    from backend.shared.database import init_db, Base
-    from backend.auth_service.app.models import User  # Import wszystkich modeli
+        from backend.shared.database import init_db, Base
+        from backend.auth_service.app.models import User  # Import wszystkich modeli
 
-    init_db()  # Tworzy tabele
-```
+        init_db()  # Tworzy tabele
     """
     # Import wszystkich modeli (żeby Base.metadata je "zobaczył")
     # W produkcji to robi Alembic
@@ -145,11 +142,9 @@ def drop_all_tables() -> None:
     ⚠️ NIEBEZPIECZNE! Używaj tylko w testach!
 
     Użycie:
-```python
-    from backend.shared.database import drop_all_tables
+        from backend.shared.database import drop_all_tables
 
-    drop_all_tables()  # Usuwa wszystkie tabele
-```
+        drop_all_tables()  # Usuwa wszystkie tabele
     """
     Base.metadata.drop_all(bind=engine)
     print("⚠️ Wszystkie tabele usunięte!")
@@ -159,12 +154,10 @@ def check_connection() -> bool:
     Sprawdza czy połączenie z bazą danych działa.
 
     Użycie w health check (Wymaganie NF28):
-```python
-    @app.get("/health")
-    def health_check():
-        db_ok = check_connection()
-        return {"status": "healthy" if db_ok else "unhealthy"}
-```
+        @app.get("/health")
+        def health_check():
+            db_ok = check_connection()
+            return {"status": "healthy" if db_ok else "unhealthy"}
 
     Returns:
         bool: True jeśli połączenie działa, False w przeciwnym razie
@@ -172,7 +165,7 @@ def check_connection() -> bool:
     try:
         # Próbujemy wykonać proste zapytanie
         with engine.connect() as connection:
-            connection.execute("SELECT 1")
+            connection.execute(text("SELECT 1"))
         return True
 
     except Exception as e:
@@ -190,20 +183,18 @@ class TransactionContext:
     Automatyczne commit/rollback (Wymaganie NF15 - transakcje ACID).
 
     Użycie:
-```python
-    from backend.shared.database import SessionLocal, TransactionContext
+        from backend.shared.database import SessionLocal, TransactionContext
 
-    with TransactionContext(SessionLocal()) as db:
-        # Wszystkie operacje w jednej transakcji
-        user = User(email="test@example.com")
-        db.add(user)
+        with TransactionContext(SessionLocal()) as db:
+            # Wszystkie operacje w jednej transakcji
+            user = User(email="test@example.com")
+            db.add(user)
 
-        reservation = Reservation(user_id=user.id, ...)
-        db.add(reservation)
+            reservation = Reservation(user_id=user.id, ...)
+            db.add(reservation)
 
-        # Automatyczny commit na końcu
-        # Jeśli błąd → automatyczny rollback
-```
+            # Automatyczny commit na końcu
+            # Jeśli błąd → automatyczny rollback
     """
 
     def __init__(self, session):
