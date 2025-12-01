@@ -5,6 +5,8 @@ Wymaganie: Punkt 5 - Opis metod i podejść do testowania
 Konfiguracja testów jednostkowych i integracyjnych.
 """
 
+from unittest.mock import Mock
+
 import pytest
 from app.main import app
 from app.models.book import Book
@@ -14,8 +16,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
-from backend.shared.database import Base
-from backend.shared.dependencies import get_db
+from backend.shared.database import Base, get_db
 
 # Database URL dla testów (in-memory SQLite)
 SQLALCHEMY_TEST_DATABASE_URL = "sqlite:///:memory:"
@@ -65,6 +66,57 @@ def client(db_session):
         yield test_client
 
     app.dependency_overrides.clear()
+
+
+@pytest.fixture
+def app_fixture():
+    """
+    Fixture zwracający instancję aplikacji FastAPI.
+    Używana w testach do nadpisywania dependencies.
+    """
+    return app
+
+
+@pytest.fixture
+def mock_librarian():
+    """
+    Mock użytkownika LIBRARIAN dla testów dependency overrides.
+    """
+    mock = Mock()
+    mock.id = "librarian-uuid-1234"
+    mock.email = "librarian@library.com"
+    mock.role = "LIBRARIAN"
+    mock.is_active = True
+    mock.is_blocked = False
+    return mock
+
+
+@pytest.fixture
+def mock_admin():
+    """
+    Mock użytkownika ADMIN dla testów dependency overrides.
+    """
+    mock = Mock()
+    mock.id = "admin-uuid-5678"
+    mock.email = "admin@library.com"
+    mock.role = "ADMIN"
+    mock.is_active = True
+    mock.is_blocked = False
+    return mock
+
+
+@pytest.fixture
+def mock_reader():
+    """
+    Mock użytkownika READER dla testów dependency overrides.
+    """
+    mock = Mock()
+    mock.id = "reader-uuid-9012"
+    mock.email = "reader@library.com"
+    mock.role = "READER"
+    mock.is_active = True
+    mock.is_blocked = False
+    return mock
 
 
 @pytest.fixture

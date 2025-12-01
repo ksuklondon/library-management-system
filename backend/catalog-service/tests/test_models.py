@@ -34,7 +34,7 @@ class TestBookModel:
         assert book.title == "Test Book"
         assert book.authors == "Test Author"
         assert book.isbn == "1234567890123"
-        assert book.is_deleted == False
+        assert book.is_deleted is False
         assert book.created_at is not None
         assert book.updated_at is not None
 
@@ -85,7 +85,7 @@ class TestBookModel:
         db_session.commit()
         db_session.refresh(sample_book)
 
-        assert sample_book.is_deleted == True
+        assert sample_book.is_deleted is True
         assert sample_book.deleted_by == "admin-uuid-123"
 
     def test_book_repr(self, sample_book):
@@ -118,7 +118,7 @@ class TestBookCopyModel:
         assert copy.inventory_no == "INV-001"
         assert copy.status == CopyStatus.AVAILABLE
         assert copy.location == "Shelf A-1"
-        assert copy.is_deleted == False
+        assert copy.is_deleted is False
 
     def test_copy_is_available(self, db_session, sample_book):
         """Test metody is_available() (F8, F11)."""
@@ -129,7 +129,7 @@ class TestBookCopyModel:
         db_session.add(copy1)
         db_session.commit()
 
-        assert copy1.is_available() == True
+        assert copy1.is_available() is True
 
         # Wypożyczony egzemplarz
         copy2 = BookCopy(
@@ -138,7 +138,7 @@ class TestBookCopyModel:
         db_session.add(copy2)
         db_session.commit()
 
-        assert copy2.is_available() == False
+        assert copy2.is_available() is False
 
         # Usunięty egzemplarz
         copy3 = BookCopy(
@@ -150,7 +150,7 @@ class TestBookCopyModel:
         db_session.add(copy3)
         db_session.commit()
 
-        assert copy3.is_available() == False
+        assert copy3.is_available() is False
 
     def test_copy_can_be_reserved(self, db_session, sample_book):
         """Test metody can_be_reserved() (F8)."""
@@ -160,13 +160,13 @@ class TestBookCopyModel:
         db_session.add(copy)
         db_session.commit()
 
-        assert copy.can_be_reserved() == True
+        assert copy.can_be_reserved() is True
 
         # Zmień status na BORROWED
         copy.status = CopyStatus.BORROWED
         db_session.commit()
 
-        assert copy.can_be_reserved() == False
+        assert copy.can_be_reserved() is False
 
     def test_copy_can_be_borrowed(self, db_session, sample_book):
         """Test metody can_be_borrowed() (F11)."""
@@ -176,7 +176,7 @@ class TestBookCopyModel:
         )
         db_session.add(copy1)
         db_session.commit()
-        assert copy1.can_be_borrowed() == True
+        assert copy1.can_be_borrowed() is True
 
         # Zarezerwowany (też można wypożyczyć)
         copy2 = BookCopy(
@@ -184,7 +184,7 @@ class TestBookCopyModel:
         )
         db_session.add(copy2)
         db_session.commit()
-        assert copy2.can_be_borrowed() == True
+        assert copy2.can_be_borrowed() is True
 
         # Wypożyczony (nie można)
         copy3 = BookCopy(
@@ -192,7 +192,7 @@ class TestBookCopyModel:
         )
         db_session.add(copy3)
         db_session.commit()
-        assert copy3.can_be_borrowed() == False
+        assert copy3.can_be_borrowed() is False
 
         # Uszkodzony (nie można)
         copy4 = BookCopy(
@@ -200,7 +200,7 @@ class TestBookCopyModel:
         )
         db_session.add(copy4)
         db_session.commit()
-        assert copy4.can_be_borrowed() == False
+        assert copy4.can_be_borrowed() is False
 
     def test_copy_soft_delete(self, db_session, sample_book_copy):
         """Test soft delete egzemplarza (NF19)."""
@@ -209,7 +209,7 @@ class TestBookCopyModel:
         db_session.commit()
         db_session.refresh(sample_book_copy)
 
-        assert sample_book_copy.is_deleted == True
+        assert sample_book_copy.is_deleted is True
 
     def test_copy_repr(self, sample_book_copy):
         """Test reprezentacji tekstowej egzemplarza."""

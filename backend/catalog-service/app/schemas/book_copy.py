@@ -38,9 +38,6 @@ class BookCopyBase(BaseModel):
     location: Optional[str] = Field(
         None, max_length=100, description="Lokalizacja w bibliotece"
     )
-    status: CopyStatusEnum = Field(
-        CopyStatusEnum.AVAILABLE, description="Status egzemplarza"
-    )
 
 
 class BookCopyCreate(BaseModel):
@@ -66,7 +63,7 @@ class BookCopyUpdate(BaseModel):
 
     inventory_no: Optional[str] = Field(None, min_length=1, max_length=50)
     location: Optional[str] = Field(None, max_length=100)
-    status: Optional[CopyStatusEnum] = Field(None)
+    status: Optional[str] = Field(None)  # ZMIANA: CopyStatusEnum → str
 
 
 class CopyStatusUpdate(BaseModel):
@@ -76,7 +73,9 @@ class CopyStatusUpdate(BaseModel):
     Wymaganie F16: Zmiana statusu egzemplarza
     """
 
-    status: CopyStatusEnum = Field(..., description="Nowy status egzemplarza")
+    status: str = Field(
+        ..., description="Nowy status egzemplarza"
+    )  # ZMIANA: CopyStatusEnum → str
 
 
 class BookCopyResponse(BookCopyBase):
@@ -88,6 +87,7 @@ class BookCopyResponse(BookCopyBase):
 
     id: UUID
     book_id: UUID
+    status: str = Field(..., description="Status egzemplarza")
     book_title: Optional[str] = Field(None, description="Tytuł książki (dla wygody)")
     created_at: datetime
     updated_at: datetime

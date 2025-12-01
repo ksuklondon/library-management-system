@@ -10,14 +10,13 @@ Dostęp:
 - tylko ADMIN – usuwanie książek
 """
 
-from typing import List
+from typing import Any, Dict, List
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.models.book import Book
-from app.models.user import User, UserRole
 from app.schemas.book import BookCreate, BookResponse, BookUpdate
 from backend.shared.database import get_db
 from backend.shared.dependencies import require_role
@@ -29,7 +28,7 @@ router = APIRouter()
 def create_book(
     book_data: BookCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_role([UserRole.LIBRARIAN, UserRole.ADMIN])),
+    current_user: Dict[str, Any] = Depends(require_role(["LIBRARIAN", "ADMIN"])),
 ):
     """
     Dodawanie nowej książki do katalogu.
@@ -84,7 +83,7 @@ def update_book(
     book_id: UUID,
     book_data: BookUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_role([UserRole.LIBRARIAN, UserRole.ADMIN])),
+    current_user: Dict[str, Any] = Depends(require_role(["LIBRARIAN", "ADMIN"])),
 ):
     """
     Aktualizacja informacji o książce.
@@ -93,7 +92,7 @@ def update_book(
     Dodatkowo pilnowana jest unikalność ISBN – nie można przypisać ISBN
     już używanego przez inną książkę.
     """
-    book = db.query(Book).filter(Book.id == book_id, Book.is_deleted == False).first()
+    book = db.query(Book).filter(Book.id == book_id, Book.is_deleted.is_(False)).first()
 
     if not book:
         raise HTTPException(
@@ -142,7 +141,7 @@ def update_book(
 def delete_book(
     book_id: UUID,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_role([UserRole.ADMIN])),
+    current_user: Dict[str, Any] = Depends(require_role(["ADMIN"])),
 ):
     """
     Usuwanie książki (soft delete).
@@ -153,7 +152,7 @@ def delete_book(
     Dodatkowo książka nie może zostać usunięta, jeśli istnieją wypożyczone
     lub zarezerwowane egzemplarze.
     """
-    book = db.query(Book).filter(Book.id == book_id, Book.is_deleted == False).first()
+    book = db.query(Book).filter(Book.id == book_id, Book.is_deleted.is_(False)).first()
 
     if not book:
         raise HTTPException(
@@ -173,7 +172,7 @@ def delete_book(
         )
 
     book.is_deleted = True
-    book.deleted_by = current_user.id
+    book.deleted_by = UUID(current_user.get("sub"))
 
     for copy in book.copies:
         if not copy.is_deleted:
@@ -190,7 +189,7 @@ def get_all_books_management(
     limit: int = 100,
     include_deleted: bool = False,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_role([UserRole.LIBRARIAN, UserRole.ADMIN])),
+    current_user: Dict[str, Any] = Depends(require_role(["LIBRARIAN", "ADMIN"])),
 ):
     """
     Lista wszystkich książek (dla panelu zarządzania).
@@ -202,7 +201,7 @@ def get_all_books_management(
     query = db.query(Book)
 
     if not include_deleted:
-        query = query.filter(Book.is_deleted == False)
+        query = query.filter(Book.is_deleted.is_(False))
 
     books = query.offset(skip).limit(limit).all()
 

@@ -5,36 +5,8 @@ Wymaganie: Punkt 5 - Opis metod i podejść do testowania
 Testy dla F16 (Zarządzanie egzemplarzami - LIBRARIAN/ADMIN)
 """
 
-from unittest.mock import Mock
-
-import pytest
 from app.models.book_copy import CopyStatus
-from app.models.user import User, UserRole
 from fastapi import status
-
-
-@pytest.fixture
-def mock_librarian():
-    """Mock użytkownika LIBRARIAN do testów."""
-    user = Mock(spec=User)
-    user.id = "librarian-uuid-1234"
-    user.email = "librarian@library.com"
-    user.role = UserRole.LIBRARIAN
-    user.is_active = True
-    user.is_blocked = False
-    return user
-
-
-@pytest.fixture
-def mock_admin():
-    """Mock użytkownika ADMIN do testów."""
-    user = Mock(spec=User)
-    user.id = "admin-uuid-5678"
-    user.email = "admin@library.com"
-    user.role = UserRole.ADMIN
-    user.is_active = True
-    user.is_blocked = False
-    return user
 
 
 class TestCreateBookCopy:
@@ -42,7 +14,9 @@ class TestCreateBookCopy:
     Testy dla tworzenia egzemplarzy (F16).
     """
 
-    def test_create_copy_success(self, client, db_session, sample_book, mock_librarian):
+    def test_create_copy_success(
+        self, client, db_session, sample_book, mock_librarian, app_fixture
+    ):
         """Test pomyślnego dodania egzemplarza (F16 - LIBRARIAN)."""
         copy_data = {
             "book_id": str(sample_book.id),
@@ -52,7 +26,7 @@ class TestCreateBookCopy:
 
         from backend.shared.dependencies import require_role
 
-        app.dependency_overrides[require_role([UserRole.LIBRARIAN, UserRole.ADMIN])] = (
+        app_fixture.dependency_overrides[require_role(["LIBRARIAN", "ADMIN"])] = (
             lambda: mock_librarian
         )
 
@@ -65,16 +39,16 @@ class TestCreateBookCopy:
         assert data["status"] == "AVAILABLE"
         assert "id" in data
 
-        app.dependency_overrides.clear()
+        app_fixture.dependency_overrides.clear()
 
-    def test_create_copy_nonexistent_book(self, client, mock_librarian):
+    def test_create_copy_nonexistent_book(self, client, mock_librarian, app_fixture):
         """Test dodania egzemplarza do nieistniejącej książki."""
         fake_uuid = "00000000-0000-0000-0000-000000000000"
         copy_data = {"book_id": fake_uuid, "inventory_no": "INV-2024-999"}
 
         from backend.shared.dependencies import require_role
 
-        app.dependency_overrides[require_role([UserRole.LIBRARIAN, UserRole.ADMIN])] = (
+        app_fixture.dependency_overrides[require_role(["LIBRARIAN", "ADMIN"])] = (
             lambda: mock_librarian
         )
 
@@ -82,10 +56,16 @@ class TestCreateBookCopy:
 
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
-        app.dependency_overrides.clear()
+        app_fixture.dependency_overrides.clear()
 
     def test_create_copy_duplicate_inventory_no(
-        self, client, db_session, sample_book, sample_book_copy, mock_librarian
+        self,
+        client,
+        db_session,
+        sample_book,
+        sample_book_copy,
+        mock_librarian,
+        app_fixture,
     ):
         """Test dodania egzemplarza z duplikującym się numerem inwentarzowym."""
         copy_data = {
@@ -95,7 +75,7 @@ class TestCreateBookCopy:
 
         from backend.shared.dependencies import require_role
 
-        app.dependency_overrides[require_role([UserRole.LIBRARIAN, UserRole.ADMIN])] = (
+        app_fixture.dependency_overrides[require_role(["LIBRARIAN", "ADMIN"])] = (
             lambda: mock_librarian
         )
 
@@ -104,7 +84,7 @@ class TestCreateBookCopy:
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert "już istnieje" in response.json()["detail"].lower()
 
-        app.dependency_overrides.clear()
+        app_fixture.dependency_overrides.clear()
 
 
 class TestGetCopiesByBook:
@@ -161,14 +141,14 @@ class TestUpdateBookCopy:
     """
 
     def test_update_copy_success(
-        self, client, db_session, sample_book_copy, mock_librarian
+        self, client, db_session, sample_book_copy, mock_librarian, app_fixture
     ):
         """Test pomyślnej aktualizacji egzemplarza (F16)."""
         update_data = {"location": "Shelf B-5"}
 
         from backend.shared.dependencies import require_role
 
-        app.dependency_overrides[require_role([UserRole.LIBRARIAN, UserRole.ADMIN])] = (
+        app_fixture.dependency_overrides[require_role(["LIBRARIAN", "ADMIN"])] = (
             lambda: mock_librarian
         )
 
@@ -178,10 +158,16 @@ class TestUpdateBookCopy:
         data = response.json()
         assert data["location"] == "Shelf B-5"
 
-        app.dependency_overrides.clear()
+        app_fixture.dependency_overrides.clear()
 
     def test_update_copy_inventory_no_conflict(
-        self, client, db_session, sample_book, mock_librarian
+        self,
+        client,
+        db_session,
+        sample_book,
+        sample_book_copy,
+        mock_librarian,
+        app_fixture,
     ):
         """Test aktualizacji numeru inwentarzowego na już istniejący."""
         # Stwórz drugi egzemplarz
@@ -200,7 +186,7 @@ class TestUpdateBookCopy:
 
         from backend.shared.dependencies import require_role
 
-        app.dependency_overrides[require_role([UserRole.LIBRARIAN, UserRole.ADMIN])] = (
+        app_fixture.dependency_overrides[require_role(["LIBRARIAN", "ADMIN"])] = (
             lambda: mock_librarian
         )
 
@@ -208,7 +194,7 @@ class TestUpdateBookCopy:
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
-        app.dependency_overrides.clear()
+        app_fixture.dependency_overrides.clear()
 
 
 class TestUpdateCopyStatus:
@@ -217,14 +203,14 @@ class TestUpdateCopyStatus:
     """
 
     def test_update_copy_status_success(
-        self, client, db_session, sample_book_copy, mock_librarian
+        self, client, db_session, sample_book_copy, mock_librarian, app_fixture
     ):
         """Test pomyślnej zmiany statusu egzemplarza (F16)."""
         status_data = {"status": "DAMAGED"}
 
         from backend.shared.dependencies import require_role
 
-        app.dependency_overrides[require_role([UserRole.LIBRARIAN, UserRole.ADMIN])] = (
+        app_fixture.dependency_overrides[require_role(["LIBRARIAN", "ADMIN"])] = (
             lambda: mock_librarian
         )
 
@@ -236,10 +222,10 @@ class TestUpdateCopyStatus:
         data = response.json()
         assert data["status"] == "DAMAGED"
 
-        app.dependency_overrides.clear()
+        app_fixture.dependency_overrides.clear()
 
     def test_update_borrowed_copy_to_damaged(
-        self, client, db_session, sample_book_copy, mock_librarian
+        self, client, db_session, sample_book_copy, mock_librarian, app_fixture
     ):
         """Test zmiany statusu wypożyczonego egzemplarza."""
         # Ustaw status na BORROWED
@@ -250,7 +236,7 @@ class TestUpdateCopyStatus:
 
         from backend.shared.dependencies import require_role
 
-        app.dependency_overrides[require_role([UserRole.LIBRARIAN, UserRole.ADMIN])] = (
+        app_fixture.dependency_overrides[require_role(["LIBRARIAN", "ADMIN"])] = (
             lambda: mock_librarian
         )
 
@@ -261,7 +247,7 @@ class TestUpdateCopyStatus:
         # Nie można zmienić statusu wypożyczonego egzemplarza na DAMAGED
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
-        app.dependency_overrides.clear()
+        app_fixture.dependency_overrides.clear()
 
 
 class TestDeleteBookCopy:
@@ -270,12 +256,12 @@ class TestDeleteBookCopy:
     """
 
     def test_delete_copy_success(
-        self, client, db_session, sample_book_copy, mock_admin
+        self, client, db_session, sample_book_copy, mock_admin, app_fixture
     ):
         """Test pomyślnego usunięcia egzemplarza (F16 - ADMIN, NF19 - soft delete)."""
         from backend.shared.dependencies import require_role
 
-        app.dependency_overrides[require_role([UserRole.ADMIN])] = lambda: mock_admin
+        app_fixture.dependency_overrides[require_role(["ADMIN"])] = lambda: mock_admin
 
         response = client.delete(f"/api/copies/{sample_book_copy.id}")
 
@@ -283,12 +269,12 @@ class TestDeleteBookCopy:
 
         # Sprawdź soft delete
         db_session.refresh(sample_book_copy)
-        assert sample_book_copy.is_deleted == True
+        assert sample_book_copy.is_deleted is True
 
-        app.dependency_overrides.clear()
+        app_fixture.dependency_overrides.clear()
 
     def test_delete_borrowed_copy(
-        self, client, db_session, sample_book_copy, mock_admin
+        self, client, db_session, sample_book_copy, mock_admin, app_fixture
     ):
         """Test usuwania wypożyczonego egzemplarza."""
         # Ustaw status na BORROWED
@@ -297,7 +283,7 @@ class TestDeleteBookCopy:
 
         from backend.shared.dependencies import require_role
 
-        app.dependency_overrides[require_role([UserRole.ADMIN])] = lambda: mock_admin
+        app_fixture.dependency_overrides[require_role(["ADMIN"])] = lambda: mock_admin
 
         response = client.delete(f"/api/copies/{sample_book_copy.id}")
 
@@ -308,4 +294,4 @@ class TestDeleteBookCopy:
             or "wypożyczon" in response.json()["detail"].lower()
         )
 
-        app.dependency_overrides.clear()
+        app_fixture.dependency_overrides.clear()

@@ -10,7 +10,7 @@ Dostęp:
 - tylko ADMIN – usuwanie egzemplarzy
 """
 
-from typing import List
+from typing import Any, Dict, List
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -18,7 +18,6 @@ from sqlalchemy.orm import Session
 
 from app.models.book import Book
 from app.models.book_copy import BookCopy, CopyStatus
-from app.models.user import User, UserRole
 from app.schemas.book_copy import (
     BookCopyCreate,
     BookCopyResponse,
@@ -35,7 +34,7 @@ router = APIRouter()
 def create_book_copy(
     copy_data: BookCopyCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_role([UserRole.LIBRARIAN, UserRole.ADMIN])),
+    current_user: Dict[str, Any] = Depends(require_role(["LIBRARIAN", "ADMIN"])),
 ):
     """
     Dodawanie nowego egzemplarza książki.
@@ -46,11 +45,7 @@ def create_book_copy(
     - czy numer inwentarzowy jest unikalny w systemie.
     Nowy egzemplarz domyślnie otrzymuje status AVAILABLE.
     """
-    book = (
-        db.query(Book)
-        .filter(Book.id == copy_data.book_id, Book.is_deleted == False)
-        .first()
-    )
+    book = db.query(Book).filter(Book.id == copy_data.book_id, ~Book.is_deleted).first()
 
     if not book:
         raise HTTPException(
@@ -84,7 +79,7 @@ def create_book_copy(
         id=new_copy.id,
         book_id=new_copy.book_id,
         inventory_no=new_copy.inventory_no,
-        status=new_copy.status,
+        status=new_copy.status.value,
         location=new_copy.location,
         book_title=book.title,
         created_at=new_copy.created_at,
@@ -113,7 +108,7 @@ def get_copies_by_book(
     query = db.query(BookCopy).filter(BookCopy.book_id == book_id)
 
     if not include_deleted:
-        query = query.filter(BookCopy.is_deleted == False)
+        query = query.filter(~BookCopy.is_deleted)
 
     copies = query.all()
 
@@ -123,7 +118,7 @@ def get_copies_by_book(
             id=copy.id,
             book_id=copy.book_id,
             inventory_no=copy.inventory_no,
-            status=copy.status,
+            status=copy.status.value,
             location=copy.location,
             book_title=book.title,
             created_at=copy.created_at,
@@ -144,9 +139,7 @@ def get_copy_details(copy_id: UUID, db: Session = Depends(get_db)):
     oraz tytuł powiązanej książki.
     """
     copy = (
-        db.query(BookCopy)
-        .filter(BookCopy.id == copy_id, BookCopy.is_deleted == False)
-        .first()
+        db.query(BookCopy).filter(BookCopy.id == copy_id, ~BookCopy.is_deleted).first()
     )
 
     if not copy:
@@ -160,7 +153,7 @@ def get_copy_details(copy_id: UUID, db: Session = Depends(get_db)):
         id=copy.id,
         book_id=copy.book_id,
         inventory_no=copy.inventory_no,
-        status=copy.status,
+        status=copy.status.value,
         location=copy.location,
         book_title=book.title if book else None,
         created_at=copy.created_at,
@@ -173,7 +166,7 @@ def update_book_copy(
     copy_id: UUID,
     copy_data: BookCopyUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_role([UserRole.LIBRARIAN, UserRole.ADMIN])),
+    current_user: Dict[str, Any] = Depends(require_role(["LIBRARIAN", "ADMIN"])),
 ):
     """
     Aktualizacja informacji o egzemplarzu (np. lokalizacja, numer inwentarzowy).
@@ -183,9 +176,7 @@ def update_book_copy(
     wśród innych egzemplarzy.
     """
     copy = (
-        db.query(BookCopy)
-        .filter(BookCopy.id == copy_id, BookCopy.is_deleted == False)
-        .first()
+        db.query(BookCopy).filter(BookCopy.id == copy_id, ~BookCopy.is_deleted).first()
     )
 
     if not copy:
@@ -211,7 +202,11 @@ def update_book_copy(
     update_data = copy_data.model_dump(exclude_unset=True)
 
     for field, value in update_data.items():
-        setattr(copy, field, value)
+        if field == "status" and value is not None:
+            # Konwersja string → CopyStatus enum
+            setattr(copy, field, CopyStatus(value))
+        else:
+            setattr(copy, field, value)
 
     db.commit()
     db.refresh(copy)
@@ -222,7 +217,7 @@ def update_book_copy(
         id=copy.id,
         book_id=copy.book_id,
         inventory_no=copy.inventory_no,
-        status=copy.status,
+        status=copy.status.value,
         location=copy.location,
         book_title=book.title if book else None,
         created_at=copy.created_at,
@@ -235,7 +230,7 @@ def update_copy_status(
     copy_id: UUID,
     status_data: CopyStatusUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_role([UserRole.LIBRARIAN, UserRole.ADMIN])),
+    current_user: Dict[str, Any] = Depends(require_role(["LIBRARIAN", "ADMIN"])),
 ):
     """
     Zmiana statusu egzemplarza (AVAILABLE, DAMAGED, LOST, BORROWED, RESERVED itd.).
@@ -247,9 +242,7 @@ def update_copy_status(
       procesu obsługi wypożyczeń (loan-service).
     """
     copy = (
-        db.query(BookCopy)
-        .filter(BookCopy.id == copy_id, BookCopy.is_deleted == False)
-        .first()
+        db.query(BookCopy).filter(BookCopy.id == copy_id, ~BookCopy.is_deleted).first()
     )
 
     if not copy:
@@ -261,16 +254,16 @@ def update_copy_status(
         CopyStatus.BORROWED,
         CopyStatus.RESERVED,
     ] and status_data.status not in [
-        CopyStatus.BORROWED,
-        CopyStatus.RESERVED,
-        CopyStatus.AVAILABLE,
+        CopyStatus.BORROWED.value,
+        CopyStatus.RESERVED.value,
+        CopyStatus.AVAILABLE.value,
     ]:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Nie można zmienić statusu egzemplarza który jest {copy.status}",
+            detail=f"Nie można zmienić statusu egzemplarza który jest {copy.status.value}",
         )
 
-    copy.status = status_data.status
+    copy.status = CopyStatus(status_data.status)  # ZMIANA: konwersja string → enum
 
     db.commit()
     db.refresh(copy)
@@ -281,7 +274,7 @@ def update_copy_status(
         id=copy.id,
         book_id=copy.book_id,
         inventory_no=copy.inventory_no,
-        status=copy.status,
+        status=copy.status.value,
         location=copy.location,
         book_title=book.title if book else None,
         created_at=copy.created_at,
@@ -293,7 +286,7 @@ def update_copy_status(
 def delete_book_copy(
     copy_id: UUID,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_role([UserRole.ADMIN])),
+    current_user: Dict[str, Any] = Depends(require_role(["ADMIN"])),
 ):
     """
     Usuwanie egzemplarza (soft delete).
@@ -305,9 +298,7 @@ def delete_book_copy(
     lub RESERVED (wypożyczony / zarezerwowany).
     """
     copy = (
-        db.query(BookCopy)
-        .filter(BookCopy.id == copy_id, BookCopy.is_deleted == False)
-        .first()
+        db.query(BookCopy).filter(BookCopy.id == copy_id, ~BookCopy.is_deleted).first()
     )
 
     if not copy:
@@ -318,7 +309,7 @@ def delete_book_copy(
     if copy.status in [CopyStatus.BORROWED, CopyStatus.RESERVED]:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Nie można usunąć egzemplarza - status: {copy.status}",
+            detail=f"Nie można usunąć egzemplarza - status: {copy.status.value}",
         )
 
     copy.is_deleted = True

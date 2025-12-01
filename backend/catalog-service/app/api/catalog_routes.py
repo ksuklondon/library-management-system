@@ -51,7 +51,7 @@ def browse_catalog(
     Parametr available_only pozwala wyświetlić tylko te pozycje,
     które mają co najmniej jeden egzemplarz o statusie AVAILABLE.
     """
-    query = db.query(Book).filter(Book.is_deleted == False)
+    query = db.query(Book).filter(~Book.is_deleted)
 
     if authors:
         query = query.filter(Book.authors.ilike(f"%{authors}%"))
@@ -71,7 +71,7 @@ def browse_catalog(
             .filter(
                 and_(
                     BookCopy.status == CopyStatus.AVAILABLE,
-                    BookCopy.is_deleted == False,
+                    ~BookCopy.is_deleted,
                 )
             )
             .distinct()
@@ -132,7 +132,7 @@ def search_books(
     - inne / brak – wyszukiwanie we wszystkich trzech polach jednocześnie.
     Wyniki są paginowane (NF20) tak jak w przeglądaniu katalogu.
     """
-    query = db.query(Book).filter(Book.is_deleted == False)
+    query = db.query(Book).filter(~Book.is_deleted)
 
     search_term = f"%{search.query}%"
 
@@ -196,11 +196,7 @@ def get_book_details(book_id: UUID, db: Session = Depends(get_db)):
     Zwracane są m.in. liczby dostępnych egzemplarzy (available_copies)
     oraz wszystkich egzemplarzy danej książki (total_copies).
     """
-    book = (
-        db.query(Book)
-        .filter(and_(Book.id == book_id, Book.is_deleted == False))
-        .first()
-    )
+    book = db.query(Book).filter(and_(Book.id == book_id, ~Book.is_deleted)).first()
 
     if not book:
         raise HTTPException(

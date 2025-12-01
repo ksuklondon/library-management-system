@@ -8,12 +8,16 @@ Odpowiada za przechowywanie informacji o konkretnych egzemplarzach książek.
 import enum
 import uuid
 from datetime import datetime
+from typing import TYPE_CHECKING
 
-from sqlalchemy import Boolean, Column, DateTime, Enum, ForeignKey, String
+from sqlalchemy import Boolean, DateTime, Enum, ForeignKey, String
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from backend.shared.database import Base
+
+if TYPE_CHECKING:
+    from app.models.book import Book
 
 
 class CopyStatus(str, enum.Enum):
@@ -48,27 +52,33 @@ class BookCopy(Base):
     __tablename__ = "book_copies"
 
     # Kolumny podstawowe
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    book_id = Column(
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    book_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("books.id"), nullable=False, index=True
     )
-    inventory_no = Column(String(50), unique=True, nullable=False, index=True)
-    status = Column(
+    inventory_no: Mapped[str] = mapped_column(
+        String(50), unique=True, nullable=False, index=True
+    )
+    status: Mapped[CopyStatus] = mapped_column(
         Enum(CopyStatus), default=CopyStatus.AVAILABLE, nullable=False, index=True
     )
-    location = Column(String(100), nullable=True)
+    location: Mapped[str | None] = mapped_column(String(100), nullable=True)
 
     # Soft delete (Wymaganie NF19)
-    is_deleted = Column(Boolean, default=False, nullable=False)
+    is_deleted: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
 
     # Timestamps
-    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
-    updated_at = Column(
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, default=datetime.utcnow, nullable=False
+    )
+    updated_at: Mapped[datetime] = mapped_column(
         DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False
     )
 
     # Relacje (zgodnie z diagramem klas)
-    book = relationship("Book", back_populates="copies")
+    book: Mapped["Book"] = relationship("Book", back_populates="copies")
 
     def __repr__(self):
         return f"<BookCopy {self.inventory_no} - {self.status}>"

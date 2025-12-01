@@ -7,12 +7,16 @@ Odpowiada za przechowywanie informacji o książkach.
 
 import uuid
 from datetime import datetime
+from typing import TYPE_CHECKING
 
-from sqlalchemy import Boolean, Column, DateTime, Integer, String, Text
+from sqlalchemy import Boolean, DateTime, Integer, String, Text
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from backend.shared.database import Base
+
+if TYPE_CHECKING:
+    from app.models.book_copy import BookCopy
 
 
 class Book(Base):
@@ -39,29 +43,39 @@ class Book(Base):
     __tablename__ = "books"
 
     # Kolumny podstawowe
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    title = Column(String(500), nullable=False, index=True)
-    authors = Column(String(500), nullable=False, index=True)
-    isbn = Column(String(20), unique=True, nullable=True, index=True)
-    publisher = Column(String(255), nullable=True)
-    pages = Column(Integer, nullable=True)
-    language = Column(String(50), nullable=True, default="pl")
-    cover_url = Column(String(500), nullable=True)
-    description = Column(Text, nullable=True)
-    genre = Column(String(100), nullable=True, index=True)
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    title: Mapped[str] = mapped_column(String(500), nullable=False, index=True)
+    authors: Mapped[str] = mapped_column(String(500), nullable=False, index=True)
+    isbn: Mapped[str | None] = mapped_column(
+        String(20), unique=True, nullable=True, index=True
+    )
+    publisher: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    pages: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    language: Mapped[str | None] = mapped_column(
+        String(50), nullable=True, default="pl"
+    )
+    cover_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    genre: Mapped[str | None] = mapped_column(String(100), nullable=True, index=True)
 
     # Soft delete (Wymaganie NF19 - audyt)
-    is_deleted = Column(Boolean, default=False, nullable=False)
-    deleted_by = Column(UUID(as_uuid=True), nullable=True)
+    is_deleted: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    deleted_by: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), nullable=True
+    )
 
     # Timestamps (Wymaganie NF16 - logowanie zmian)
-    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
-    updated_at = Column(
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, default=datetime.utcnow, nullable=False
+    )
+    updated_at: Mapped[datetime] = mapped_column(
         DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False
     )
 
     # Relacje (zgodnie z diagramem klas)
-    copies = relationship(
+    copies: Mapped[list["BookCopy"]] = relationship(
         "BookCopy", back_populates="book", cascade="all, delete-orphan"
     )
 

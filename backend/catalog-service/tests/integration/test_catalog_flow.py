@@ -5,35 +5,7 @@ Wymaganie: Punkt 5 - Opis metod i podejść do testowania
 Testy end-to-end dla scenariuszy użytkownika.
 """
 
-from unittest.mock import Mock
-
-import pytest
-from app.models.user import User, UserRole
 from fastapi import status
-
-
-@pytest.fixture
-def mock_librarian():
-    """Mock użytkownika LIBRARIAN."""
-    user = Mock(spec=User)
-    user.id = "librarian-uuid-1234"
-    user.email = "librarian@library.com"
-    user.role = UserRole.LIBRARIAN
-    user.is_active = True
-    user.is_blocked = False
-    return user
-
-
-@pytest.fixture
-def mock_reader():
-    """Mock użytkownika READER."""
-    user = Mock(spec=User)
-    user.id = "reader-uuid-5678"
-    user.email = "reader@library.com"
-    user.role = UserRole.READER
-    user.is_active = True
-    user.is_blocked = False
-    return user
 
 
 class TestLibrarianWorkflow:
@@ -41,7 +13,9 @@ class TestLibrarianWorkflow:
     Test pełnego przepływu pracy bibliotekarza (F15, F16).
     """
 
-    def test_librarian_adds_book_and_copies(self, client, db_session, mock_librarian):
+    def test_librarian_adds_book_and_copies(
+        self, client, db_session, mock_librarian, app_fixture
+    ):
         """
         Scenariusz: Bibliotekarz dodaje nową książkę i egzemplarze.
 
@@ -53,7 +27,7 @@ class TestLibrarianWorkflow:
         """
         from backend.shared.dependencies import require_role
 
-        app.dependency_overrides[require_role([UserRole.LIBRARIAN, UserRole.ADMIN])] = (
+        app_fixture.dependency_overrides[require_role(["LIBRARIAN", "ADMIN"])] = (
             lambda: mock_librarian
         )
 
@@ -84,7 +58,7 @@ class TestLibrarianWorkflow:
             assert response.status_code == status.HTTP_201_CREATED
 
         # KROK 3: Sprawdź czy książka widoczna w katalogu (bez autentykacji)
-        app.dependency_overrides.clear()
+        app_fixture.dependency_overrides.clear()
 
         response = client.get("/api/catalog/browse")
         assert response.status_code == status.HTTP_200_OK
@@ -96,7 +70,7 @@ class TestLibrarianWorkflow:
         assert data["books"][0]["available_copies"] == 3
         assert data["books"][0]["total_copies"] == 3
 
-        app.dependency_overrides.clear()
+        app_fixture.dependency_overrides.clear()
 
 
 class TestReaderSearchWorkflow:
@@ -150,7 +124,7 @@ class TestBookLifecycle:
     """
 
     def test_complete_book_lifecycle(
-        self, client, db_session, mock_librarian, mock_admin
+        self, client, db_session, mock_librarian, mock_admin, app_fixture
     ):
         """
         Scenariusz: Cykl życia książki od dodania do usunięcia.
@@ -166,7 +140,7 @@ class TestBookLifecycle:
         from backend.shared.dependencies import require_role
 
         # KROK 1: Dodaj książkę
-        app.dependency_overrides[require_role([UserRole.LIBRARIAN, UserRole.ADMIN])] = (
+        app_fixture.dependency_overrides[require_role(["LIBRARIAN", "ADMIN"])] = (
             lambda: mock_librarian
         )
 
@@ -198,13 +172,13 @@ class TestBookLifecycle:
         assert response.status_code == status.HTTP_200_OK
 
         # KROK 5: Admin usuwa książkę
-        app.dependency_overrides[require_role([UserRole.ADMIN])] = lambda: mock_admin
+        app_fixture.dependency_overrides[require_role(["ADMIN"])] = lambda: mock_admin
 
         response = client.delete(f"/api/books/{book_id}")
         assert response.status_code == status.HTTP_204_NO_CONTENT
 
         # KROK 6: Sprawdź czy nie widoczna w katalogu
-        app.dependency_overrides.clear()
+        app_fixture.dependency_overrides.clear()
 
         response = client.get("/api/catalog/browse")
         assert response.status_code == status.HTTP_200_OK
@@ -214,7 +188,7 @@ class TestBookLifecycle:
         book_titles = [book["title"] for book in data["books"]]
         assert "Test Lifecycle Book" not in book_titles
 
-        app.dependency_overrides.clear()
+        app_fixture.dependency_overrides.clear()
 
 
 class TestPaginationFlow:
@@ -222,7 +196,9 @@ class TestPaginationFlow:
     Test przepływu z paginacją (NF20).
     """
 
-    def test_pagination_through_catalog(self, client, db_session, mock_librarian):
+    def test_pagination_through_catalog(
+        self, client, db_session, mock_librarian, app_fixture
+    ):
         """
         Scenariusz: Przeglądanie dużego katalogu z paginacją.
 
@@ -233,7 +209,7 @@ class TestPaginationFlow:
         """
         from backend.shared.dependencies import require_role
 
-        app.dependency_overrides[require_role([UserRole.LIBRARIAN, UserRole.ADMIN])] = (
+        app_fixture.dependency_overrides[require_role(["LIBRARIAN", "ADMIN"])] = (
             lambda: mock_librarian
         )
 
@@ -247,7 +223,7 @@ class TestPaginationFlow:
             response = client.post("/api/books/", json=book_data)
             assert response.status_code == status.HTTP_201_CREATED
 
-        app.dependency_overrides.clear()
+        app_fixture.dependency_overrides.clear()
 
         # KROK 2 & 3: Przeglądaj stronami
         # Strona 1
