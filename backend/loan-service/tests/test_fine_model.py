@@ -5,9 +5,9 @@ Wymaganie: NF9 - Testy jednostkowe
 Wymaganie: F27 - Płatność kar za przetrzymanie
 """
 
-import pytest
-from datetime import datetime
+import time
 import uuid
+from datetime import datetime
 
 from app.models.fine import Fine
 from app.models.loan import Loan, LoanStatus
@@ -27,10 +27,7 @@ class TestFineModel:
         - brak daty opłacenia.
         """
         fine = Fine(
-            loan_id=test_loan.id,
-            user_id=test_loan.user_id,
-            amount=10.0,
-            paid=False
+            loan_id=test_loan.id, user_id=test_loan.user_id, amount=10.0, paid=False
         )
 
         db.add(fine)
@@ -41,7 +38,7 @@ class TestFineModel:
         assert fine.loan_id == test_loan.id
         assert fine.user_id == test_loan.user_id
         assert fine.amount == 10.0
-        assert fine.paid == False
+        assert fine.paid is False
         assert fine.paid_at is None
         assert not fine.is_deleted
 
@@ -51,10 +48,7 @@ class TestFineModel:
         gdy kara ma paid=True i paid_at ustawione (F27).
         """
         fine = Fine(
-            loan_id=test_loan.id,
-            user_id=test_loan.user_id,
-            amount=10.0,
-            paid=True
+            loan_id=test_loan.id, user_id=test_loan.user_id, amount=10.0, paid=True
         )
         fine.paid_at = datetime.utcnow()
 
@@ -62,34 +56,28 @@ class TestFineModel:
         db.commit()
         db.refresh(fine)
 
-        assert fine.is_paid() == True
+        assert fine.is_paid() is True
 
     def test_is_paid_false(self, db, test_loan):
         """
         Test: is_paid() == False gdy kara nieopłacona (F27).
         """
         fine = Fine(
-            loan_id=test_loan.id,
-            user_id=test_loan.user_id,
-            amount=10.0,
-            paid=False
+            loan_id=test_loan.id, user_id=test_loan.user_id, amount=10.0, paid=False
         )
 
         db.add(fine)
         db.commit()
         db.refresh(fine)
 
-        assert fine.is_paid() == False
+        assert fine.is_paid() is False
 
     def test_is_paid_false_deleted(self, db, test_loan):
         """
         Test: Soft-deleted kara nie jest traktowana jako opłacona (NF19).
         """
         fine = Fine(
-            loan_id=test_loan.id,
-            user_id=test_loan.user_id,
-            amount=10.0,
-            paid=True
+            loan_id=test_loan.id, user_id=test_loan.user_id, amount=10.0, paid=True
         )
         fine.paid_at = datetime.utcnow()
         fine.is_deleted = True
@@ -98,7 +86,7 @@ class TestFineModel:
         db.commit()
         db.refresh(fine)
 
-        assert fine.is_paid() == False
+        assert fine.is_paid() is False
 
     def test_can_be_paid_true(self, db, test_loan):
         """
@@ -108,27 +96,21 @@ class TestFineModel:
         - ma kwotę > 0
         """
         fine = Fine(
-            loan_id=test_loan.id,
-            user_id=test_loan.user_id,
-            amount=10.0,
-            paid=False
+            loan_id=test_loan.id, user_id=test_loan.user_id, amount=10.0, paid=False
         )
 
         db.add(fine)
         db.commit()
         db.refresh(fine)
 
-        assert fine.can_be_paid() == True
+        assert fine.can_be_paid() is True
 
     def test_can_be_paid_false_already_paid(self, db, test_loan):
         """
         Test: Nie można ponownie opłacić opłaconej kary (F27).
         """
         fine = Fine(
-            loan_id=test_loan.id,
-            user_id=test_loan.user_id,
-            amount=10.0,
-            paid=True
+            loan_id=test_loan.id, user_id=test_loan.user_id, amount=10.0, paid=True
         )
         fine.paid_at = datetime.utcnow()
 
@@ -136,17 +118,14 @@ class TestFineModel:
         db.commit()
         db.refresh(fine)
 
-        assert fine.can_be_paid() == False
+        assert fine.can_be_paid() is False
 
     def test_can_be_paid_false_deleted(self, db, test_loan):
         """
         Test: Soft-deleted kara nie może być opłacona (NF19).
         """
         fine = Fine(
-            loan_id=test_loan.id,
-            user_id=test_loan.user_id,
-            amount=10.0,
-            paid=False
+            loan_id=test_loan.id, user_id=test_loan.user_id, amount=10.0, paid=False
         )
         fine.is_deleted = True
 
@@ -154,24 +133,21 @@ class TestFineModel:
         db.commit()
         db.refresh(fine)
 
-        assert fine.can_be_paid() == False
+        assert fine.can_be_paid() is False
 
     def test_can_be_paid_false_zero_amount(self, db, test_loan):
         """
         Test: Kara z kwotą 0 zł nie powinna być płatna (NF7 / logika F27).
         """
         fine = Fine(
-            loan_id=test_loan.id,
-            user_id=test_loan.user_id,
-            amount=0.0,
-            paid=False
+            loan_id=test_loan.id, user_id=test_loan.user_id, amount=0.0, paid=False
         )
 
         db.add(fine)
         db.commit()
         db.refresh(fine)
 
-        assert fine.can_be_paid() == False
+        assert fine.can_be_paid() is False
 
     def test_mark_as_paid(self, db, test_loan):
         """
@@ -183,10 +159,7 @@ class TestFineModel:
         - wymaga podania payment_method.
         """
         fine = Fine(
-            loan_id=test_loan.id,
-            user_id=test_loan.user_id,
-            amount=10.0,
-            paid=False
+            loan_id=test_loan.id, user_id=test_loan.user_id, amount=10.0, paid=False
         )
 
         db.add(fine)
@@ -201,7 +174,7 @@ class TestFineModel:
 
         after = datetime.utcnow()
 
-        assert fine.paid == True
+        assert fine.paid is True
         assert fine.paid_at is not None
         assert before <= fine.paid_at <= after
 
@@ -212,10 +185,7 @@ class TestFineModel:
         Model nie zapisuje payment_method, jednak metoda ma działać.
         """
         fine = Fine(
-            loan_id=test_loan.id,
-            user_id=test_loan.user_id,
-            amount=10.0,
-            paid=False
+            loan_id=test_loan.id, user_id=test_loan.user_id, amount=10.0, paid=False
         )
 
         db.add(fine)
@@ -226,7 +196,7 @@ class TestFineModel:
         db.commit()
         db.refresh(fine)
 
-        assert fine.paid == True
+        assert fine.paid is True
 
     def test_update_amount(self, db, test_loan):
         """
@@ -235,10 +205,7 @@ class TestFineModel:
         Możliwa jeśli kara nie została jeszcze opłacona.
         """
         fine = Fine(
-            loan_id=test_loan.id,
-            user_id=test_loan.user_id,
-            amount=10.0,
-            paid=False
+            loan_id=test_loan.id, user_id=test_loan.user_id, amount=10.0, paid=False
         )
 
         db.add(fine)
@@ -256,10 +223,7 @@ class TestFineModel:
         Test: Nie wolno zmieniać kwoty opłaconej kary (F27).
         """
         fine = Fine(
-            loan_id=test_loan.id,
-            user_id=test_loan.user_id,
-            amount=10.0,
-            paid=True
+            loan_id=test_loan.id, user_id=test_loan.user_id, amount=10.0, paid=True
         )
         fine.paid_at = datetime.utcnow()
 
@@ -275,15 +239,15 @@ class TestFineModel:
 
         assert fine.amount == original_amount  # wartość nie może się zmienić
 
-    def test_fine_with_loan_relationship(self, db, test_user):
+    def test_fine_with_loan_relationship(self, db, mock_reader):
         """
         Test: Sprawdzenie relacji FK fine -> loan (NF9).
         """
         loan = Loan(
-            user_id=test_user.id,
+            user_id=mock_reader["sub"],
             book_copy_id=uuid.uuid4(),
             borrowed_at=datetime.utcnow(),
-            status=LoanStatus.ACTIVE
+            status=LoanStatus.ACTIVE,
         )
 
         db.add(loan)
@@ -291,10 +255,7 @@ class TestFineModel:
         db.refresh(loan)
 
         fine = Fine(
-            loan_id=loan.id,
-            user_id=test_user.id,
-            amount=12.0,
-            paid=False
+            loan_id=loan.id, user_id=mock_reader["sub"], amount=12.0, paid=False
         )
 
         db.add(fine)
@@ -310,10 +271,7 @@ class TestFineModel:
         before = datetime.utcnow()
 
         fine = Fine(
-            loan_id=test_loan.id,
-            user_id=test_loan.user_id,
-            amount=10.0,
-            paid=False
+            loan_id=test_loan.id, user_id=test_loan.user_id, amount=10.0, paid=False
         )
 
         db.add(fine)
@@ -330,10 +288,7 @@ class TestFineModel:
         Test: updated_at powinno się zmienić przy aktualizacji danych (NF9).
         """
         fine = Fine(
-            loan_id=test_loan.id,
-            user_id=test_loan.user_id,
-            amount=10.0,
-            paid=False
+            loan_id=test_loan.id, user_id=test_loan.user_id, amount=10.0, paid=False
         )
 
         db.add(fine)
@@ -343,7 +298,6 @@ class TestFineModel:
         original_updated_at = fine.updated_at
 
         # krótka pauza, aby timestamp się zmienił
-        import time
         time.sleep(0.1)
 
         fine.update_amount(15.0)
@@ -362,10 +316,7 @@ class TestFineModel:
         - zablokowaniem opłacenia kary.
         """
         fine = Fine(
-            loan_id=test_loan.id,
-            user_id=test_loan.user_id,
-            amount=10.0,
-            paid=False
+            loan_id=test_loan.id, user_id=test_loan.user_id, amount=10.0, paid=False
         )
 
         db.add(fine)
@@ -377,20 +328,17 @@ class TestFineModel:
         db.commit()
         db.refresh(fine)
 
-        assert fine.is_deleted == True
+        assert fine.is_deleted is True
         assert fine.deleted_by == "admin-id"
-        assert fine.is_paid() == False
-        assert fine.can_be_paid() == False
+        assert fine.is_paid() is False
+        assert fine.can_be_paid() is False
 
     def test_fine_repr(self, db, test_loan):
         """
         Test: __repr__ musi zawierać kluczowe dane obiektu (NF9).
         """
         fine = Fine(
-            loan_id=test_loan.id,
-            user_id=test_loan.user_id,
-            amount=10.0,
-            paid=False
+            loan_id=test_loan.id, user_id=test_loan.user_id, amount=10.0, paid=False
         )
 
         db.add(fine)
@@ -410,10 +358,7 @@ class TestFineModel:
         Test: Precyzja wartości amount — powinna zachować 2 miejsca po przecinku (F27).
         """
         fine = Fine(
-            loan_id=test_loan.id,
-            user_id=test_loan.user_id,
-            amount=12.56,
-            paid=False
+            loan_id=test_loan.id, user_id=test_loan.user_id, amount=12.56, paid=False
         )
 
         db.add(fine)

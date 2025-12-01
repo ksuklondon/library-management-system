@@ -17,11 +17,12 @@ Kara może zostać:
 - usunięta logicznie (soft delete).
 """
 
-from sqlalchemy import Column, String, DateTime, Boolean, Float, ForeignKey
-from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import relationship
 import uuid
 from datetime import datetime
+
+from sqlalchemy import Boolean, DateTime, Float, ForeignKey, String
+from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import Mapped, mapped_column
 
 from backend.shared.database import Base
 
@@ -44,31 +45,40 @@ class Fine(Base):
     __tablename__ = "fines"
 
     # Unikalny identyfikator kary (UUID).
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, nullable=False)
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, nullable=False
+    )
 
     # Powiązanie z wypożyczeniem, którego dotyczy kara.
-    loan_id = Column(UUID(as_uuid=True), ForeignKey('loans.id'), nullable=False, index=True)
+    loan_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("loans.id"), nullable=False, index=True
+    )
 
     # Identyfikator użytkownika – ułatwia filtrowanie kar bez łączenia z Loan.
-    user_id = Column(String(255), nullable=False, index=True)
+    user_id: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
 
     # Kwota kary w złotówkach (ustalana np. 2 zł * liczba dni).
-    amount = Column(Float, nullable=False, default=0.0)
+    amount: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
 
     # Czy kara została już opłacona.
-    paid = Column(Boolean, nullable=False, default=False, index=True)
+    paid: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, default=False, index=True
+    )
 
     # Data opłacenia kary – None jeśli nieopłacona.
-    paid_at = Column(DateTime, nullable=True)
+    paid_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
 
     # Soft delete (NF19) – kara usunięta logicznie, ale rekord zostaje w bazie.
-    is_deleted = Column(Boolean, nullable=False, default=False)
-    deleted_by = Column(String(255), nullable=True)
+    is_deleted: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    deleted_by: Mapped[str | None] = mapped_column(String(255), nullable=True)
 
     # Daty techniczne – utworzenie / ostatnia aktualizacja.
-    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
-    updated_at = Column(DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
-
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, nullable=False, default=datetime.utcnow
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow
+    )
 
     def is_paid(self) -> bool:
         """
@@ -79,7 +89,6 @@ class Fine(Base):
         - rekord nie jest oznaczony jako usunięty.
         """
         return self.paid and not self.is_deleted
-
 
     def can_be_paid(self) -> bool:
         """
@@ -92,8 +101,7 @@ class Fine(Base):
         """
         return not self.paid and not self.is_deleted and self.amount > 0
 
-
-    def mark_as_paid(self, payment_method: str = None) -> None:
+    def mark_as_paid(self, payment_method: str | None = None) -> None:
         """
         Oznacz karę jako opłaconą (F27).
 
@@ -111,7 +119,6 @@ class Fine(Base):
             self.paid_at = datetime.utcnow()
             self.updated_at = datetime.utcnow()
 
-
     def update_amount(self, new_amount: float) -> None:
         """
         Zaktualizuj kwotę kary.
@@ -125,7 +132,6 @@ class Fine(Base):
         if not self.paid:
             self.amount = new_amount
             self.updated_at = datetime.utcnow()
-
 
     def __repr__(self) -> str:
         """

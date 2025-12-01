@@ -5,18 +5,16 @@ Wymaganie: NF9 - Testy jednostkowe i integracyjne
 Wymaganie: F27 - Płatność kar za przetrzymanie
 """
 
-import pytest
-from fastapi import status
-from datetime import datetime, timedelta
 import uuid
+from datetime import datetime, timedelta
+
+from fastapi import status
 
 
 class TestFineRoutes:
     """Testy dla endpointów kar (F27, NF9)."""
 
-    def test_create_fine_success(
-        self, client, auth_headers_librarian, test_loan
-    ):
+    def test_create_fine_success(self, client, auth_headers_librarian, test_loan):
         """
         Test: Utworzenie kary przez bibliotekarza (F27, NF9).
 
@@ -29,14 +27,10 @@ class TestFineRoutes:
         data = {
             "loan_id": str(test_loan.id),
             "user_id": test_loan.user_id,
-            "amount": 10.0
+            "amount": 10.0,
         }
 
-        response = client.post(
-            "/api/fines/",
-            json=data,
-            headers=auth_headers_librarian
-        )
+        response = client.post("/api/fines/", json=data, headers=auth_headers_librarian)
 
         assert response.status_code == status.HTTP_201_CREATED
         result = response.json()
@@ -44,9 +38,7 @@ class TestFineRoutes:
         assert result["paid"] is False
         assert "id" in result
 
-    def test_create_fine_reader_forbidden(
-        self, client, auth_headers_reader, test_loan
-    ):
+    def test_create_fine_reader_forbidden(self, client, auth_headers_reader, test_loan):
         """
         Test: Czytelnik nie może tworzyć kar (NF5, NF9).
 
@@ -56,20 +48,14 @@ class TestFineRoutes:
         data = {
             "loan_id": str(test_loan.id),
             "user_id": test_loan.user_id,
-            "amount": 10.0
+            "amount": 10.0,
         }
 
-        response = client.post(
-            "/api/fines/",
-            json=data,
-            headers=auth_headers_reader
-        )
+        response = client.post("/api/fines/", json=data, headers=auth_headers_reader)
 
         assert response.status_code == status.HTTP_403_FORBIDDEN
 
-    def test_create_fine_duplicate(
-        self, client, auth_headers_librarian, test_fine
-    ):
+    def test_create_fine_duplicate(self, client, auth_headers_librarian, test_fine):
         """
         Test: Próba utworzenia drugiej kary dla tego samego wypożyczenia (NF9).
 
@@ -79,21 +65,15 @@ class TestFineRoutes:
         data = {
             "loan_id": str(test_fine.loan_id),
             "user_id": test_fine.user_id,
-            "amount": 10.0
+            "amount": 10.0,
         }
 
-        response = client.post(
-            "/api/fines/",
-            json=data,
-            headers=auth_headers_librarian
-        )
+        response = client.post("/api/fines/", json=data, headers=auth_headers_librarian)
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert "już istnieje" in response.json()["detail"].lower()
 
-    def test_get_user_fines(
-        self, client, auth_headers_reader, test_user, test_fine
-    ):
+    def test_get_user_fines(self, client, auth_headers_reader, test_user, test_fine):
         """
         Test: Pobieranie listy kar użytkownika (F27, NF9).
 
@@ -102,8 +82,7 @@ class TestFineRoutes:
         - zwracana lista zawiera co najmniej jeden element
         """
         response = client.get(
-            f"/api/fines/user/{test_user.id}",
-            headers=auth_headers_reader
+            f"/api/fines/user/{test_user.id}", headers=auth_headers_reader
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -121,8 +100,7 @@ class TestFineRoutes:
         - tylko właściciel, LIBRARIAN, ADMIN
         """
         response = client.get(
-            f"/api/fines/user/{test_librarian.id}",
-            headers=auth_headers_reader
+            f"/api/fines/user/{test_librarian.id}", headers=auth_headers_reader
         )
 
         assert response.status_code == status.HTTP_403_FORBIDDEN
@@ -137,8 +115,7 @@ class TestFineRoutes:
         - /?paid=false → tylko nieopłacone kary
         """
         response = client.get(
-            f"/api/fines/user/{test_user.id}?paid=false",
-            headers=auth_headers_reader
+            f"/api/fines/user/{test_user.id}?paid=false", headers=auth_headers_reader
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -147,9 +124,7 @@ class TestFineRoutes:
         for fine in result:
             assert fine["paid"] is False
 
-    def test_pay_fine_success(
-        self, client, auth_headers_reader, test_fine
-    ):
+    def test_pay_fine_success(self, client, auth_headers_reader, test_fine):
         """
         Test: Opłacenie kary przez użytkownika (F27, NF9).
 
@@ -160,9 +135,7 @@ class TestFineRoutes:
         data = {"payment_method": "card"}
 
         response = client.patch(
-            f"/api/fines/{test_fine.id}/pay",
-            json=data,
-            headers=auth_headers_reader
+            f"/api/fines/{test_fine.id}/pay", json=data, headers=auth_headers_reader
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -170,9 +143,7 @@ class TestFineRoutes:
         assert result["paid"] is True
         assert result["paid_at"] is not None
 
-    def test_pay_fine_already_paid(
-        self, client, auth_headers_reader, test_fine, db
-    ):
+    def test_pay_fine_already_paid(self, client, auth_headers_reader, test_fine, db):
         """
         Test: Próba ponownej płatności opłaconej kary (F27, NF9).
 
@@ -187,16 +158,12 @@ class TestFineRoutes:
         data = {"payment_method": "card"}
 
         response = client.patch(
-            f"/api/fines/{test_fine.id}/pay",
-            json=data,
-            headers=auth_headers_reader
+            f"/api/fines/{test_fine.id}/pay", json=data, headers=auth_headers_reader
         )
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
-    def test_pay_fine_forbidden(
-        self, client, auth_headers_reader, test_librarian, db
-    ):
+    def test_pay_fine_forbidden(self, client, auth_headers_reader, test_librarian, db):
         """
         Test: Użytkownik nie może opłacić kary należącej do innej osoby (NF5, NF9).
 
@@ -210,7 +177,7 @@ class TestFineRoutes:
             user_id=test_librarian.id,
             book_copy_id=uuid.uuid4(),
             borrowed_at=datetime.utcnow(),
-            status="ACTIVE"
+            status="ACTIVE",
         )
         loan.due_date = datetime.utcnow() + timedelta(days=14)
         db.add(loan)
@@ -218,12 +185,7 @@ class TestFineRoutes:
         db.refresh(loan)
 
         # Utwórz karę dla bibliotekarza
-        fine = Fine(
-            loan_id=loan.id,
-            user_id=test_librarian.id,
-            amount=10.0,
-            paid=False
-        )
+        fine = Fine(loan_id=loan.id, user_id=test_librarian.id, amount=10.0, paid=False)
         db.add(fine)
         db.commit()
         db.refresh(fine)
@@ -231,16 +193,12 @@ class TestFineRoutes:
         data = {"payment_method": "card"}
 
         response = client.patch(
-            f"/api/fines/{fine.id}/pay",
-            json=data,
-            headers=auth_headers_reader
+            f"/api/fines/{fine.id}/pay", json=data, headers=auth_headers_reader
         )
 
         assert response.status_code == status.HTTP_403_FORBIDDEN
 
-    def test_list_all_fines_librarian(
-        self, client, auth_headers_librarian, test_fine
-    ):
+    def test_list_all_fines_librarian(self, client, auth_headers_librarian, test_fine):
         """
         Test: Bibliotekarz może listować wszystkie kary (F27, NF5, NF9).
 
@@ -248,34 +206,24 @@ class TestFineRoutes:
         - dostęp tylko dla LIBRARIAN/ADMIN
         - zwracana lista zawiera dane
         """
-        response = client.get(
-            "/api/fines/",
-            headers=auth_headers_librarian
-        )
+        response = client.get("/api/fines/", headers=auth_headers_librarian)
 
         assert response.status_code == status.HTTP_200_OK
         result = response.json()
         assert isinstance(result, list)
         assert len(result) >= 1
 
-    def test_list_all_fines_reader_forbidden(
-        self, client, auth_headers_reader
-    ):
+    def test_list_all_fines_reader_forbidden(self, client, auth_headers_reader):
         """
         Test: Czytelnik nie może listować wszystkich kar (NF5, NF9).
 
         RBAC → dostęp zablokowany (403).
         """
-        response = client.get(
-            "/api/fines/",
-            headers=auth_headers_reader
-        )
+        response = client.get("/api/fines/", headers=auth_headers_reader)
 
         assert response.status_code == status.HTTP_403_FORBIDDEN
 
-    def test_get_unpaid_total(
-        self, client, auth_headers_librarian, test_fine
-    ):
+    def test_get_unpaid_total(self, client, auth_headers_librarian, test_fine):
         """
         Test: Pobieranie sumy nieopłaconych kar (F27, NF9).
 
@@ -283,10 +231,7 @@ class TestFineRoutes:
         - total_amount
         - count
         """
-        response = client.get(
-            "/api/fines/unpaid/total",
-            headers=auth_headers_librarian
-        )
+        response = client.get("/api/fines/unpaid/total", headers=auth_headers_librarian)
 
         assert response.status_code == status.HTTP_200_OK
         result = response.json()
@@ -304,7 +249,7 @@ class TestFineRoutes:
         """
         response = client.get(
             f"/api/fines/unpaid/total?user_id={test_user.id}",
-            headers=auth_headers_librarian
+            headers=auth_headers_librarian,
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -325,7 +270,7 @@ class TestFineRoutes:
         """
         response = client.patch(
             f"/api/fines/loan/{test_overdue_loan.id}/calculate",
-            headers=auth_headers_librarian
+            headers=auth_headers_librarian,
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -344,23 +289,19 @@ class TestFineRoutes:
         - błąd 400
         """
         response = client.patch(
-            f"/api/fines/loan/{test_loan.id}/calculate",
-            headers=auth_headers_librarian
+            f"/api/fines/loan/{test_loan.id}/calculate", headers=auth_headers_librarian
         )
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
-    def test_delete_fine_admin(
-        self, client, auth_headers_admin, test_fine
-    ):
+    def test_delete_fine_admin(self, client, auth_headers_admin, test_fine):
         """
         Test: Usunięcie kary przez administratora (NF19, NF5, NF9).
 
         Soft delete → status 204.
         """
         response = client.delete(
-            f"/api/fines/{test_fine.id}",
-            headers=auth_headers_admin
+            f"/api/fines/{test_fine.id}", headers=auth_headers_admin
         )
 
         assert response.status_code == status.HTTP_204_NO_CONTENT
@@ -374,15 +315,12 @@ class TestFineRoutes:
         ADMIN-only → 403.
         """
         response = client.delete(
-            f"/api/fines/{test_fine.id}",
-            headers=auth_headers_librarian
+            f"/api/fines/{test_fine.id}", headers=auth_headers_librarian
         )
 
         assert response.status_code == status.HTTP_403_FORBIDDEN
 
-    def test_fine_amount_validation(
-        self, client, auth_headers_librarian, test_loan
-    ):
+    def test_fine_amount_validation(self, client, auth_headers_librarian, test_loan):
         """
         Test: Walidacja kwoty kary (NF7, NF9).
 
@@ -391,20 +329,14 @@ class TestFineRoutes:
         data = {
             "loan_id": str(test_loan.id),
             "user_id": test_loan.user_id,
-            "amount": -5.0
+            "amount": -5.0,
         }
 
-        response = client.post(
-            "/api/fines/",
-            json=data,
-            headers=auth_headers_librarian
-        )
+        response = client.post("/api/fines/", json=data, headers=auth_headers_librarian)
 
         assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
-    def test_fine_not_found(
-        self, client, auth_headers_librarian
-    ):
+    def test_fine_not_found(self, client, auth_headers_librarian):
         """
         Test: Pobranie nieistniejącej kary (NF9).
 
@@ -413,8 +345,7 @@ class TestFineRoutes:
         non_existent_id = uuid.uuid4()
 
         response = client.get(
-            f"/api/fines/{non_existent_id}",
-            headers=auth_headers_librarian
+            f"/api/fines/{non_existent_id}", headers=auth_headers_librarian
         )
 
         assert response.status_code == status.HTTP_404_NOT_FOUND

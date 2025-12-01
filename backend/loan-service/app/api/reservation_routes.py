@@ -13,30 +13,32 @@ Wymaganie: NF19 - Audyt
     - zamiast twardego usuwania stosujemy soft delete (flaga is_deleted, pole deleted_by)
 """
 
+import uuid
+from datetime import datetime
+from typing import Any, Dict, List
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from typing import List
-from datetime import datetime
-import uuid
 
-from backend.shared.database import get_db
-from backend.shared.auth import get_current_user, require_roles
-from backend.shared.models import User
 from app.models.reservation import Reservation, ReservationStatus
 from app.schemas.reservation import (
     ReservationCreate,
     ReservationResponse,
-    ReservationUpdate
+    ReservationUpdate,
 )
+from backend.shared.database import get_db
+from backend.shared.dependencies import get_current_user_payload, require_role
 
 router = APIRouter()
 
 
-@router.post("/", response_model=ReservationResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/", response_model=ReservationResponse, status_code=status.HTTP_201_CREATED
+)
 async def create_reservation(
     reservation_data: ReservationCreate,
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    current_user: Dict[str, Any] = Depends(get_current_user_payload),
+    db: Session = Depends(get_db),
 ):
     """
     Utwórz nową rezerwację książki (F8).
@@ -46,39 +48,49 @@ async def create_reservation(
     - NF29: Max 3 aktywne rezerwacje na użytkownika
     - NF5: Dostęp dla READER, LIBRARIAN, ADMIN (kontrola przez get_current_user + reguły)
     """
+    current_user_id = current_user.get("sub")
+
     # Sprawdź limit rezerwacji (NF29 - max 3 aktywne na użytkownika)
-    active_reservations = db.query(Reservation).filter(
-        Reservation.user_id == current_user.id,
-        Reservation.status == ReservationStatus.ACTIVE,
-        Reservation.is_deleted == False
-    ).count()
+    active_reservations = (
+        db.query(Reservation)
+        .filter(
+            Reservation.user_id == current_user_id,
+            Reservation.status == ReservationStatus.ACTIVE,
+            ~Reservation.is_deleted,
+        )
+        .count()
+    )
 
     if active_reservations >= 3:
         # Użytkownik przekroczył limit aktywnych rezerwacji
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Osiągnięto limit 3 aktywnych rezerwacji"
+            detail="Osiągnięto limit 3 aktywnych rezerwacji",
         )
 
     # Sprawdź czy użytkownik nie ma już aktywnej rezerwacji tej konkretnej książki
-    existing_reservation = db.query(Reservation).filter(
-        Reservation.user_id == current_user.id,
-        Reservation.book_id == reservation_data.book_id,
-        Reservation.status == ReservationStatus.ACTIVE,
-        Reservation.is_deleted == False
-    ).first()
+    existing_reservation = (
+        db.query(Reservation)
+        .filter(
+            Reservation.user_id == current_user_id,
+            Reservation.book_id == reservation_data.book_id,
+            Reservation.status == ReservationStatus.ACTIVE,
+            ~Reservation.is_deleted,
+        )
+        .first()
+    )
 
     if existing_reservation:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Masz już aktywną rezerwację tej książki"
+            detail="Masz już aktywną rezerwację tej książki",
         )
 
     # Utwórz rezerwację (F8) – domyślne daty i status ustawia model Reservation
     reservation = Reservation(
-        user_id=current_user.id,
+        user_id=current_user_id,
         book_id=reservation_data.book_id,
-        status=ReservationStatus.ACTIVE
+        status=ReservationStatus.ACTIVE,
     )
 
     db.add(reservation)
@@ -91,8 +103,8 @@ async def create_reservation(
 @router.get("/user/{user_id}", response_model=List[ReservationResponse])
 async def get_user_reservations(
     user_id: str,
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    current_user: Dict[str, Any] = Depends(get_current_user_payload),
+    db: Session = Depends(get_db),
 ):
     """
     Pobierz rezerwacje użytkownika (F9).
@@ -102,18 +114,23 @@ async def get_user_reservations(
     - NF5: RBAC – użytkownik widzi tylko swoje rezerwacje,
       LIBRARIAN/ADMIN może przeglądać rezerwacje dowolnego użytkownika.
     """
+    current_user_id = current_user.get("sub")
+    current_user_role = current_user.get("role")
+
     # Sprawdź uprawnienia (NF5 – ograniczenie dostępu do cudzych rezerwacji)
-    if current_user.id != user_id and current_user.role not in ['LIBRARIAN', 'ADMIN']:
+    if current_user_id != user_id and current_user_role not in ["LIBRARIAN", "ADMIN"]:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Nie masz uprawnień do przeglądania rezerwacji innych użytkowników"
+            detail="Nie masz uprawnień do przeglądania rezerwacji innych użytkowników",
         )
 
     # Pobierz rezerwacje (F9) – tylko te, które nie zostały soft-usunięte
-    reservations = db.query(Reservation).filter(
-        Reservation.user_id == user_id,
-        Reservation.is_deleted == False
-    ).order_by(Reservation.created_at.desc()).all()
+    reservations = (
+        db.query(Reservation)
+        .filter(Reservation.user_id == user_id, ~Reservation.is_deleted)
+        .order_by(Reservation.created_at.desc())
+        .all()
+    )
 
     return reservations
 
@@ -121,8 +138,8 @@ async def get_user_reservations(
 @router.get("/{reservation_id}", response_model=ReservationResponse)
 async def get_reservation(
     reservation_id: uuid.UUID,
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    current_user: Dict[str, Any] = Depends(get_current_user_payload),
+    db: Session = Depends(get_db),
 ):
     """
     Pobierz szczegóły pojedynczej rezerwacji (F9).
@@ -135,22 +152,29 @@ async def get_reservation(
         * ADMIN.
     """
     # Pobierz rezerwację z bazy (z pominięciem soft-usuniętych)
-    reservation = db.query(Reservation).filter(
-        Reservation.id == reservation_id,
-        Reservation.is_deleted == False
-    ).first()
+    reservation = (
+        db.query(Reservation)
+        .filter(Reservation.id == reservation_id, ~Reservation.is_deleted)
+        .first()
+    )
 
     if not reservation:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Rezerwacja nie została znaleziona"
+            detail="Rezerwacja nie została znaleziona",
         )
 
+    current_user_id = current_user.get("sub")
+    current_user_role = current_user.get("role")
+
     # Sprawdź uprawnienia (NF5)
-    if reservation.user_id != current_user.id and current_user.role not in ['LIBRARIAN', 'ADMIN']:
+    if str(reservation.user_id) != current_user_id and current_user_role not in [
+        "LIBRARIAN",
+        "ADMIN",
+    ]:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Nie masz uprawnień do tej rezerwacji"
+            detail="Nie masz uprawnień do tej rezerwacji",
         )
 
     return reservation
@@ -160,8 +184,8 @@ async def get_reservation(
 async def update_reservation(
     reservation_id: uuid.UUID,
     update_data: ReservationUpdate,
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    current_user: Dict[str, Any] = Depends(get_current_user_payload),
+    db: Session = Depends(get_db),
 ):
     """
     Aktualizuj rezerwację (F10 - głównie anulowanie).
@@ -171,34 +195,41 @@ async def update_reservation(
     - NF5: RBAC – właściciel, LIBRARIAN, ADMIN
     """
     # Pobierz rezerwację, jeżeli nie została soft-usunięta
-    reservation = db.query(Reservation).filter(
-        Reservation.id == reservation_id,
-        Reservation.is_deleted == False
-    ).first()
+    reservation = (
+        db.query(Reservation)
+        .filter(Reservation.id == reservation_id, ~Reservation.is_deleted)
+        .first()
+    )
 
     if not reservation:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Rezerwacja nie została znaleziona"
+            detail="Rezerwacja nie została znaleziona",
         )
 
+    current_user_id = current_user.get("sub")
+    current_user_role = current_user.get("role")
+
     # Sprawdź uprawnienia (NF5)
-    if reservation.user_id != current_user.id and current_user.role not in ['LIBRARIAN', 'ADMIN']:
+    if str(reservation.user_id) != current_user_id and current_user_role not in [
+        "LIBRARIAN",
+        "ADMIN",
+    ]:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Nie masz uprawnień do tej rezerwacji"
+            detail="Nie masz uprawnień do tej rezerwacji",
         )
 
     # Sprawdź czy można anulować (logika biznesowa w modelu Reservation)
     if not reservation.can_be_cancelled():
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Nie można anulować tej rezerwacji (nieprawidłowy status)"
+            detail="Nie można anulować tej rezerwacji (nieprawidłowy status)",
         )
 
     # Aktualizuj status (F10) – typowo na CANCELLED
     if update_data.status:
-        reservation.status = update_data.status
+        reservation.status = ReservationStatus(update_data.status)
         reservation.updated_at = datetime.utcnow()
 
     db.commit()
@@ -210,8 +241,8 @@ async def update_reservation(
 @router.delete("/{reservation_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_reservation(
     reservation_id: uuid.UUID,
-    current_user: User = Depends(require_roles(['LIBRARIAN', 'ADMIN'])),
-    db: Session = Depends(get_db)
+    current_user: Dict[str, Any] = Depends(require_role(["LIBRARIAN", "ADMIN"])),
+    db: Session = Depends(get_db),
 ):
     """
     Usuń rezerwację (soft delete) (NF19).
@@ -221,20 +252,21 @@ async def delete_reservation(
     - NF5: RBAC – tylko LIBRARIAN/ADMIN mogą fizycznie "usuwać" rezerwacje (logicznie)
     """
     # Pobierz rezerwację, jeśli jeszcze istnieje logicznie
-    reservation = db.query(Reservation).filter(
-        Reservation.id == reservation_id,
-        Reservation.is_deleted == False
-    ).first()
+    reservation = (
+        db.query(Reservation)
+        .filter(Reservation.id == reservation_id, ~Reservation.is_deleted)
+        .first()
+    )
 
     if not reservation:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Rezerwacja nie została znaleziona"
+            detail="Rezerwacja nie została znaleziona",
         )
 
     # Soft delete (NF19) – oznaczamy jako usuniętą i zapisujemy, kto usunął
     reservation.is_deleted = True
-    reservation.deleted_by = current_user.id
+    reservation.deleted_by = current_user.get("sub")
     reservation.updated_at = datetime.utcnow()
 
     db.commit()
@@ -244,11 +276,11 @@ async def delete_reservation(
 
 @router.get("/", response_model=List[ReservationResponse])
 async def list_reservations(
-    status: ReservationStatus = None,
+    status_filter: ReservationStatus | None = None,
     skip: int = 0,
     limit: int = 100,
-    current_user: User = Depends(require_roles(['LIBRARIAN', 'ADMIN'])),
-    db: Session = Depends(get_db)
+    current_user: Dict[str, Any] = Depends(require_role(["LIBRARIAN", "ADMIN"])),
+    db: Session = Depends(get_db),
 ):
     """
     Pobierz listę wszystkich rezerwacji (widok administracyjny).
@@ -259,15 +291,15 @@ async def list_reservations(
     - NF20 (pośrednio): paginacja przy użyciu skip/limit
     """
     # Bazowe zapytanie – tylko nieusunięte rezerwacje
-    query = db.query(Reservation).filter(Reservation.is_deleted == False)
+    query = db.query(Reservation).filter(~Reservation.is_deleted)
 
     # Filtruj po statusie jeśli podany (np. tylko ACTIVE, tylko EXPIRED)
-    if status:
-        query = query.filter(Reservation.status == status)
+    if status_filter:
+        query = query.filter(Reservation.status == status_filter)
 
     # Paginacja i sortowanie malejąco po dacie utworzenia
-    reservations = query.order_by(
-        Reservation.created_at.desc()
-    ).offset(skip).limit(limit).all()
+    reservations = (
+        query.order_by(Reservation.created_at.desc()).offset(skip).limit(limit).all()
+    )
 
     return reservations

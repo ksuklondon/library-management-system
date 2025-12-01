@@ -5,10 +5,10 @@ Wymaganie: NF9 - Testy jednostkowe i integracyjne
 Wymaganie: F8-F10 - Rezerwacje książek
 """
 
-import pytest
-from fastapi import status
-from datetime import datetime, timedelta
 import uuid
+from datetime import datetime, timedelta
+
+from fastapi import status
 
 
 class TestReservationRoutes:
@@ -20,15 +20,11 @@ class TestReservationRoutes:
         """
         # Arrange
         book_id = str(uuid.uuid4())
-        data = {
-            "book_id": book_id
-        }
+        data = {"book_id": book_id}
 
         # Act
         response = client.post(
-            "/api/reservations/",
-            json=data,
-            headers=auth_headers_reader
+            "/api/reservations/", json=data, headers=auth_headers_reader
         )
 
         # Assert
@@ -44,9 +40,7 @@ class TestReservationRoutes:
         Test: Próba utworzenia rezerwacji bez autoryzacji (NF5, NF9).
         """
         # Arrange
-        data = {
-            "book_id": str(uuid.uuid4())
-        }
+        data = {"book_id": str(uuid.uuid4())}
 
         # Act
         response = client.post("/api/reservations/", json=data)
@@ -61,15 +55,11 @@ class TestReservationRoutes:
         Test: Przekroczenie limitu 3 rezerwacji (NF29, NF9).
         """
         # Arrange - użytkownik ma już 3 aktywne rezerwacje
-        data = {
-            "book_id": str(uuid.uuid4())
-        }
+        data = {"book_id": str(uuid.uuid4())}
 
         # Act
         response = client.post(
-            "/api/reservations/",
-            json=data,
-            headers=auth_headers_reader
+            "/api/reservations/", json=data, headers=auth_headers_reader
         )
 
         # Assert
@@ -84,8 +74,7 @@ class TestReservationRoutes:
         """
         # Act
         response = client.get(
-            f"/api/reservations/user/{test_user.id}",
-            headers=auth_headers_reader
+            f"/api/reservations/user/{test_user.id}", headers=auth_headers_reader
         )
 
         # Assert
@@ -103,23 +92,19 @@ class TestReservationRoutes:
         """
         # Act
         response = client.get(
-            f"/api/reservations/user/{test_librarian.id}",
-            headers=auth_headers_reader
+            f"/api/reservations/user/{test_librarian.id}", headers=auth_headers_reader
         )
 
         # Assert
         assert response.status_code == status.HTTP_403_FORBIDDEN
 
-    def test_get_reservation_by_id(
-        self, client, auth_headers_reader, test_reservation
-    ):
+    def test_get_reservation_by_id(self, client, auth_headers_reader, test_reservation):
         """
         Test: Pobieranie szczegółów rezerwacji (F9, NF9).
         """
         # Act
         response = client.get(
-            f"/api/reservations/{test_reservation.id}",
-            headers=auth_headers_reader
+            f"/api/reservations/{test_reservation.id}", headers=auth_headers_reader
         )
 
         # Assert
@@ -135,15 +120,13 @@ class TestReservationRoutes:
         Test: Anulowanie rezerwacji (F10, NF9).
         """
         # Arrange
-        data = {
-            "status": "CANCELLED"
-        }
+        data = {"status": "CANCELLED"}
 
         # Act
         response = client.patch(
             f"/api/reservations/{test_reservation.id}",
             json=data,
-            headers=auth_headers_reader
+            headers=auth_headers_reader,
         )
 
         # Assert
@@ -163,22 +146,20 @@ class TestReservationRoutes:
         reservation = Reservation(
             user_id=test_librarian.id,
             book_id=uuid.uuid4(),
-            status=ReservationStatus.ACTIVE
+            status=ReservationStatus.ACTIVE,
         )
         reservation.expires_at = datetime.utcnow() + timedelta(days=3)
         db.add(reservation)
         db.commit()
         db.refresh(reservation)
 
-        data = {
-            "status": "CANCELLED"
-        }
+        data = {"status": "CANCELLED"}
 
         # Act
         response = client.patch(
             f"/api/reservations/{reservation.id}",
             json=data,
-            headers=auth_headers_reader
+            headers=auth_headers_reader,
         )
 
         # Assert
@@ -192,8 +173,7 @@ class TestReservationRoutes:
         """
         # Act
         response = client.delete(
-            f"/api/reservations/{test_reservation.id}",
-            headers=auth_headers_librarian
+            f"/api/reservations/{test_reservation.id}", headers=auth_headers_librarian
         )
 
         # Assert
@@ -201,8 +181,7 @@ class TestReservationRoutes:
 
         # Verify soft delete
         get_response = client.get(
-            f"/api/reservations/{test_reservation.id}",
-            headers=auth_headers_librarian
+            f"/api/reservations/{test_reservation.id}", headers=auth_headers_librarian
         )
         assert get_response.status_code == status.HTTP_404_NOT_FOUND
 
@@ -214,8 +193,7 @@ class TestReservationRoutes:
         """
         # Act
         response = client.delete(
-            f"/api/reservations/{test_reservation.id}",
-            headers=auth_headers_reader
+            f"/api/reservations/{test_reservation.id}", headers=auth_headers_reader
         )
 
         # Assert
@@ -228,10 +206,7 @@ class TestReservationRoutes:
         Test: Bibliotekarz może listować wszystkie rezerwacje (NF5, NF9).
         """
         # Act
-        response = client.get(
-            "/api/reservations/",
-            headers=auth_headers_librarian
-        )
+        response = client.get("/api/reservations/", headers=auth_headers_librarian)
 
         # Assert
         assert response.status_code == status.HTTP_200_OK
@@ -239,17 +214,12 @@ class TestReservationRoutes:
         assert isinstance(result, list)
         assert len(result) >= 1
 
-    def test_list_all_reservations_reader_forbidden(
-        self, client, auth_headers_reader
-    ):
+    def test_list_all_reservations_reader_forbidden(self, client, auth_headers_reader):
         """
         Test: Czytelnik nie może listować wszystkich rezerwacji (NF5, NF9).
         """
         # Act
-        response = client.get(
-            "/api/reservations/",
-            headers=auth_headers_reader
-        )
+        response = client.get("/api/reservations/", headers=auth_headers_reader)
 
         # Assert
         assert response.status_code == status.HTTP_403_FORBIDDEN
@@ -262,8 +232,7 @@ class TestReservationRoutes:
         """
         # Act
         response = client.get(
-            "/api/reservations/?status=ACTIVE",
-            headers=auth_headers_librarian
+            "/api/reservations/?status=ACTIVE", headers=auth_headers_librarian
         )
 
         # Assert
@@ -273,30 +242,22 @@ class TestReservationRoutes:
         for reservation in result:
             assert reservation["status"] == "ACTIVE"
 
-    def test_create_reservation_invalid_book_id(
-        self, client, auth_headers_reader
-    ):
+    def test_create_reservation_invalid_book_id(self, client, auth_headers_reader):
         """
         Test: Walidacja book_id (NF7, NF9).
         """
         # Arrange
-        data = {
-            "book_id": "invalid-uuid"
-        }
+        data = {"book_id": "invalid-uuid"}
 
         # Act
         response = client.post(
-            "/api/reservations/",
-            json=data,
-            headers=auth_headers_reader
+            "/api/reservations/", json=data, headers=auth_headers_reader
         )
 
         # Assert
         assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
-    def test_reservation_not_found(
-        self, client, auth_headers_reader
-    ):
+    def test_reservation_not_found(self, client, auth_headers_reader):
         """
         Test: Rezerwacja nie istnieje (NF9).
         """
@@ -305,8 +266,7 @@ class TestReservationRoutes:
 
         # Act
         response = client.get(
-            f"/api/reservations/{non_existent_id}",
-            headers=auth_headers_reader
+            f"/api/reservations/{non_existent_id}", headers=auth_headers_reader
         )
 
         # Assert

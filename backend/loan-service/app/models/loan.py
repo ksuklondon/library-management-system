@@ -12,11 +12,14 @@ Model obsługuje:
 - ewentualne przedłużanie wypożyczeń.
 """
 
-from sqlalchemy import Column, String, DateTime, Boolean, Enum as SQLEnum, Float
-from sqlalchemy.dialects.postgresql import UUID
-import uuid
 import enum
+import uuid
 from datetime import datetime, timedelta
+
+from sqlalchemy import Boolean, DateTime, Float, String
+from sqlalchemy import Enum as SQLEnum
+from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import Mapped, mapped_column
 
 from backend.shared.database import Base
 
@@ -29,6 +32,7 @@ class LoanStatus(str, enum.Enum):
     RETURNED – książka zwrócona,
     OVERDUE  – wypożyczenie przetrzymane (po terminie).
     """
+
     ACTIVE = "ACTIVE"
     RETURNED = "RETURNED"
     OVERDUE = "OVERDUE"
@@ -50,41 +54,51 @@ class Loan(Base):
     __tablename__ = "loans"
 
     # Techniczne ID wypożyczenia (UUID).
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, nullable=False)
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, nullable=False
+    )
 
     # Identyfikator użytkownika (powiązany z auth-service).
-    user_id = Column(String(255), nullable=False, index=True)
+    user_id: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
 
     # Identyfikator konkretnego egzemplarza (BookCopy).
-    book_copy_id = Column(UUID(as_uuid=True), nullable=False, index=True)
+    book_copy_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), nullable=False, index=True
+    )
 
     # Data rozpoczęcia wypożyczenia.
-    borrowed_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+    borrowed_at: Mapped[datetime] = mapped_column(
+        DateTime, nullable=False, default=datetime.utcnow
+    )
 
     # Termin zwrotu (ustawiany automatycznie, np. 14 dni od borrowed_at).
-    due_date = Column(DateTime, nullable=False)
+    due_date: Mapped[datetime] = mapped_column(DateTime, nullable=False)
 
     # Data faktycznego zwrotu (None, jeśli jeszcze nie zwrócono).
-    returned_at = Column(DateTime, nullable=True)
+    returned_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
 
     # Status wypożyczenia (enum).
-    status = Column(
+    status: Mapped[LoanStatus] = mapped_column(
         SQLEnum(LoanStatus, name="loan_status"),
         nullable=False,
         default=LoanStatus.ACTIVE,
-        index=True
+        index=True,
     )
 
     # Kara naliczona za dane wypożyczenie (F27) – w momencie zwrotu.
-    fine_amount = Column(Float, nullable=True, default=0.0)
+    fine_amount: Mapped[float | None] = mapped_column(Float, nullable=True, default=0.0)
 
     # Soft delete (NF19) – logiczne usunięcie wypożyczenia.
-    is_deleted = Column(Boolean, nullable=False, default=False)
-    deleted_by = Column(String(255), nullable=True)
+    is_deleted: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    deleted_by: Mapped[str | None] = mapped_column(String(255), nullable=True)
 
     # Daty techniczne – utworzenie / ostatnia aktualizacja rekordu.
-    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
-    updated_at = Column(DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, nullable=False, default=datetime.utcnow
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow
+    )
 
     def __init__(self, **kwargs):
         """
@@ -108,9 +122,9 @@ class Loan(Base):
         - nie zostało jeszcze zwrócone (returned_at == None).
         """
         return (
-            self.status == LoanStatus.ACTIVE and
-            not self.is_deleted and
-            self.returned_at is None
+            self.status == LoanStatus.ACTIVE
+            and not self.is_deleted
+            and self.returned_at is None
         )
 
     def is_overdue(self) -> bool:
@@ -121,10 +135,7 @@ class Loan(Base):
         - jest nadal aktywne (niezwrócone),
         - bieżący czas przekroczył termin zwrotu (due_date).
         """
-        return (
-            self.is_active() and
-            datetime.utcnow() > self.due_date
-        )
+        return self.is_active() and datetime.utcnow() > self.due_date
 
     def can_be_returned(self) -> bool:
         """
@@ -141,7 +152,7 @@ class Loan(Base):
         W tej wersji:
         - można przedłużyć tylko wypożyczenie aktywne,
         - nieprzetrzymane (nie OVERDUE).
-        Logikę “można przedłużyć tylko raz” można dodać w warstwie serwisu.
+        Logikę "można przedłużyć tylko raz" można dodać w warstwie serwisu.
         """
         return self.is_active() and not self.is_overdue()
 
@@ -155,12 +166,13 @@ class Loan(Base):
         - aktualizuje znacznik updated_at.
         """
         if self.can_be_returned():
-            self.returned_at = datetime.utcnow()
+            returned_time = datetime.utcnow()
+            self.returned_at = returned_time
             self.status = LoanStatus.RETURNED
 
             # Oblicz karę za przetrzymanie (F27 - 2 zł za dzień)
-            if self.returned_at > self.due_date:
-                days_overdue = (self.returned_at - self.due_date).days
+            if returned_time > self.due_date:
+                days_overdue = (returned_time - self.due_date).days
                 self.fine_amount = days_overdue * 2.0
 
             self.updated_at = datetime.utcnow()

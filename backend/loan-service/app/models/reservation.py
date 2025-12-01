@@ -6,12 +6,14 @@ Wymaganie: NF19 - Soft delete
 Wymaganie: NF29 - Reguły biznesowe (max 3 rezerwacje na użytkownika)
 """
 
-from sqlalchemy import Column, String, DateTime, Boolean, Enum as SQLEnum, ForeignKey
-from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import relationship
-import uuid
 import enum
+import uuid
 from datetime import datetime, timedelta
+
+from sqlalchemy import Boolean, DateTime, String
+from sqlalchemy import Enum as SQLEnum
+from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import Mapped, mapped_column
 
 from backend.shared.database import Base
 
@@ -25,6 +27,7 @@ class ReservationStatus(str, enum.Enum):
     EXPIRED    – rezerwacja wygasła (minął czas ważności),
     COMPLETED  – rezerwacja zrealizowana (powiązane wypożyczenie).
     """
+
     ACTIVE = "ACTIVE"
     CANCELLED = "CANCELLED"
     EXPIRED = "EXPIRED"
@@ -45,40 +48,52 @@ class Reservation(Base):
     __tablename__ = "reservations"
 
     # Identyfikator rezerwacji (UUID, klucz główny).
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, nullable=False)
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, nullable=False
+    )
 
     # Identyfikator użytkownika (np. UUID z auth-service trzymany jako string).
-    user_id = Column(String(255), nullable=False, index=True)
+    user_id: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
 
     # Identyfikator książki (pozycja w katalogu, nie konkretny egzemplarz).
-    book_id = Column(UUID(as_uuid=True), nullable=False, index=True)
+    book_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), nullable=False, index=True
+    )
 
     # Identyfikator konkretnego egzemplarza (opcjonalnie, gdy egzemplarz został już przydzielony).
-    book_copy_id = Column(UUID(as_uuid=True), nullable=True)
+    book_copy_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), nullable=True
+    )
 
     # Status rezerwacji – jeden z ReservationStatus.
-    status = Column(
+    status: Mapped[ReservationStatus] = mapped_column(
         SQLEnum(ReservationStatus, name="reservation_status"),
         nullable=False,
         default=ReservationStatus.ACTIVE,
-        index=True
+        index=True,
     )
 
     # Data utworzenia rezerwacji.
-    reserved_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+    reserved_at: Mapped[datetime] = mapped_column(
+        DateTime, nullable=False, default=datetime.utcnow
+    )
 
     # Data wygaśnięcia rezerwacji (np. po 3 dniach, jeśli nie została zrealizowana).
-    expires_at = Column(DateTime, nullable=False)
+    expires_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
 
     # Soft delete (NF19) – zamiast usuwać, oznaczamy rekord jako usunięty.
-    is_deleted = Column(Boolean, nullable=False, default=False)
+    is_deleted: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
 
     # Informacja kto usunął rezerwację (np. admin z panelu).
-    deleted_by = Column(String(255), nullable=True)
+    deleted_by: Mapped[str | None] = mapped_column(String(255), nullable=True)
 
     # Znaczniki czasu utworzenia i ostatniej aktualizacji rekordu.
-    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
-    updated_at = Column(DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, nullable=False, default=datetime.utcnow
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow
+    )
 
     def __init__(self, **kwargs):
         """
@@ -101,9 +116,9 @@ class Reservation(Base):
         - obecny czas jest wcześniejszy niż expires_at.
         """
         return (
-            self.status == ReservationStatus.ACTIVE and
-            not self.is_deleted and
-            datetime.utcnow() < self.expires_at
+            self.status == ReservationStatus.ACTIVE
+            and not self.is_deleted
+            and datetime.utcnow() < self.expires_at
         )
 
     def can_be_cancelled(self) -> bool:
@@ -124,7 +139,10 @@ class Reservation(Base):
         - aktualny czas >= expires_at,
         - status nadal ACTIVE (czyli rezerwacja nie została jeszcze "oficjalnie" wygaszona).
         """
-        return datetime.utcnow() >= self.expires_at and self.status == ReservationStatus.ACTIVE
+        return (
+            datetime.utcnow() >= self.expires_at
+            and self.status == ReservationStatus.ACTIVE
+        )
 
     def cancel(self) -> None:
         """
