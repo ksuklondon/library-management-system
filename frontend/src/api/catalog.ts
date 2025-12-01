@@ -10,7 +10,7 @@
  * - F16: Zarządzanie egzemplarzami (LIBRARIAN/ADMIN)
  */
 
-import {
+import type {
   Book,
   BookCopy,
   BookCopyCreateRequest,

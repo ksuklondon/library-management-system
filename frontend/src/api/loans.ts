@@ -12,7 +12,7 @@
  * - F27: Płatność kar
  */
 
-import {
+import type {
   Fine,
   FinePaymentRequest,
   FinesResponse,
@@ -25,7 +25,7 @@ import {
   ReservationCreateRequest,
   ReservationsResponse,
 } from "../types/loan";
-import {
+import type {
   AllReservationsResponse,
   BookAvailability,
   CheckReservationEligibilityRequest,

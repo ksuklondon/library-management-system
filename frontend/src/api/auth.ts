@@ -12,7 +12,7 @@
  * - F28: Zmiana roli użytkownika (ADMIN)
  */
 
-import {
+import type {
   LoginRequest,
   LoginResponse,
   RefreshTokenRequest,

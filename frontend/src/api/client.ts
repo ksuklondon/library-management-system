@@ -8,7 +8,8 @@
  * - F2a: Automatyczne odświeżanie tokenów
  */
 
-import axios, { AxiosError, AxiosInstance, InternalAxiosRequestConfig } from "axios";
+import type { AxiosError, AxiosInstance, InternalAxiosRequestConfig } from "axios";
+import axios from "axios";
 
 /**
  * Bazowy URL dla API (z .env).

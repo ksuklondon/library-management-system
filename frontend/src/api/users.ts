@@ -8,7 +8,7 @@
  * - NF19: Audyt zmian
  */
 
-import { User, UserRole } from "../types/user";
+import type { User, UserRole } from "../types/user";
 import { authClient, getErrorMessage } from "./client";
 
 /**
@@ -125,7 +125,7 @@ export interface UserAuditLog {
   action: string;
   changed_by: string;
   changed_at: string;
-  details?: Record<string, any>;
+  details?: Record<string, unknown>;
 }
 
 /**
