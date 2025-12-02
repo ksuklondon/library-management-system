@@ -6,7 +6,7 @@
  * - NF11: Intuicyjny interfejs użytkownika
  */
 
-import React, { ButtonHTMLAttributes } from "react";
+import React, { type ButtonHTMLAttributes } from "react";
 
 /**
  * Warianty przycisku.

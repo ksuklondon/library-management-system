@@ -11,7 +11,7 @@
 import { BookOpen, CheckCircle, User, XCircle } from "lucide-react";
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { Book } from "../types/book";
+import type { Book } from "../types/book";
 import Button from "./Button";
 
 /**

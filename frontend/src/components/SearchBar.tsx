@@ -8,7 +8,7 @@
  */
 
 import { Search, X } from "lucide-react";
-import React, { FormEvent, useState } from "react";
+import React, { type FormEvent, useState } from "react";
 import Button from "./Button";
 
 /**

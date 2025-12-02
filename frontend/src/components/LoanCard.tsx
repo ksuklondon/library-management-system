@@ -12,8 +12,8 @@ import { differenceInDays, formatDistanceToNow } from "date-fns";
 import { pl } from "date-fns/locale";
 import { AlertTriangle, BookOpen, Calendar, CheckCircle, Clock, DollarSign } from "lucide-react";
 import React from "react";
-import { useNavigate } from "react-router-dom";
-import { Loan, LoanStatus } from "../types/loan";
+import type { Loan } from "../types/loan";
+import { LoanStatus } from "../types/loan";
 import Button from "./Button";
 
 /**
@@ -49,19 +49,6 @@ const LoanCard: React.FC<LoanCardProps> = ({
   onPayFine,
   isPayingFine = false,
 }) => {
-  const navigate = useNavigate();
-
-  /**
-   * Przejdź do szczegółów książki (F7).
-   */
-  const handleViewBook = () => {
-    if (loan.book_copy?.book) {
-      // Tutaj potrzebujemy ID książki, nie egzemplarza
-      // Zakładamy że book_copy ma zagnieżdżony book z ID
-      navigate(`/book/${loan.book_copy.book.id || loan.book_copy_id}`);
-    }
-  };
-
   /**
    * Przedłuż wypożyczenie (F14).
    */
@@ -127,43 +114,19 @@ const LoanCard: React.FC<LoanCardProps> = ({
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
       <div className="flex flex-col md:flex-row gap-4">
-        {/* Okładka książki */}
+        {/* Ikona książki */}
         <div className="flex-shrink-0">
-          <div className="w-24 h-32 bg-gray-200 dark:bg-gray-700 rounded-md overflow-hidden">
-            {loan.book_copy?.book?.cover_url ? (
-              <img
-                src={loan.book_copy.book.cover_url}
-                alt={loan.book_copy.book.title}
-                className="w-full h-full object-cover cursor-pointer hover:opacity-80 transition-opacity"
-                onClick={handleViewBook}
-              />
-            ) : (
-              <div
-                className="w-full h-full flex items-center justify-center cursor-pointer hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
-                onClick={handleViewBook}
-              >
-                <BookOpen size={32} className="text-gray-400 dark:text-gray-500" />
-              </div>
-            )}
+          <div className="w-24 h-32 bg-gray-200 dark:bg-gray-700 rounded-md overflow-hidden flex items-center justify-center">
+            <BookOpen size={48} className="text-gray-400 dark:text-gray-500" />
           </div>
         </div>
 
         {/* Informacje o wypożyczeniu */}
         <div className="flex-1 min-w-0">
-          {/* Tytuł książki */}
-          <h3
-            className="text-lg font-semibold text-gray-900 dark:text-white mb-2 cursor-pointer hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-            onClick={handleViewBook}
-          >
-            {loan.book_copy?.book?.title || "Książka"}
+          {/* ID egzemplarza */}
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+            Egzemplarz: {loan.book_copy_id}
           </h3>
-
-          {/* Autor */}
-          {loan.book_copy?.book?.authors && (
-            <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
-              {loan.book_copy.book.authors}
-            </p>
-          )}
 
           {/* Status */}
           <div className="flex items-center gap-2 mb-3">
@@ -173,13 +136,6 @@ const LoanCard: React.FC<LoanCardProps> = ({
               {status.icon}
               {status.label}
             </span>
-
-            {/* Numer inwentarzowy */}
-            {loan.book_copy?.inventory_no && (
-              <span className="text-xs text-gray-500 dark:text-gray-400">
-                Egz. {loan.book_copy.inventory_no}
-              </span>
-            )}
           </div>
 
           {/* Daty */}
@@ -219,10 +175,6 @@ const LoanCard: React.FC<LoanCardProps> = ({
 
           {/* Przyciski akcji */}
           <div className="flex flex-wrap gap-2">
-            <Button variant="outline" size="small" onClick={handleViewBook}>
-              Zobacz książkę
-            </Button>
-
             {/* Przycisk przedłuż (F14 - tylko dla aktywnych) */}
             {showExtendButton && loan.status === LoanStatus.ACTIVE && !isOverdue && onExtend && (
               <Button

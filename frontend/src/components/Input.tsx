@@ -7,7 +7,7 @@
  * - NF11: Intuicyjny interfejs użytkownika
  */
 
-import { InputHTMLAttributes, forwardRef } from "react";
+import { type InputHTMLAttributes, forwardRef, useId } from "react";
 
 /**
  * Props dla komponentu Input.
@@ -33,8 +33,9 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
     { label, error, helperText, fullWidth = false, required = false, className = "", ...props },
     ref
   ) => {
-    // ID dla powiązania label z input
-    const inputId = props.id || `input-${Math.random().toString(36).substr(2, 9)}`;
+    // ID dla powiązania label z input (React 18+ useId hook)
+    const generatedId = useId();
+    const inputId = props.id || generatedId;
 
     // Klasy bazowe
     const baseClasses =

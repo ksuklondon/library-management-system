@@ -68,15 +68,6 @@ export interface Loan {
   fine_amount?: number;
   created_at: string;
   updated_at: string;
-  // Dodatkowe informacje dla frontendu
-  book_copy?: {
-    inventory_no: string;
-    book: {
-      title: string;
-      authors: string;
-      cover_url?: string;
-    };
-  };
 }
 
 /**

@@ -7,7 +7,7 @@
  * - F10: Anulowanie rezerwacji
  */
 
-import { Reservation, ReservationStatus } from "./loan";
+import { type Reservation, ReservationStatus } from "./loan";
 
 /**
  * Rozszerzona informacja o rezerwacji z dodatkowymi danymi książki.

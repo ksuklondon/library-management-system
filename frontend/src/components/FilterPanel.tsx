@@ -9,7 +9,7 @@
 
 import { Filter } from "lucide-react";
 import React, { useState } from "react";
-import { CatalogFilter } from "../types/book";
+import type { CatalogFilter } from "../types/book";
 import Button from "./Button";
 
 /**

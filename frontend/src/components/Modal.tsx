@@ -7,7 +7,7 @@
  */
 
 import { X } from "lucide-react";
-import React, { ReactNode, useEffect } from "react";
+import React, { type ReactNode, useEffect } from "react";
 import Button from "./Button";
 
 /**

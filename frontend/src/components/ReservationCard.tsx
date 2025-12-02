@@ -10,9 +10,10 @@
 import { formatDistanceToNow } from "date-fns";
 import { pl } from "date-fns/locale";
 import { AlertCircle, BookOpen, Calendar, CheckCircle, Clock, XCircle } from "lucide-react";
-import React from "react";
+import React, { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { Reservation, ReservationStatus } from "../types/loan";
+import type { Reservation } from "../types/loan";
+import { ReservationStatus } from "../types/loan";
 import Button from "./Button";
 
 /**
@@ -45,11 +46,7 @@ const ReservationCard: React.FC<ReservationCardProps> = ({
    * Przejdź do szczegółów książki (F7).
    */
   const handleViewBook = () => {
-    if (reservation.book?.id) {
-      navigate(`/book/${reservation.book.id}`);
-    } else {
-      navigate(`/book/${reservation.book_id}`);
-    }
+    navigate(`/books/${reservation.book_id}`);
   };
 
   /**
@@ -85,15 +82,27 @@ const ReservationCard: React.FC<ReservationCardProps> = ({
       color: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
       label: "Zrealizowana",
     },
-  };
+  } as const;
 
   const status = statusConfig[reservation.status];
 
   /**
-   * Oblicz czas do wygaśnięcia rezerwacji.
+   * Oblicz datę wygaśnięcia rezerwacji.
    */
-  const expiresAt = new Date(reservation.expires_at);
-  const isExpiringSoon = expiresAt.getTime() - Date.now() < 24 * 60 * 60 * 1000; // < 24h
+  const expiresAt = useMemo(() => new Date(reservation.expires_at), [reservation.expires_at]);
+
+  const MS_IN_DAY = 24 * 60 * 60 * 1000;
+
+  /**
+   * Czy rezerwacja wygasa w ciągu najbliższych 24 godzin.
+   */
+
+  // eslint-disable-next-line react-hooks/purity
+  const isExpiringSoon = expiresAt.getTime() - Date.now() < MS_IN_DAY;
+
+  /**
+   * Tekst „za ile wygaśnie" – używany też gdy jest już po terminie.
+   */
   const timeToExpire = formatDistanceToNow(expiresAt, {
     addSuffix: true,
     locale: pl,
