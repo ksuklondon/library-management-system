@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 /**
  * AuthContext - zarządzanie stanem autentykacji w całej aplikacji.
  *
@@ -11,7 +12,7 @@
  * wszystkim komponentom bez prop drilling.
  */
 
-import React, { createContext, ReactNode, useContext, useEffect, useState } from "react";
+import React, { createContext, type ReactNode, useContext, useEffect, useState } from "react";
 import {
   getCurrentUser,
   login as loginApi,
@@ -19,7 +20,8 @@ import {
   register as registerApi,
 } from "../api/auth";
 import { getAccessToken } from "../api/client";
-import { LoginRequest, RegisterRequest, User, UserRole } from "../types/user";
+import type { LoginRequest, RegisterRequest, User } from "../types/user";
+import { UserRole } from "../types/user";
 
 /**
  * Interface opisujący stan i metody AuthContext.
@@ -99,7 +101,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setIsLoading(true);
 
       // Wywołaj API logowania (zapisuje tokeny do localStorage)
-      const response = await loginApi(credentials);
+      await loginApi(credentials);
 
       // Pobierz pełne dane użytkownika
       const userData = await getCurrentUser();
@@ -235,8 +237,3 @@ export const useAuth = (): AuthContextType => {
 
   return context;
 };
-
-/**
- * Export domyślny - AuthContext (dla zaawansowanych przypadków).
- */
-export default AuthContext;

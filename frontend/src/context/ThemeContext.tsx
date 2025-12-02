@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 /**
  * ThemeContext - zarządzanie motywem (jasny/ciemny) w aplikacji.
  *
@@ -6,7 +7,7 @@
  * - NF11: Intuicyjny interfejs - wybór jasnego/ciemnego motywu
  */
 
-import React, { createContext, ReactNode, useContext, useEffect, useState } from "react";
+import React, { createContext, type ReactNode, useContext, useEffect, useState } from "react";
 
 /**
  * Typ motywu - 'light' lub 'dark'.
@@ -90,7 +91,6 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     if (mediaQuery.addEventListener) {
       mediaQuery.addEventListener("change", handleChange);
     } else {
-      // @ts-ignore - fallback dla starszych przeglądarek
       mediaQuery.addListener(handleChange);
     }
 
@@ -99,7 +99,6 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
       if (mediaQuery.removeEventListener) {
         mediaQuery.removeEventListener("change", handleChange);
       } else {
-        // @ts-ignore - fallback dla starszych przeglądarek
         mediaQuery.removeListener(handleChange);
       }
     };
@@ -146,8 +145,3 @@ export const useTheme = (): ThemeContextType => {
 
   return context;
 };
-
-/**
- * Export domyślny - ThemeContext.
- */
-export default ThemeContext;
