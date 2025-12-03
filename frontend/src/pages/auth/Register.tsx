@@ -8,12 +8,27 @@
  */
 
 import { AlertCircle, CheckCircle, UserPlus } from "lucide-react";
-import React, { FormEvent, useState } from "react";
+import React, { type FormEvent, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Button from "../../components/Button";
 import Input from "../../components/Input";
 import { useAuth } from "../../hooks/useAuth";
 import { getPasswordStrength, isValidEmail, validatePassword } from "../../utils/validators";
+
+type RegisterFormData = {
+  email: string;
+  password: string;
+  confirmPassword: string;
+  fullName: string;
+};
+
+type RegisterErrors = {
+  email?: string;
+  password?: string;
+  confirmPassword?: string;
+  fullName?: string;
+  general?: string;
+};
 
 /**
  * Komponent Register - formularz rejestracji (F1).
@@ -23,28 +38,22 @@ const Register: React.FC = () => {
   const { register, isLoading } = useAuth();
 
   // Stan formularza
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<RegisterFormData>({
     email: "",
     password: "",
     confirmPassword: "",
     fullName: "",
   });
 
-  const [errors, setErrors] = useState<{
-    email?: string;
-    password?: string;
-    confirmPassword?: string;
-    fullName?: string;
-    general?: string;
-  }>({});
+  const [errors, setErrors] = useState<RegisterErrors>({});
 
   const [showPasswordStrength, setShowPasswordStrength] = useState(false);
 
   /**
    * Aktualizuj pole formularza.
    */
-  const handleChange = (field: string, value: string) => {
-    setFormData({ ...formData, [field]: value });
+  const handleChange = (field: keyof RegisterFormData, value: string) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
 
     // Pokaż siłę hasła gdy użytkownik zaczyna pisać
     if (field === "password" && value.length > 0) {
@@ -59,15 +68,23 @@ const Register: React.FC = () => {
 
   const strengthConfig = {
     weak: { color: "bg-red-500", text: "Słabe", textColor: "text-red-600" },
-    medium: { color: "bg-yellow-500", text: "Średnie", textColor: "text-yellow-600" },
-    strong: { color: "bg-green-500", text: "Silne", textColor: "text-green-600" },
-  };
+    medium: {
+      color: "bg-yellow-500",
+      text: "Średnie",
+      textColor: "text-yellow-600",
+    },
+    strong: {
+      color: "bg-green-500",
+      text: "Silne",
+      textColor: "text-green-600",
+    },
+  } as const;
 
   /**
    * Walidacja formularza (NF7).
    */
   const validateForm = (): boolean => {
-    const newErrors: any = {};
+    const newErrors: RegisterErrors = {};
 
     // Email
     if (!formData.email.trim()) {
@@ -101,7 +118,7 @@ const Register: React.FC = () => {
   /**
    * Obsługa wysłania formularza (F1).
    */
-  const handleSubmit = async (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setErrors({});
 
@@ -120,10 +137,12 @@ const Register: React.FC = () => {
 
       // Przekieruj na stronę główną (użytkownik jest automatycznie zalogowany)
       navigate("/");
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Registration error:", error);
+      const message =
+        error instanceof Error ? error.message : "Nie udało się utworzyć konta. Spróbuj ponownie.";
       setErrors({
-        general: error.message || "Nie udało się utworzyć konta. Spróbuj ponownie.",
+        general: message,
       });
     }
   };

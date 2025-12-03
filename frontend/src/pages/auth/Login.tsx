@@ -7,13 +7,25 @@
  * - NF4: JWT tokens
  */
 
-import React, { useState, FormEvent } from 'react';
-import { useNavigate, useLocation, Link } from 'react-router-dom';
-import { useAuth } from '../../hooks/useAuth';
-import { LogIn, Mail, Lock, AlertCircle } from 'lucide-react';
-import Input from '../../components/Input';
-import Button from '../../components/Button';
-import { isValidEmail } from '../../utils/validators';
+import { AlertCircle, LogIn } from "lucide-react";
+import React, { useState, type FormEvent } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import Button from "../../components/Button";
+import Input from "../../components/Input";
+import { useAuth } from "../../hooks/useAuth";
+import { isValidEmail } from "../../utils/validators";
+
+type LoginErrors = {
+  email?: string;
+  password?: string;
+  general?: string;
+};
+
+type AuthLocationState = {
+  from?: {
+    pathname: string;
+  };
+};
 
 /**
  * Komponent Login - formularz logowania (F2).
@@ -24,29 +36,30 @@ const Login: React.FC = () => {
   const { login, isLoading } = useAuth();
 
   // Stan formularza
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [errors, setErrors] = useState<{ email?: string; password?: string; general?: string }>({});
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [errors, setErrors] = useState<LoginErrors>({});
 
   // Skąd użytkownik przyszedł (do przekierowania po logowaniu)
-  const from = (location.state as any)?.from?.pathname || '/';
+  const typedState = (location.state ?? {}) as AuthLocationState;
+  const from = typedState.from?.pathname ?? "/";
 
   /**
    * Walidacja formularza (NF7).
    */
   const validateForm = (): boolean => {
-    const newErrors: { email?: string; password?: string } = {};
+    const newErrors: LoginErrors = {};
 
     // Walidacja email
     if (!email.trim()) {
-      newErrors.email = 'Email jest wymagany';
+      newErrors.email = "Email jest wymagany";
     } else if (!isValidEmail(email)) {
-      newErrors.email = 'Nieprawidłowy format email';
+      newErrors.email = "Nieprawidłowy format email";
     }
 
     // Walidacja hasła
     if (!password) {
-      newErrors.password = 'Hasło jest wymagane';
+      newErrors.password = "Hasło jest wymagane";
     }
 
     setErrors(newErrors);
@@ -56,7 +69,7 @@ const Login: React.FC = () => {
   /**
    * Obsługa wysłania formularza (F2).
    */
-  const handleSubmit = async (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setErrors({});
 
@@ -71,10 +84,10 @@ const Login: React.FC = () => {
 
       // Przekieruj do poprzedniej strony lub strony głównej
       navigate(from, { replace: true });
-    } catch (error: any) {
-      console.error('Login error:', error);
+    } catch (error) {
+      console.error("Login error:", error);
       setErrors({
-        general: error.message || 'Nieprawidłowy email lub hasło',
+        general: error instanceof Error ? error.message : "Nieprawidłowy email lub hasło",
       });
     }
   };
@@ -87,11 +100,9 @@ const Login: React.FC = () => {
           <div className="flex justify-center mb-4">
             <LogIn size={48} className="text-blue-600 dark:text-blue-400" />
           </div>
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
-            Zaloguj się
-          </h2>
+          <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Zaloguj się</h2>
           <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-            Lub{' '}
+            Lub{" "}
             <Link
               to="/register"
               className="font-medium text-blue-600 dark:text-blue-400 hover:text-blue-500"
@@ -137,9 +148,7 @@ const Login: React.FC = () => {
               <div className="flex">
                 <AlertCircle className="h-5 w-5 text-red-400" />
                 <div className="ml-3">
-                  <p className="text-sm text-red-800 dark:text-red-200">
-                    {errors.general}
-                  </p>
+                  <p className="text-sm text-red-800 dark:text-red-200">{errors.general}</p>
                 </div>
               </div>
             </div>
@@ -158,7 +167,7 @@ const Login: React.FC = () => {
 
           {/* Link do resetowania hasła (opcjonalnie) */}
           <div className="text-center">
-
+            <a
               href="#"
               className="text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-500"
             >
@@ -169,9 +178,7 @@ const Login: React.FC = () => {
 
         {/* Informacja o demo (dla celów testowych) */}
         <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-          <p className="text-sm text-blue-800 dark:text-blue-200 font-medium mb-2">
-            Konta demo:
-          </p>
+          <p className="text-sm text-blue-800 dark:text-blue-200 font-medium mb-2">Konta demo:</p>
           <ul className="text-xs text-blue-700 dark:text-blue-300 space-y-1">
             <li>👤 Czytelnik: reader@example.com / Password123</li>
             <li>📚 Bibliotekarz: librarian@example.com / Password123</li>

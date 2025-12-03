@@ -7,13 +7,39 @@
  */
 
 import { AlertCircle, CheckCircle, Edit, Save, User as UserIcon, X } from "lucide-react";
-import React, { FormEvent, useEffect, useState } from "react";
+import React, { type FormEvent, useEffect, useState } from "react";
 import { updateUser } from "../../api/auth";
 import Button from "../../components/Button";
 import Input from "../../components/Input";
 import { useAuth } from "../../hooks/useAuth";
 import { formatDate } from "../../utils/formatters";
 import { isValidEmail, validatePassword } from "../../utils/validators";
+
+/**
+ * Typy pomocnicze dla formularza profilu.
+ */
+interface ProfileFormData {
+  email: string;
+  fullName: string;
+  currentPassword: string;
+  newPassword: string;
+  confirmPassword: string;
+}
+
+interface ProfileErrors {
+  email?: string;
+  fullName?: string;
+  currentPassword?: string;
+  newPassword?: string;
+  confirmPassword?: string;
+  general?: string;
+}
+
+interface UpdateUserPayload {
+  email: string;
+  full_name?: string;
+  password?: string;
+}
 
 /**
  * Komponent Profile - profil użytkownika (F20).
@@ -25,7 +51,7 @@ const Profile: React.FC = () => {
   const [successMessage, setSuccessMessage] = useState("");
 
   // Stan formularza
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<ProfileFormData>({
     email: user?.email || "",
     fullName: user?.full_name || "",
     currentPassword: "",
@@ -33,14 +59,7 @@ const Profile: React.FC = () => {
     confirmPassword: "",
   });
 
-  const [errors, setErrors] = useState<{
-    email?: string;
-    fullName?: string;
-    currentPassword?: string;
-    newPassword?: string;
-    confirmPassword?: string;
-    general?: string;
-  }>({});
+  const [errors, setErrors] = useState<ProfileErrors>({});
 
   /**
    * Aktualizuj formularz gdy user się zmieni.
@@ -60,17 +79,17 @@ const Profile: React.FC = () => {
   /**
    * Aktualizuj pole formularza.
    */
-  const handleChange = (field: string, value: string) => {
-    setFormData({ ...formData, [field]: value });
+  const handleChange = (field: keyof ProfileFormData, value: string) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
     // Wyczyść błąd dla tego pola
-    setErrors({ ...errors, [field]: undefined });
+    setErrors((prev) => ({ ...prev, [field]: undefined }));
   };
 
   /**
    * Walidacja formularza (NF7).
    */
   const validateForm = (): boolean => {
-    const newErrors: any = {};
+    const newErrors: ProfileErrors = {};
 
     // Email
     if (!formData.email.trim()) {
@@ -105,7 +124,7 @@ const Profile: React.FC = () => {
   /**
    * Obsługa wysłania formularza (F20).
    */
-  const handleSubmit = async (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setErrors({});
     setSuccessMessage("");
@@ -121,7 +140,7 @@ const Profile: React.FC = () => {
 
     try {
       // Przygotuj dane do aktualizacji
-      const updateData: any = {
+      const updateData: UpdateUserPayload = {
         email: formData.email,
         full_name: formData.fullName || undefined,
       };
@@ -142,19 +161,30 @@ const Profile: React.FC = () => {
       setIsEditing(false);
 
       // Wyczyść pola haseł
-      setFormData({
-        ...formData,
+      setFormData((prev) => ({
+        ...prev,
         currentPassword: "",
         newPassword: "",
         confirmPassword: "",
-      });
+      }));
 
       // Ukryj komunikat po 3 sekundach
       setTimeout(() => setSuccessMessage(""), 3000);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Update profile error:", error);
+
+      let message = "Nie udało się zaktualizować profilu";
+      if (
+        error &&
+        typeof error === "object" &&
+        "message" in error &&
+        typeof (error as { message?: string }).message === "string"
+      ) {
+        message = (error as { message: string }).message;
+      }
+
       setErrors({
-        general: error.message || "Nie udało się zaktualizować profilu",
+        general: message,
       });
     } finally {
       setIsLoading(false);
