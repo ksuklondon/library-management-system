@@ -9,12 +9,12 @@
 import { AlertCircle, CheckCircle, Search, Shield, Users } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getAllUsers, updateUserRole } from "../../api/users";
+import { changeUserRole, getAllUsers } from "../../api/users";
 import Button from "../../components/Button";
 import Input from "../../components/Input";
 import Loading from "../../components/Loading";
 import { useAuth } from "../../hooks/useAuth";
-import { User, UserRole } from "../../types/user";
+import type { User, UserRole } from "../../types/user";
 import { formatDate } from "../../utils/formatters";
 
 /**
@@ -35,6 +35,31 @@ const UserRoles: React.FC = () => {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   /**
+   * Załaduj użytkowników z API.
+   */
+  const loadUsers = async () => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const data = await getAllUsers(0, 100);
+      setUsers(Array.isArray(data) ? data : []);
+    } catch (err: unknown) {
+      console.error("Error loading users:", err);
+      setError(err instanceof Error ? err.message : "Nie udało się załadować użytkowników");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  /**
+   * Załaduj użytkowników przy montowaniu.
+   */
+  useEffect(() => {
+    loadUsers();
+  }, []);
+
+  /**
    * Sprawdź uprawnienia (NF5).
    */
   if (!isAdmin()) {
@@ -51,31 +76,6 @@ const UserRoles: React.FC = () => {
       </div>
     );
   }
-
-  /**
-   * Załaduj użytkowników z API.
-   */
-  const loadUsers = async () => {
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const data = await getAllUsers({ page: 1, page_size: 100 });
-      setUsers(data.users || data);
-    } catch (err: any) {
-      console.error("Error loading users:", err);
-      setError(err.message || "Nie udało się załadować użytkowników");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  /**
-   * Załaduj użytkowników przy montowaniu.
-   */
-  useEffect(() => {
-    loadUsers();
-  }, []);
 
   /**
    * Zmień rolę użytkownika (F28).
@@ -98,7 +98,7 @@ const UserRoles: React.FC = () => {
     setError(null);
 
     try {
-      await updateUserRole(userId, newRole);
+      await changeUserRole(userId, newRole);
       setSuccessMessage("Rola użytkownika została zmieniona pomyślnie!");
 
       // Odśwież listę użytkowników
@@ -106,9 +106,9 @@ const UserRoles: React.FC = () => {
 
       // Ukryj komunikat po 3 sekundach
       setTimeout(() => setSuccessMessage(null), 3000);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Error updating user role:", err);
-      setError(err.message || "Nie udało się zmienić roli użytkownika");
+      setError(err instanceof Error ? err.message : "Nie udało się zmienić roli użytkownika");
     } finally {
       setUpdatingUserId(null);
     }
@@ -128,13 +128,13 @@ const UserRoles: React.FC = () => {
   /**
    * Kolor dla roli.
    */
-  const getRoleColor = (role: UserRole) => {
+  const getRoleColor = (role: string) => {
     switch (role) {
-      case UserRole.ADMIN:
+      case "ADMIN":
         return "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200";
-      case UserRole.LIBRARIAN:
+      case "LIBRARIAN":
         return "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200";
-      case UserRole.READER:
+      case "READER":
         return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200";
       default:
         return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200";
@@ -144,13 +144,13 @@ const UserRoles: React.FC = () => {
   /**
    * Etykieta roli po polsku.
    */
-  const getRoleLabel = (role: UserRole) => {
+  const getRoleLabel = (role: string) => {
     switch (role) {
-      case UserRole.ADMIN:
+      case "ADMIN":
         return "Administrator";
-      case UserRole.LIBRARIAN:
+      case "LIBRARIAN":
         return "Bibliotekarz";
-      case UserRole.READER:
+      case "READER":
         return "Czytelnik";
       default:
         return role;
@@ -210,19 +210,19 @@ const UserRoles: React.FC = () => {
         <div className="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4">
             <div className="text-2xl font-bold text-red-600 dark:text-red-400">
-              {users.filter((u) => u.role === UserRole.ADMIN).length}
+              {users.filter((u) => u.role === "ADMIN").length}
             </div>
             <div className="text-sm text-gray-600 dark:text-gray-400">Administratorów</div>
           </div>
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4">
             <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
-              {users.filter((u) => u.role === UserRole.LIBRARIAN).length}
+              {users.filter((u) => u.role === "LIBRARIAN").length}
             </div>
             <div className="text-sm text-gray-600 dark:text-gray-400">Bibliotekarzy</div>
           </div>
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4">
             <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-              {users.filter((u) => u.role === UserRole.READER).length}
+              {users.filter((u) => u.role === "READER").length}
             </div>
             <div className="text-sm text-gray-600 dark:text-gray-400">Czytelników</div>
           </div>
@@ -304,7 +304,7 @@ const UserRoles: React.FC = () => {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm">
                         <div className="flex gap-2">
-                          {Object.values(UserRole).map((role) => (
+                          {(["ADMIN", "LIBRARIAN", "READER"] as UserRole[]).map((role) => (
                             <Button
                               key={role}
                               variant={user.role === role ? "primary" : "outline"}

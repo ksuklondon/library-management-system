@@ -43,24 +43,6 @@ const AdminPanel: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   /**
-   * Sprawdź uprawnienia (NF5).
-   */
-  if (!isAdmin()) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
-        <div className="text-center">
-          <AlertTriangle size={64} className="mx-auto text-red-500 mb-4" />
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Brak dostępu</h1>
-          <p className="text-gray-600 dark:text-gray-400 mb-4">
-            Nie masz uprawnień do panelu administratora. Wymagana rola: Administrator.
-          </p>
-          <Button onClick={() => navigate("/")}>Wróć do strony głównej</Button>
-        </div>
-      </div>
-    );
-  }
-
-  /**
    * Załaduj statystyki systemowe.
    */
   useEffect(() => {
@@ -84,6 +66,24 @@ const AdminPanel: React.FC = () => {
 
     loadStats();
   }, []);
+
+  /**
+   * Sprawdź uprawnienia (NF5).
+   */
+  if (!isAdmin()) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+        <div className="text-center">
+          <AlertTriangle size={64} className="mx-auto text-red-500 mb-4" />
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Brak dostępu</h1>
+          <p className="text-gray-600 dark:text-gray-400 mb-4">
+            Nie masz uprawnień do panelu administratora. Wymagana rola: Administrator.
+          </p>
+          <Button onClick={() => navigate("/")}>Wróć do strony głównej</Button>
+        </div>
+      </div>
+    );
+  }
 
   if (isLoading) {
     return <Loading fullScreen text="Ładowanie panelu..." />;

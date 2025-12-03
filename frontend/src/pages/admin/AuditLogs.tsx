@@ -49,8 +49,91 @@ const AuditLogs: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [actionFilter, setActionFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [dateFrom, setDateFrom] = useState("");
-  const [dateTo, setDateTo] = useState("");
+
+  /**
+   * Załaduj logi przy montowaniu.
+   */
+  useEffect(() => {
+    const initLoadLogs = async () => {
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        // W przyszłości: wywołanie API getAuditLogs()
+        // Teraz: symulacja danych
+        setTimeout(() => {
+          setLogs([
+            {
+              id: "1",
+              timestamp: new Date(Date.now() - 5 * 60000).toISOString(),
+              user_id: "user-123",
+              user_email: "admin@example.com",
+              action: "USER_ROLE_CHANGED",
+              resource: "User",
+              resource_id: "user-456",
+              details: "Changed role from READER to LIBRARIAN",
+              ip_address: "192.168.1.100",
+              status: "SUCCESS",
+            },
+            {
+              id: "2",
+              timestamp: new Date(Date.now() - 15 * 60000).toISOString(),
+              user_id: "user-789",
+              user_email: "librarian@example.com",
+              action: "BOOK_ISSUED",
+              resource: "Loan",
+              resource_id: "loan-101",
+              details: "Book issued to user-456",
+              ip_address: "192.168.1.101",
+              status: "SUCCESS",
+            },
+            {
+              id: "3",
+              timestamp: new Date(Date.now() - 30 * 60000).toISOString(),
+              user_id: "user-456",
+              user_email: "reader@example.com",
+              action: "LOGIN_FAILED",
+              resource: "Auth",
+              details: "Invalid password",
+              ip_address: "192.168.1.102",
+              status: "FAILURE",
+            },
+            {
+              id: "4",
+              timestamp: new Date(Date.now() - 45 * 60000).toISOString(),
+              user_id: "user-789",
+              user_email: "librarian@example.com",
+              action: "BOOK_ADDED",
+              resource: "Book",
+              resource_id: "book-999",
+              details: 'Added new book: "The Great Gatsby"',
+              ip_address: "192.168.1.101",
+              status: "SUCCESS",
+            },
+            {
+              id: "5",
+              timestamp: new Date(Date.now() - 60 * 60000).toISOString(),
+              user_id: "user-123",
+              user_email: "admin@example.com",
+              action: "USER_BLOCKED",
+              resource: "User",
+              resource_id: "user-999",
+              details: "Blocked user due to policy violation",
+              ip_address: "192.168.1.100",
+              status: "SUCCESS",
+            },
+          ]);
+          setIsLoading(false);
+        }, 500);
+      } catch (err: unknown) {
+        console.error("Error loading audit logs:", err);
+        setError(err instanceof Error ? err.message : "Nie udało się załadować logów audytu");
+        setIsLoading(false);
+      }
+    };
+
+    initLoadLogs();
+  }, []);
 
   /**
    * Sprawdź uprawnienia (NF5).
@@ -71,98 +154,11 @@ const AuditLogs: React.FC = () => {
   }
 
   /**
-   * Załaduj logi audytu (NF19).
-   */
-  const loadLogs = async () => {
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      // W przyszłości: wywołanie API getAuditLogs()
-      // Teraz: symulacja danych
-      setTimeout(() => {
-        setLogs([
-          {
-            id: "1",
-            timestamp: new Date(Date.now() - 5 * 60000).toISOString(),
-            user_id: "user-123",
-            user_email: "admin@example.com",
-            action: "USER_ROLE_CHANGED",
-            resource: "User",
-            resource_id: "user-456",
-            details: "Changed role from READER to LIBRARIAN",
-            ip_address: "192.168.1.100",
-            status: "SUCCESS",
-          },
-          {
-            id: "2",
-            timestamp: new Date(Date.now() - 15 * 60000).toISOString(),
-            user_id: "user-789",
-            user_email: "librarian@example.com",
-            action: "BOOK_ISSUED",
-            resource: "Loan",
-            resource_id: "loan-101",
-            details: "Book issued to user-456",
-            ip_address: "192.168.1.101",
-            status: "SUCCESS",
-          },
-          {
-            id: "3",
-            timestamp: new Date(Date.now() - 30 * 60000).toISOString(),
-            user_id: "user-456",
-            user_email: "reader@example.com",
-            action: "LOGIN_FAILED",
-            resource: "Auth",
-            details: "Invalid password",
-            ip_address: "192.168.1.102",
-            status: "FAILURE",
-          },
-          {
-            id: "4",
-            timestamp: new Date(Date.now() - 45 * 60000).toISOString(),
-            user_id: "user-789",
-            user_email: "librarian@example.com",
-            action: "BOOK_ADDED",
-            resource: "Book",
-            resource_id: "book-999",
-            details: 'Added new book: "The Great Gatsby"',
-            ip_address: "192.168.1.101",
-            status: "SUCCESS",
-          },
-          {
-            id: "5",
-            timestamp: new Date(Date.now() - 60 * 60000).toISOString(),
-            user_id: "user-123",
-            user_email: "admin@example.com",
-            action: "USER_BLOCKED",
-            resource: "User",
-            resource_id: "user-999",
-            details: "Blocked user due to policy violation",
-            ip_address: "192.168.1.100",
-            status: "SUCCESS",
-          },
-        ]);
-        setIsLoading(false);
-      }, 500);
-    } catch (err: any) {
-      console.error("Error loading audit logs:", err);
-      setError(err.message || "Nie udało się załadować logów audytu");
-      setIsLoading(false);
-    }
-  };
-
-  /**
-   * Załaduj logi przy montowaniu.
-   */
-  useEffect(() => {
-    loadLogs();
-  }, []);
-
-  /**
    * Zastosuj filtry.
    */
   const handleApplyFilters = () => {
-    loadLogs();
+    // W przyszłości: wywołaj API z parametrami filtrów
+    console.log("Applying filters:", { searchQuery, actionFilter, statusFilter });
   };
 
   /**
