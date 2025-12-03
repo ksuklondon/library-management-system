@@ -23,8 +23,14 @@ import { createReservation } from "../../api/loans";
 import Button from "../../components/Button";
 import Loading from "../../components/Loading";
 import { useAuth } from "../../hooks/useAuth";
-import { Book, BookCopy } from "../../types/book";
+import { type Book, type BookCopy } from "../../types/book";
 import { formatISBN } from "../../utils/formatters";
+
+/**
+ * Pomocnicza funkcja do wyciągania komunikatu z wyjątku.
+ */
+const getErrorMessage = (err: unknown, fallback: string): string =>
+  err instanceof Error ? err.message : fallback;
 
 /**
  * Komponent BookDetails - szczegóły książki (F7, F8).
@@ -48,7 +54,7 @@ const BookDetails: React.FC = () => {
    * Załaduj szczegóły książki i egzemplarze (F7).
    */
   useEffect(() => {
-    const loadBookDetails = async () => {
+    const loadBookDetails = async (): Promise<void> => {
       if (!id) return;
 
       setIsLoading(true);
@@ -62,22 +68,23 @@ const BookDetails: React.FC = () => {
         // Pobierz listę egzemplarzy (F7)
         const copiesData = await getBookCopies(id);
         setCopies(copiesData);
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error("Error loading book details:", err);
-        setError(err.message || "Nie udało się załadować szczegółów książki");
+        setError(getErrorMessage(err, "Nie udało się załadować szczegółów książki"));
       } finally {
         setIsLoading(false);
       }
     };
 
-    loadBookDetails();
+    void loadBookDetails();
   }, [id]);
 
   /**
    * Obsługa rezerwacji książki (F8).
    */
-  const handleReserve = async () => {
+  const handleReserve = async (): Promise<void> => {
     if (!isAuthenticated) {
+      // proste ostrzeżenie – brak side-effectów w stanie React
       alert("Musisz być zalogowany, aby zarezerwować książkę");
       navigate("/login");
       return;
@@ -96,9 +103,9 @@ const BookDetails: React.FC = () => {
       // Odśwież dane książki
       const updatedBook = await getBookDetails(id);
       setBook(updatedBook);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Error reserving book:", err);
-      setError(err.message || "Nie udało się zarezerwować książki");
+      setError(getErrorMessage(err, "Nie udało się zarezerwować książki"));
     } finally {
       setIsReserving(false);
     }

@@ -9,8 +9,7 @@
  */
 
 import { AlertCircle, BookOpen } from "lucide-react";
-import React, { useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import React, { useCallback, useEffect, useState } from "react";
 import { browseCatalog, searchBooks } from "../../api/catalog";
 import { createReservation } from "../../api/loans";
 import BookCard from "../../components/BookCard";
@@ -19,14 +18,13 @@ import FilterPanel from "../../components/FilterPanel";
 import Loading from "../../components/Loading";
 import SearchBar from "../../components/SearchBar";
 import { useAuth } from "../../hooks/useAuth";
-import { Book, CatalogFilter, CatalogResponse } from "../../types/book";
+import { type Book, type CatalogFilter, type CatalogResponse } from "../../types/book";
 
 /**
  * Komponent Catalog - strona katalogu książek (F4, F5, F6).
  */
 const Catalog: React.FC = () => {
   const { isAuthenticated } = useAuth();
-  const [searchParams, setSearchParams] = useSearchParams();
 
   // Stan danych
   const [books, setBooks] = useState<Book[]>([]);
@@ -43,12 +41,14 @@ const Catalog: React.FC = () => {
   const [searchIn, setSearchIn] = useState<"all" | "title" | "authors" | "isbn">("all");
   const [filters, setFilters] = useState<CatalogFilter>({});
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(20);
+  // Rozmiar strony jest stały, nie zmieniamy go w runtime, więc nie potrzebujemy settera
+  const [pageSize] = useState<number>(20);
 
   /**
    * Załaduj książki z API (F4).
+   * Używamy useCallback, aby spełnić wymagania react-hooks/exhaustive-deps.
    */
-  const loadBooks = async () => {
+  const loadBooks = useCallback(async () => {
     setIsLoading(true);
     setError(null);
 
@@ -69,20 +69,22 @@ const Catalog: React.FC = () => {
       setBooks(response.books);
       setTotal(response.total);
       setTotalPages(response.total_pages);
-    } catch (err: any) {
+    } catch (err: unknown) {
+      // err typujemy w środku, żeby nie używać `any`
+      const errorObj = err as { message?: string };
       console.error("Error loading books:", err);
-      setError(err.message || "Nie udało się załadować katalogu");
+      setError(errorObj.message ?? "Nie udało się załadować katalogu");
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [filters, page, pageSize, searchIn, searchQuery]);
 
   /**
    * Załaduj książki przy montowaniu i zmianie parametrów.
    */
   useEffect(() => {
-    loadBooks();
-  }, [searchQuery, searchIn, filters, page, pageSize]);
+    void loadBooks();
+  }, [loadBooks]);
 
   /**
    * Obsługa wyszukiwania (F5).
@@ -116,10 +118,11 @@ const Catalog: React.FC = () => {
       await createReservation({ book_id: bookId });
       alert("Książka została zarezerwowana!");
       // Odśwież listę książek aby zaktualizować dostępność
-      loadBooks();
-    } catch (err: any) {
+      await loadBooks();
+    } catch (err: unknown) {
+      const errorObj = err as { message?: string };
       console.error("Error reserving book:", err);
-      alert(err.message || "Nie udało się zarezerwować książki");
+      alert(errorObj.message ?? "Nie udało się zarezerwować książki");
     } finally {
       setReservingBookId(null);
     }
