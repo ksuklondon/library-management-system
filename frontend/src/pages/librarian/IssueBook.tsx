@@ -8,12 +8,13 @@
  */
 
 import { AlertCircle, ArrowDownCircle, CheckCircle } from "lucide-react";
-import React, { FormEvent, useState } from "react";
+import React, { type FormEvent, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { createLoan } from "../../api/loans";
 import Button from "../../components/Button";
 import Input from "../../components/Input";
 import { useAuth } from "../../hooks/useAuth";
+import type { LoanCreateRequest } from "../../types/loan";
 import { isNotEmpty } from "../../utils/validators";
 
 /**
@@ -70,7 +71,11 @@ const IssueBook: React.FC = () => {
    * Walidacja formularza (NF7).
    */
   const validateForm = (): boolean => {
-    const newErrors: any = {};
+    const newErrors: {
+      userId?: string;
+      bookCopyId?: string;
+      dueDate?: string;
+    } = {};
 
     // User ID
     if (!isNotEmpty(formData.userId)) {
@@ -114,7 +119,7 @@ const IssueBook: React.FC = () => {
 
     try {
       // Przygotuj dane
-      const loanData: any = {
+      const loanData: LoanCreateRequest = {
         user_id: formData.userId,
         book_copy_id: formData.bookCopyId,
       };
@@ -141,12 +146,13 @@ const IssueBook: React.FC = () => {
 
       // Przewiń do góry
       window.scrollTo({ top: 0, behavior: "smooth" });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error issuing book:", error);
       setErrors({
         general:
-          error.message ||
-          "Nie udało się wypożyczyć książki. Sprawdź czy użytkownik i egzemplarz istnieją i są dostępne.",
+          error instanceof Error
+            ? error.message
+            : "Nie udało się wypożyczyć książki. Sprawdź czy użytkownik i egzemplarz istnieją i są dostępne.",
       });
     } finally {
       setIsLoading(false);

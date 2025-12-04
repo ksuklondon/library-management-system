@@ -7,15 +7,15 @@
  */
 
 import { AlertCircle, BookOpen, Edit, Plus, Search, Trash2 } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { browseCatalog } from "../../api/catalog";
+import { browseCatalog, searchBooks } from "../../api/catalog";
 import BookCard from "../../components/BookCard";
 import Button from "../../components/Button";
 import Input from "../../components/Input";
 import Loading from "../../components/Loading";
 import { useAuth } from "../../hooks/useAuth";
-import { Book } from "../../types/book";
+import type { Book, CatalogResponse } from "../../types/book";
 
 /**
  * Komponent ManageBooks - zarządzanie katalogiem książek (F15).
@@ -38,6 +38,44 @@ const ManageBooks: React.FC = () => {
   const [pageSize] = useState(20);
 
   /**
+   * Załaduj książki z API.
+   */
+  const loadBooks = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      let response: CatalogResponse;
+
+      if (searchQuery) {
+        // Użyj searchBooks dla wyszukiwania tekstowego (F5)
+        response = await searchBooks(
+          { query: searchQuery, search_in: "all" },
+          { page, page_size: pageSize }
+        );
+      } else {
+        // Użyj browseCatalog dla zwykłego przeglądania (F4)
+        response = await browseCatalog({ page, page_size: pageSize });
+      }
+
+      setBooks(response.books);
+      setTotal(response.total);
+    } catch (err: unknown) {
+      console.error("Error loading books:", err);
+      setError(err instanceof Error ? err.message : "Nie udało się załadować katalogu");
+    } finally {
+      setIsLoading(false);
+    }
+  }, [page, pageSize, searchQuery]);
+
+  /**
+   * Załaduj książki przy montowaniu i zmianie parametrów.
+   */
+  useEffect(() => {
+    loadBooks();
+  }, [loadBooks]);
+
+  /**
    * Sprawdź uprawnienia (NF5).
    */
   if (!isLibrarian() && !isAdmin()) {
@@ -54,36 +92,6 @@ const ManageBooks: React.FC = () => {
       </div>
     );
   }
-
-  /**
-   * Załaduj książki z API.
-   */
-  const loadBooks = async () => {
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const response = await browseCatalog(
-        { page, page_size: pageSize },
-        searchQuery ? { search: searchQuery } : {}
-      );
-
-      setBooks(response.books);
-      setTotal(response.total);
-    } catch (err: any) {
-      console.error("Error loading books:", err);
-      setError(err.message || "Nie udało się załadować katalogu");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  /**
-   * Załaduj książki przy montowaniu i zmianie parametrów.
-   */
-  useEffect(() => {
-    loadBooks();
-  }, [page, searchQuery]);
 
   /**
    * Obsługa wyszukiwania.

@@ -13,7 +13,8 @@ import Button from "../../components/Button";
 import Input from "../../components/Input";
 import Loading from "../../components/Loading";
 import { useAuth } from "../../hooks/useAuth";
-import { BookCopy } from "../../types/book";
+import type { BookCopy } from "../../types/book";
+import { CopyStatus } from "../../types/book";
 
 /**
  * Komponent ManageCopies - zarządzanie egzemplarzami (F16).
@@ -66,7 +67,7 @@ const ManageCopies: React.FC = () => {
             id: "1",
             book_id: selectedBookId,
             inventory_no: "INV-001",
-            status: "AVAILABLE",
+            status: CopyStatus.AVAILABLE,
             location: "Półka A1",
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
@@ -75,7 +76,7 @@ const ManageCopies: React.FC = () => {
             id: "2",
             book_id: selectedBookId,
             inventory_no: "INV-002",
-            status: "BORROWED",
+            status: CopyStatus.BORROWED,
             location: "Półka A1",
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
@@ -83,9 +84,9 @@ const ManageCopies: React.FC = () => {
         ]);
         setIsLoading(false);
       }, 500);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Error loading copies:", err);
-      setError(err.message || "Nie udało się załadować egzemplarzy");
+      setError(err instanceof Error ? err.message : "Nie udało się załadować egzemplarzy");
       setIsLoading(false);
     }
   };
@@ -133,17 +134,17 @@ const ManageCopies: React.FC = () => {
   /**
    * Kolory dla statusów egzemplarzy.
    */
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status: CopyStatus) => {
     switch (status) {
-      case "AVAILABLE":
+      case CopyStatus.AVAILABLE:
         return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200";
-      case "BORROWED":
+      case CopyStatus.BORROWED:
         return "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200";
-      case "RESERVED":
+      case CopyStatus.RESERVED:
         return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200";
-      case "DAMAGED":
+      case CopyStatus.DAMAGED:
         return "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200";
-      case "LOST":
+      case CopyStatus.LOST:
         return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200";
       default:
         return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200";
@@ -153,17 +154,17 @@ const ManageCopies: React.FC = () => {
   /**
    * Etykiety statusów po polsku.
    */
-  const getStatusLabel = (status: string) => {
+  const getStatusLabel = (status: CopyStatus) => {
     switch (status) {
-      case "AVAILABLE":
+      case CopyStatus.AVAILABLE:
         return "Dostępny";
-      case "BORROWED":
+      case CopyStatus.BORROWED:
         return "Wypożyczony";
-      case "RESERVED":
+      case CopyStatus.RESERVED:
         return "Zarezerwowany";
-      case "DAMAGED":
+      case CopyStatus.DAMAGED:
         return "Uszkodzony";
-      case "LOST":
+      case CopyStatus.LOST:
         return "Zgubiony";
       default:
         return status;

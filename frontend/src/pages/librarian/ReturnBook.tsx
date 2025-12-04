@@ -8,7 +8,7 @@
  */
 
 import { AlertCircle, ArrowUpCircle, CheckCircle, DollarSign } from "lucide-react";
-import React, { FormEvent, useState } from "react";
+import React, { type FormEvent, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { returnLoan } from "../../api/loans";
 import Button from "../../components/Button";
@@ -26,7 +26,7 @@ const ReturnBook: React.FC = () => {
 
   // Stan formularza
   const [loanId, setLoanId] = useState("");
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   // Stan sukcesu z informacją o karze
@@ -69,7 +69,7 @@ const ReturnBook: React.FC = () => {
    */
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    setError(null);
+    setError("");
     setSuccessData(null);
 
     // Walidacja
@@ -81,7 +81,7 @@ const ReturnBook: React.FC = () => {
 
     try {
       // Wywołaj API zwrotu (F12, F27 - automatyczne naliczanie kary)
-      const returnedLoan = await returnLoan(loanId);
+      const returnedLoan = await returnLoan({ loan_id: loanId });
 
       // Sprawdź czy jest kara (F27)
       const hasFine = returnedLoan.fine_amount && returnedLoan.fine_amount > 0;
@@ -99,11 +99,12 @@ const ReturnBook: React.FC = () => {
 
       // Przewiń do góry
       window.scrollTo({ top: 0, behavior: "smooth" });
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Error returning book:", err);
       setError(
-        err.message ||
-          "Nie udało się zwrócić książki. Sprawdź czy wypożyczenie istnieje i jest aktywne."
+        err instanceof Error
+          ? err.message
+          : "Nie udało się zwrócić książki. Sprawdź czy wypożyczenie istnieje i jest aktywne."
       );
     } finally {
       setIsLoading(false);
@@ -180,7 +181,7 @@ const ReturnBook: React.FC = () => {
                   type="text"
                   value={loanId}
                   onChange={(e) => setLoanId(e.target.value)}
-                  error={error}
+                  error={error || undefined}
                   placeholder="np. loan-uuid-123"
                   required
                   fullWidth
