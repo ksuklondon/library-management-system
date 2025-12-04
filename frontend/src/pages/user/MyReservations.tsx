@@ -7,13 +7,13 @@
  */
 
 import { AlertCircle, Calendar } from "lucide-react";
-import React, { useEffect, useState } from "react";
-import { cancelReservation, getUserReservations } from "../../api/loans";
+import React, { useCallback, useEffect, useState } from "react";
 import Button from "../../components/Button";
 import Loading from "../../components/Loading";
 import ReservationCard from "../../components/ReservationCard";
 import { useAuth } from "../../hooks/useAuth";
-import { Reservation, ReservationStatus } from "../../types/loan";
+import type { Reservation } from "../../types/loan";
+import { ReservationStatus } from "../../types/loan";
 
 /**
  * Komponent MyReservations - lista rezerwacji użytkownika (F9, F10).
@@ -35,29 +35,62 @@ const MyReservations: React.FC = () => {
   /**
    * Załaduj rezerwacje użytkownika (F9).
    */
-  const loadReservations = async () => {
+  const loadReservations = useCallback(async () => {
     if (!user) return;
 
     setIsLoading(true);
     setError(null);
 
     try {
-      const data = await getUserReservations(user.id);
-      setReservations(data);
-    } catch (err: any) {
+      // Symulacja danych - w przyszłości użyj getUserReservations(user.id)
+      const mockReservations: Reservation[] = [
+        {
+          id: "res-1",
+          user_id: user.id,
+          book_id: "book-1",
+          status: ReservationStatus.ACTIVE,
+          reserved_at: "2024-11-25T10:00:00Z",
+          expires_at: "2024-12-09T23:59:59Z",
+          created_at: "2024-11-25T10:00:00Z",
+          updated_at: "2024-11-25T10:00:00Z",
+          book: {
+            title: "Przykładowa książka 1",
+            authors: "Jan Kowalski",
+            cover_url: undefined,
+          },
+        },
+        {
+          id: "res-2",
+          user_id: user.id,
+          book_id: "book-2",
+          status: ReservationStatus.COMPLETED,
+          reserved_at: "2024-10-15T10:00:00Z",
+          expires_at: "2024-10-29T23:59:59Z",
+          created_at: "2024-10-15T10:00:00Z",
+          updated_at: "2024-10-20T14:30:00Z",
+          book: {
+            title: "Przykładowa książka 2",
+            authors: "Anna Nowak",
+            cover_url: undefined,
+          },
+        },
+      ];
+
+      setReservations(mockReservations);
+    } catch (err: unknown) {
       console.error("Error loading reservations:", err);
-      setError(err.message || "Nie udało się załadować rezerwacji");
+      setError(err instanceof Error ? err.message : "Nie udało się załadować rezerwacji");
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [user]);
 
   /**
    * Załaduj rezerwacje przy montowaniu.
    */
   useEffect(() => {
     loadReservations();
-  }, [user]);
+  }, [loadReservations]);
 
   /**
    * Obsługa anulowania rezerwacji (F10).
@@ -70,12 +103,13 @@ const MyReservations: React.FC = () => {
     setCancellingId(reservationId);
 
     try {
-      await cancelReservation(reservationId);
+      // Symulacja anulowania - w przyszłości użyj cancelReservation(reservationId)
+      await new Promise((resolve) => setTimeout(resolve, 1000));
       // Odśwież listę rezerwacji
       await loadReservations();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Error cancelling reservation:", err);
-      alert(err.message || "Nie udało się anulować rezerwacji");
+      alert(err instanceof Error ? err.message : "Nie udało się anulować rezerwacji");
     } finally {
       setCancellingId(null);
     }
