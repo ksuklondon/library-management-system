@@ -248,7 +248,7 @@ export const sanitizeText = (text: string): string => {
  * @param value - wartość do sprawdzenia
  * @returns true jeśli wartość nie jest pusta, false w przeciwnym razie
  */
-export const isNotEmpty = (value: any): boolean => {
+export const isNotEmpty = (value: unknown): boolean => {
   if (value === null || value === undefined) return false;
   if (typeof value === "string") return value.trim().length > 0;
   if (Array.isArray(value)) return value.length > 0;
@@ -263,11 +263,11 @@ export const isNotEmpty = (value: any): boolean => {
  * @param rules - reguły walidacji dla każdego pola
  * @returns obiekt z błędami walidacji (puste jeśli wszystko OK)
  */
-export const validateForm = <T extends Record<string, any>>(
+export const validateForm = <T extends Record<string, unknown>>(
   data: T,
-  rules: Record<keyof T, (value: any) => string | null>
+  rules: Record<keyof T, (value: unknown) => string | null>
 ): Record<keyof T, string | null> => {
-  const errors: any = {};
+  const errors: Record<keyof T, string | null> = {} as Record<keyof T, string | null>;
 
   for (const field in rules) {
     const error = rules[field](data[field]);
