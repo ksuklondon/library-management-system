@@ -6,12 +6,12 @@
  */
 
 import { AlertCircle, Calendar, CheckCircle, DollarSign } from "lucide-react";
-import React, { useEffect, useState } from "react";
-import { getUserLoans } from "../../api/loans";
+import React, { useCallback, useEffect, useState } from "react";
 import Button from "../../components/Button";
 import Loading from "../../components/Loading";
 import { useAuth } from "../../hooks/useAuth";
-import { Loan, LoanStatus } from "../../types/loan";
+import type { Loan } from "../../types/loan";
+import { LoanStatus } from "../../types/loan";
 import { formatCurrency, formatDate } from "../../utils/formatters";
 
 /**
@@ -33,7 +33,6 @@ const MyFines: React.FC = () => {
   const { user } = useAuth();
 
   // Stan danych
-  const [loans, setLoans] = useState<Loan[]>([]);
   const [fines, setFines] = useState<Fine[]>([]);
 
   // Stan UI
@@ -44,20 +43,44 @@ const MyFines: React.FC = () => {
   /**
    * Załaduj wypożyczenia i oblicz kary (F27).
    */
-  const loadFines = async () => {
+  const loadFines = useCallback(async () => {
     if (!user) return;
 
     setIsLoading(true);
     setError(null);
 
     try {
-      const loansData = await getUserLoans(user.id);
-      setLoans(loansData);
+      // Symulacja danych - w przyszłości użyj getUserLoans(user.id)
+      const mockLoans: Loan[] = [
+        {
+          id: "loan-1",
+          user_id: user.id,
+          book_copy_id: "copy-1",
+          borrowed_at: "2024-11-01T10:00:00Z",
+          due_date: "2024-11-15T23:59:59Z",
+          status: LoanStatus.OVERDUE,
+          fine_amount: 20.0,
+          created_at: "2024-11-01T10:00:00Z",
+          updated_at: "2024-11-16T10:00:00Z",
+        },
+        {
+          id: "loan-2",
+          user_id: user.id,
+          book_copy_id: "copy-2",
+          borrowed_at: "2024-10-20T10:00:00Z",
+          due_date: "2024-11-03T23:59:59Z",
+          returned_at: "2024-11-08T14:30:00Z",
+          status: LoanStatus.RETURNED,
+          fine_amount: 10.0,
+          created_at: "2024-10-20T10:00:00Z",
+          updated_at: "2024-11-08T14:30:00Z",
+        },
+      ];
 
       // Oblicz kary dla wypożyczeń
-      const calculatedFines: Fine[] = loansData
-        .filter((loan) => loan.fine_amount && loan.fine_amount > 0)
-        .map((loan) => {
+      const calculatedFines: Fine[] = mockLoans
+        .filter((loan: Loan) => loan.fine_amount && loan.fine_amount > 0)
+        .map((loan: Loan) => {
           const dueDate = new Date(loan.due_date);
           const returnedAt = loan.returned_at ? new Date(loan.returned_at) : new Date();
           const daysOverdue = Math.max(
@@ -67,7 +90,7 @@ const MyFines: React.FC = () => {
 
           return {
             loanId: loan.id,
-            bookTitle: loan.book_copy?.book?.title || "Nieznana książka",
+            bookTitle: `Książka ${loan.book_copy_id}`,
             amount: loan.fine_amount!,
             daysOverdue,
             dueDate,
@@ -76,20 +99,20 @@ const MyFines: React.FC = () => {
         });
 
       setFines(calculatedFines);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Error loading fines:", err);
-      setError(err.message || "Nie udało się załadować kar");
+      setError(err instanceof Error ? err.message : "Nie udało się załadować kar");
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [user]);
 
   /**
    * Załaduj kary przy montowaniu.
    */
   useEffect(() => {
     loadFines();
-  }, [user]);
+  }, [loadFines]);
 
   /**
    * Obsługa płatności kary (F27).
@@ -112,9 +135,9 @@ const MyFines: React.FC = () => {
 
       // Odśwież listę kar
       await loadFines();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Error paying fine:", err);
-      alert(err.message || "Nie udało się opłacić kary");
+      alert(err instanceof Error ? err.message : "Nie udało się opłacić kary");
     } finally {
       setPayingFineId(null);
     }

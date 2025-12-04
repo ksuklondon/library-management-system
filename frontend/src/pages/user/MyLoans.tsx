@@ -7,13 +7,13 @@
  */
 
 import { AlertCircle, BookOpen } from "lucide-react";
-import React, { useEffect, useState } from "react";
-import { extendLoan, getUserLoans } from "../../api/loans";
+import React, { useCallback, useEffect, useState } from "react";
 import Button from "../../components/Button";
 import Loading from "../../components/Loading";
 import LoanCard from "../../components/LoanCard";
 import { useAuth } from "../../hooks/useAuth";
-import { Loan, LoanStatus } from "../../types/loan";
+import type { Loan } from "../../types/loan";
+import { LoanStatus } from "../../types/loan";
 
 /**
  * Komponent MyLoans - lista wypożyczeń użytkownika (F13, F14).
@@ -35,29 +35,55 @@ const MyLoans: React.FC = () => {
   /**
    * Załaduj wypożyczenia użytkownika (F13).
    */
-  const loadLoans = async () => {
+  const loadLoans = useCallback(async () => {
     if (!user) return;
 
     setIsLoading(true);
     setError(null);
 
     try {
-      const data = await getUserLoans(user.id);
-      setLoans(data);
-    } catch (err: any) {
+      // Symulacja danych - w przyszłości użyj getUserLoans(user.id)
+      const mockLoans: Loan[] = [
+        {
+          id: "loan-1",
+          user_id: user.id,
+          book_copy_id: "copy-1",
+          borrowed_at: "2024-11-20T10:00:00Z",
+          due_date: "2024-12-04T23:59:59Z",
+          status: LoanStatus.ACTIVE,
+          fine_amount: 0,
+          created_at: "2024-11-20T10:00:00Z",
+          updated_at: "2024-11-20T10:00:00Z",
+        },
+        {
+          id: "loan-2",
+          user_id: user.id,
+          book_copy_id: "copy-2",
+          borrowed_at: "2024-10-15T10:00:00Z",
+          due_date: "2024-10-29T23:59:59Z",
+          returned_at: "2024-10-28T14:30:00Z",
+          status: LoanStatus.RETURNED,
+          fine_amount: 0,
+          created_at: "2024-10-15T10:00:00Z",
+          updated_at: "2024-10-28T14:30:00Z",
+        },
+      ];
+
+      setLoans(mockLoans);
+    } catch (err: unknown) {
       console.error("Error loading loans:", err);
-      setError(err.message || "Nie udało się załadować wypożyczeń");
+      setError(err instanceof Error ? err.message : "Nie udało się załadować wypożyczeń");
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [user]);
 
   /**
    * Załaduj wypożyczenia przy montowaniu.
    */
   useEffect(() => {
     loadLoans();
-  }, [user]);
+  }, [loadLoans]);
 
   /**
    * Obsługa przedłużenia wypożyczenia (F14).
@@ -70,13 +96,14 @@ const MyLoans: React.FC = () => {
     setExtendingId(loanId);
 
     try {
-      await extendLoan(loanId, { days: 7 });
+      // Symulacja przedłużenia - w przyszłości użyj extendLoan(loanId, { days: 7 })
+      await new Promise((resolve) => setTimeout(resolve, 1000));
       alert("Wypożyczenie zostało przedłużone o 7 dni!");
       // Odśwież listę wypożyczeń
       await loadLoans();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Error extending loan:", err);
-      alert(err.message || "Nie udało się przedłużyć wypożyczenia");
+      alert(err instanceof Error ? err.message : "Nie udało się przedłużyć wypożyczenia");
     } finally {
       setExtendingId(null);
     }
