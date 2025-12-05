@@ -6,7 +6,7 @@ Moduł odpowiedzialny za logikę bezpieczeństwa w auth-service:
 
 import os
 from datetime import datetime, timedelta
-from typing import Optional
+from typing import Any, Optional, cast
 
 from jose import jwt
 from passlib.context import CryptContext
@@ -42,7 +42,9 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
     return pwd_context.verify(plain_password, hashed_password)
 
 
-def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
+def create_access_token(
+    data: dict[str, Any], expires_delta: Optional[timedelta] = None
+) -> str:
     """
     Tworzy token JWT zawierający dane użytkownika (np. user_id, role).
 
@@ -64,11 +66,11 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -
     to_encode.update({"exp": expire})
 
     # Kodujemy token z użyciem sekretu i wybranego algorytmu.
-    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    encoded_jwt: str = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
 
-def verify_token(token: str) -> dict:
+def verify_token(token: str) -> dict[str, Any]:
     """
     Dekoduje i weryfikuje token JWT.
     Jeśli podpis tokenu jest niepoprawny lub token wygasł,
@@ -78,4 +80,4 @@ def verify_token(token: str) -> dict:
     :return: payload (słownik) znajdujący się w tokenie.
     """
     payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-    return payload
+    return cast(dict[str, Any], payload)
