@@ -19,7 +19,7 @@ Użycie w endpointach:
 """
 
 from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, cast
 
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
@@ -137,14 +137,17 @@ def verify_token(token: str) -> Dict[str, Any]:
             token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM]
         )
 
+        # Konwertujemy Mapping na Dict
+        payload_dict = cast(Dict[str, Any], payload)
+
         # Sprawdzamy czy token ma wymagane pola
-        if payload.get("user_id") is None:
+        if payload_dict.get("user_id") is None:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Token nieprawidłowy: brak user_id",
             )
 
-        return payload
+        return payload_dict
 
     except JWTError as e:
         # Token wygasły lub nieprawidłowy
