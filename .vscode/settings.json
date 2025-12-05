@@ -8,7 +8,15 @@
     "source.organizeImports": "explicit"
   },
 
-  "python.defaultInterpreterPath": "${workspaceFolder}/backend/auth-service/venv/bin/python",
+  "python.defaultInterpreterPath": "${workspaceFolder}/backend/auth-service/venv/Scripts/python.exe",
+  "python.analysis.extraPaths": [
+    "${workspaceFolder}/backend/auth-service/venv/Lib/site-packages",
+    "${workspaceFolder}/backend/catalog-service/venv/Lib/site-packages",
+    "${workspaceFolder}/backend/loan-service/venv/Lib/site-packages"
+  ],
+  "python.analysis.diagnosticSeverityOverrides": {
+    "reportMissingImports": "none"
+  },
   "python.analysis.typeCheckingMode": "basic",
   "python.analysis.autoImportCompletions": true,
   "python.linting.enabled": true,
@@ -23,7 +31,6 @@
     }
   },
   "ruff.enable": true,
-  "ruff.lint.args": ["--fix"],
 
   "javascript.updateImportsOnFileMove.enabled": "always",
   "typescript.updateImportsOnFileMove.enabled": "always",
@@ -54,9 +61,6 @@
   },
 
   "css.validate": false,
-  "tailwindCSS.includeLanguages": {
-    "plaintext": "html"
-  },
 
   "[markdown]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode",
