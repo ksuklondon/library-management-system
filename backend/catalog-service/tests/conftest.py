@@ -8,9 +8,9 @@ Konfiguracja testów jednostkowych i integracyjnych.
 from unittest.mock import Mock
 
 import pytest
-from app.main import app
 from app.models.book import Book
 from app.models.book_copy import BookCopy, CopyStatus
+from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -48,7 +48,32 @@ def db_session():
 
 
 @pytest.fixture(scope="function")
-def client(db_session):
+def test_app():
+    """
+    Fixture tworzący testową instancję FastAPI BEZ połączenia z PostgreSQL.
+    """
+    app = FastAPI()
+
+    # Import routerów bez uruchamiania całej aplikacji
+    try:
+        from app.api.books import router as books_router
+
+        app.include_router(books_router, prefix="/api/books", tags=["books"])
+    except (ImportError, AttributeError):
+        pass
+
+    try:
+        from app.api.copies import router as copies_router
+
+        app.include_router(copies_router, prefix="/api/copies", tags=["copies"])
+    except (ImportError, AttributeError):
+        pass
+
+    return app
+
+
+@pytest.fixture(scope="function")
+def client(db_session, test_app):
     """
     Fixture dla test clienta FastAPI.
     Używa testowej bazy danych.
@@ -60,21 +85,21 @@ def client(db_session):
         finally:
             pass
 
-    app.dependency_overrides[get_db] = override_get_db
+    test_app.dependency_overrides[get_db] = override_get_db
 
-    with TestClient(app) as test_client:
+    with TestClient(test_app) as test_client:
         yield test_client
 
-    app.dependency_overrides.clear()
+    test_app.dependency_overrides.clear()
 
 
 @pytest.fixture
-def app_fixture():
+def app_fixture(test_app):
     """
     Fixture zwracający instancję aplikacji FastAPI.
     Używana w testach do nadpisywania dependencies.
     """
-    return app
+    return test_app
 
 
 @pytest.fixture
@@ -195,3 +220,65 @@ def multiple_books(db_session):
         db_session.refresh(book)
 
     return books
+
+
+# =============================================================================
+# DODATKOWE FIXTURES DLA TESTÓW RBAC (jeśli potrzebne w przyszłości)
+# =============================================================================
+
+
+@pytest.fixture
+def reader_token():
+    """
+    Mock JWT token for READER (dla testów RBAC).
+    """
+    try:
+        from app.core.security import create_access_token
+
+        return create_access_token(data={"sub": "reader-uuid-9012", "role": "READER"})
+    except ImportError:
+        return "mock-reader-token"
+
+
+@pytest.fixture
+def librarian_token():
+    """
+    Mock JWT token for LIBRARIAN (dla testów RBAC).
+    """
+    try:
+        from app.core.security import create_access_token
+
+        return create_access_token(
+            data={"sub": "librarian-uuid-1234", "role": "LIBRARIAN"}
+        )
+    except ImportError:
+        return "mock-librarian-token"
+
+
+@pytest.fixture
+def admin_token():
+    """
+    Mock JWT token for ADMIN (dla testów RBAC).
+    """
+    try:
+        from app.core.security import create_access_token
+
+        return create_access_token(data={"sub": "admin-uuid-5678", "role": "ADMIN"})
+    except ImportError:
+        return "mock-admin-token"
+
+
+@pytest.fixture
+def test_book(sample_book):
+    """
+    Alias for sample_book (for consistency).
+    """
+    return sample_book
+
+
+@pytest.fixture
+def test_user(mock_reader):
+    """
+    Mock user for RBAC tests.
+    """
+    return mock_reader

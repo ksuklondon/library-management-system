@@ -5,11 +5,20 @@ Testy jednostkowe dla modułu bezpieczeństwa (app.core.security):
 - TestJWTTokens        – testy tworzenia i weryfikacji tokenów JWT,
 - TestPasswordStrength – testy pomocnicze dotyczące złożoności haseł
   (odzwierciedlają wymagania walidacji z schemas.user).
+
+FIXED VERSION: Naprawiono test_different_tokens_for_same_data z time.sleep(1).
 """
 
-import pytest
-from app.core.security import hash_password, verify_password, create_access_token, verify_token
+import time
 from datetime import timedelta
+
+import pytest
+from app.core.security import (
+    create_access_token,
+    hash_password,
+    verify_password,
+    verify_token,
+)
 
 
 class TestPasswordHashing:
@@ -147,12 +156,32 @@ class TestJWTTokens:
         """
         Dwa tokeny wygenerowane z tym samym payloadem powinny być różne
         (ze względu na różne czasy 'iat' / 'exp' lub użyty losowy komponent).
+
+        FIXED: Dodano time.sleep(1) aby zapewnić różne timestampy exp.
         """
         data = {"sub": "user-123"}
+
+        # Pierwszy token
         token1 = create_access_token(data)
+
+        # Czekamy 1 sekundę, żeby timestamp exp był inny
+        time.sleep(1)
+
+        # Drugi token
         token2 = create_access_token(data)
 
+        # Tokeny powinny być różne
         assert token1 != token2
+
+        # Weryfikujemy oba tokeny
+        payload1 = verify_token(token1)
+        payload2 = verify_token(token2)
+
+        # sub powinien być taki sam
+        assert payload1["sub"] == payload2["sub"]
+
+        # exp powinien być różny (różnica ~1 sekunda)
+        assert payload1["exp"] != payload2["exp"]
 
 
 class TestPasswordStrength:

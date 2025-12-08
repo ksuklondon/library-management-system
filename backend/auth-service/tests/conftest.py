@@ -1,26 +1,25 @@
 import pytest
 from app.core.security import hash_password
-from app.main import app
 from app.models.user import User, UserRole
+from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
-from backend.shared.database import Base, get_db  # ZMIANA: dodano get_db tutaj
+from backend.shared.database import Base, get_db
 
-# Adres testowej bazy danych — tutaj używamy SQLite w pamięci (szybka, izolowana dla testów)
+# Adres testowej bazy danych — SQLite w pamięci
 SQLALCHEMY_TEST_DATABASE_URL = "sqlite:///:memory:"
 
-# Tworzymy silnik bazy danych SQLite działający w pamięci RAM.
-# StaticPool zapewnia, że sesje testowe korzystają z jednego połączenia (wymagane dla :memory:)
+# Silnik bazy danych SQLite działający w pamięci RAM
 test_engine = create_engine(
     SQLALCHEMY_TEST_DATABASE_URL,
     connect_args={"check_same_thread": False},
     poolclass=StaticPool,
 )
 
-# Tworzymy klasę Session lokalną dla testów
+# Klasa Session lokalna dla testów
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=test_engine)
 
 
@@ -28,10 +27,6 @@ TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=test_
 def db_session():
     """
     Fixture tworzący nową instancję bazy danych i sesji dla każdego testu.
-
-    - Tworzy wszystkie tabele przed testem
-    - Zwraca sesję SQLAlchemy
-    - Po teście usuwa wszystkie tabele (czysty stan przed kolejnym testem)
     """
     Base.metadata.create_all(bind=test_engine)
 
@@ -44,38 +39,60 @@ def db_session():
 
 
 @pytest.fixture(scope="function")
-def client(db_session):
+def test_app():
+    """
+    Fixture tworzący testową instancję FastAPI BEZ połączenia z PostgreSQL.
+    """
+    app = FastAPI()
+
+    # Import routerów z prawidłowymi prefiksami
+    try:
+        from app.api.auth_routes import router as auth_router
+
+        app.include_router(auth_router, prefix="/api/auth", tags=["auth"])
+    except (ImportError, AttributeError) as e:
+        print(f"Warning: Could not load auth router: {e}")
+
+    try:
+        from app.api.user_routes import router as users_router
+
+        app.include_router(users_router, prefix="/api/users", tags=["users"])
+    except (ImportError, AttributeError) as e:
+        print(f"Warning: Could not load users router: {e}")
+
+    return app
+
+
+@pytest.fixture(scope="function")
+def client(db_session, test_app):
     """
     Fixture tworzący klienta testowego FastAPI (TestClient).
-
-    Nadpisuje zależność get_db → tak, aby aplikacja używała testowej sesji bazy danych
-    zamiast prawdziwej bazy PostgreSQL.
     """
 
     def override_get_db():
         try:
             yield db_session
         finally:
-            pass  # nie zamykamy tutaj sesji — robi to db_session fixture
+            pass
 
     # Podmiana dependency injection FastAPI
-    app.dependency_overrides[get_db] = override_get_db
+    test_app.dependency_overrides[get_db] = override_get_db
 
     # Tworzymy testowego klienta HTTP
-    with TestClient(app) as test_client:
+    with TestClient(test_app) as test_client:
         yield test_client
 
     # Po teście czyścimy nadpisania zależności
-    app.dependency_overrides.clear()
+    test_app.dependency_overrides.clear()
 
 
 @pytest.fixture
-def app_fixture():  # DODANO nową fixture dla app
+def app_fixture(test_app):
     """
     Fixture zwracający instancję aplikacji FastAPI.
     Używana w testach do nadpisywania dependencies.
     """
-    return app
+    return test_app
 
 
 @pytest.fixture
@@ -130,7 +147,7 @@ def sample_admin(db_session):
 
 
 @pytest.fixture
-def mock_admin(db_session):  # DODANO fixture dla mock_admin
+def mock_admin(db_session):
     """
     Mock użytkownika ADMIN dla testów dependency overrides.
     """
@@ -146,7 +163,7 @@ def mock_admin(db_session):  # DODANO fixture dla mock_admin
 
 
 @pytest.fixture
-def mock_librarian(db_session):  # DODANO fixture dla mock_librarian
+def mock_librarian(db_session):
     """
     Mock użytkownika LIBRARIAN dla testów dependency overrides.
     """
@@ -164,12 +181,7 @@ def mock_librarian(db_session):  # DODANO fixture dla mock_librarian
 @pytest.fixture
 def auth_headers(client, sample_user):
     """
-    Loguje testowego użytkownika i zwraca nagłówki Authorization,
-    które można używać w testach chronionych endpointów.
-
-    - wykonuje faktyczne żądanie POST /api/auth/login
-    - pobiera access_token z odpowiedzi
-    - zwraca nagłówek: {"Authorization": "Bearer <token>"}
+    Loguje testowego użytkownika i zwraca nagłówki Authorization.
     """
     response = client.post(
         "/api/auth/login",
@@ -229,3 +241,11 @@ def test_user(sample_user):
     Alias for sample_user (for consistency with test naming).
     """
     return sample_user
+
+
+@pytest.fixture
+def app(test_app):
+    """
+    Alias for test_app - integration tests expect 'app' fixture.
+    """
+    return test_app

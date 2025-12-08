@@ -6,13 +6,13 @@ Endpointy związane z uwierzytelnianiem użytkowników:
 - /refresh  – wygenerowanie nowego access tokenu na podstawie refresh tokenu,
 - /logout   – wylogowanie (logiczne; w tej wersji bez blacklisty),
 - /me       – pobranie informacji o aktualnie zalogowanym użytkowniku.
+
+FIXED VERSION: Dodano konwersję str -> UUID w endpoint /me.
 """
 
 from datetime import timedelta
 from typing import Any, Dict
-
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
+from uuid import UUID
 
 from app.core.security import (
     ACCESS_TOKEN_EXPIRE_MINUTES,
@@ -30,8 +30,11 @@ from app.schemas.auth import (
     TokenResponse,
 )
 from app.schemas.user import UserResponse
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.orm import Session
+
 from backend.shared.database import get_db
-from backend.shared.dependencies import get_current_user_payload  # ZMIANA!
+from backend.shared.dependencies import get_current_user_payload
 
 router = APIRouter()
 
@@ -164,7 +167,7 @@ def refresh_token(request: RefreshTokenRequest):
 
 
 @router.post("/logout", status_code=status.HTTP_200_OK)
-def logout(user_payload: Dict[str, Any] = Depends(get_current_user_payload)):  # ZMIANA!
+def logout(user_payload: Dict[str, Any] = Depends(get_current_user_payload)):
     """
     "Wylogowanie" użytkownika.
 
@@ -176,13 +179,24 @@ def logout(user_payload: Dict[str, Any] = Depends(get_current_user_payload)):  #
 
 @router.get("/me", response_model=UserResponse)
 def get_current_user_info(
-    user_payload: Dict[str, Any] = Depends(get_current_user_payload),  # ZMIANA!
+    user_payload: Dict[str, Any] = Depends(get_current_user_payload),
     db: Session = Depends(get_db),
 ):
     """
     Zwraca dane aktualnie zalogowanego użytkownika na podstawie tokenu JWT.
+
+    FIXED: Konwersja str -> UUID dla user_id.
     """
-    user_id = user_payload.get("sub")
+    user_id_str = user_payload.get("sub")
+
+    # Konwersja string -> UUID (JWT zawsze zwraca stringi)
+    try:
+        user_id = UUID(user_id_str)
+    except (ValueError, TypeError):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Nieprawidłowy format ID użytkownika w tokenie",
+        )
 
     user = db.query(User).filter(User.id == user_id).first()
 

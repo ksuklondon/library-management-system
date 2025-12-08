@@ -9,10 +9,10 @@ from datetime import datetime, timedelta
 from typing import Any, Dict, Generator
 
 import pytest
-from app.main import app
 from app.models.fine import Fine
 from app.models.loan import Loan, LoanStatus
 from app.models.reservation import Reservation, ReservationStatus
+from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -66,7 +66,44 @@ def db() -> Generator:
 
 
 @pytest.fixture(scope="function")
-def client(db) -> Generator:
+def test_app():
+    """
+    Fixture tworzący testową instancję FastAPI BEZ połączenia z PostgreSQL.
+
+    Zamiast importować app.main (który łączy się z PostgreSQL),
+    tworzymy czystą instancję FastAPI i dodajemy tylko routery.
+    """
+    app = FastAPI()
+
+    # Import routerów bez uruchamiania całej aplikacji
+    try:
+        from app.api.reservations import router as reservations_router
+
+        app.include_router(
+            reservations_router, prefix="/api/reservations", tags=["reservations"]
+        )
+    except (ImportError, AttributeError):
+        pass
+
+    try:
+        from app.api.loans import router as loans_router
+
+        app.include_router(loans_router, prefix="/api/loans", tags=["loans"])
+    except (ImportError, AttributeError):
+        pass
+
+    try:
+        from app.api.fines import router as fines_router
+
+        app.include_router(fines_router, prefix="/api/fines", tags=["fines"])
+    except (ImportError, AttributeError):
+        pass
+
+    return app
+
+
+@pytest.fixture(scope="function")
+def client(db, test_app) -> Generator:
     """
     Fixture tworzący TestClient FastAPI z podmienioną bazą danych (NF9).
 
@@ -80,12 +117,12 @@ def client(db) -> Generator:
         finally:
             pass
 
-    app.dependency_overrides[get_db] = override_get_db
+    test_app.dependency_overrides[get_db] = override_get_db
 
-    with TestClient(app) as test_client:
+    with TestClient(test_app) as test_client:
         yield test_client
 
-    app.dependency_overrides.clear()
+    test_app.dependency_overrides.clear()
 
 
 # ---------------------------------------------------------
@@ -277,11 +314,14 @@ def test_user_token(mock_reader):
     """
     Generate JWT token for READER user.
     """
-    from app.core.security import create_access_token
+    try:
+        from app.core.security import create_access_token
 
-    return create_access_token(
-        data={"sub": mock_reader["sub"], "role": mock_reader["role"]}
-    )
+        return create_access_token(
+            data={"sub": mock_reader["sub"], "role": mock_reader["role"]}
+        )
+    except ImportError:
+        return "mock-reader-token"
 
 
 @pytest.fixture(scope="function")
@@ -289,11 +329,14 @@ def librarian_token(mock_librarian):
     """
     Generate JWT token for LIBRARIAN user.
     """
-    from app.core.security import create_access_token
+    try:
+        from app.core.security import create_access_token
 
-    return create_access_token(
-        data={"sub": mock_librarian["sub"], "role": mock_librarian["role"]}
-    )
+        return create_access_token(
+            data={"sub": mock_librarian["sub"], "role": mock_librarian["role"]}
+        )
+    except ImportError:
+        return "mock-librarian-token"
 
 
 @pytest.fixture(scope="function")
@@ -301,11 +344,14 @@ def admin_token(mock_admin):
     """
     Generate JWT token for ADMIN user.
     """
-    from app.core.security import create_access_token
+    try:
+        from app.core.security import create_access_token
 
-    return create_access_token(
-        data={"sub": mock_admin["sub"], "role": mock_admin["role"]}
-    )
+        return create_access_token(
+            data={"sub": mock_admin["sub"], "role": mock_admin["role"]}
+        )
+    except ImportError:
+        return "mock-admin-token"
 
 
 @pytest.fixture(scope="function")
@@ -321,11 +367,7 @@ def test_book(db):
     """
     Create test book for scenarios.
     """
-    # UWAGA: Sprawdź czy masz model Book w loan-service
-    # Jeśli NIE MA - usuń tę fixture lub zaimportuj z catalog-service
     try:
-        import uuid
-
         from app.models.book import Book
 
         book = Book(
@@ -342,8 +384,7 @@ def test_book(db):
         db.refresh(book)
         return book
     except ImportError:
-        # Jeśli Book nie istnieje w loan-service, zwróć mock
-        import uuid
+        # Mock jeśli Book nie istnieje w loan-service
         from unittest.mock import Mock
 
         book = Mock()
@@ -357,10 +398,7 @@ def test_book_copy(db, test_book):
     """
     Create single AVAILABLE book copy.
     """
-    # UWAGA: Sprawdź czy masz model BookCopy w loan-service
     try:
-        import uuid
-
         from app.models.book_copy import BookCopy, CopyStatus
 
         copy = BookCopy(
@@ -375,13 +413,12 @@ def test_book_copy(db, test_book):
         db.refresh(copy)
         return copy
     except ImportError:
-        # Jeśli BookCopy nie istnieje w loan-service, zwróć mock
-        import uuid
+        # Mock jeśli BookCopy nie istnieje
         from unittest.mock import Mock
 
         copy = Mock()
         copy.id = uuid.uuid4()
-        copy.book_id = test_book.id
+        copy.book_id = test_book.id if hasattr(test_book, "id") else uuid.uuid4()
         copy.status = "AVAILABLE"
         return copy
 
@@ -392,8 +429,6 @@ def test_book_copies(db, test_book):
     Create 10 AVAILABLE book copies for limit tests.
     """
     try:
-        import uuid
-
         from app.models.book_copy import BookCopy, CopyStatus
 
         copies = []
@@ -415,15 +450,14 @@ def test_book_copies(db, test_book):
 
         return copies
     except ImportError:
-        # Mock dla testów jeśli nie ma modelu
-        import uuid
+        # Mock dla testów
         from unittest.mock import Mock
 
         copies = []
         for i in range(10):
             copy = Mock()
             copy.id = uuid.uuid4()
-            copy.book_id = test_book.id
+            copy.book_id = test_book.id if hasattr(test_book, "id") else uuid.uuid4()
             copy.status = "AVAILABLE"
             copies.append(copy)
         return copies
@@ -432,9 +466,8 @@ def test_book_copies(db, test_book):
 @pytest.fixture(scope="function")
 def test_user(db, mock_reader):
     """
-    Create test User in database (for RBAC tests if needed).
+    Create test User in database (for integration tests).
     """
-    # UWAGA: Sprawdź czy masz model User w loan-service
     try:
         from app.models.user import User, UserRole
 
@@ -452,7 +485,7 @@ def test_user(db, mock_reader):
         db.refresh(user)
         return user
     except ImportError:
-        # Jeśli User nie istnieje w loan-service, zwróć mock
+        # Mock jeśli User nie istnieje w loan-service
         from unittest.mock import Mock
 
         user = Mock()
@@ -493,11 +526,11 @@ def test_user_reservation(db, mock_reader, test_book_copy):
 
 
 @pytest.fixture(scope="function")
-async def async_client():
+async def async_client(test_app):
     """
     AsyncClient for async tests (race condition scenarios).
     """
     from httpx import AsyncClient
 
-    async with AsyncClient(app=app, base_url="http://test") as client:
+    async with AsyncClient(app=test_app, base_url="http://test") as client:
         yield client
