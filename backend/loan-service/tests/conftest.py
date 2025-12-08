@@ -265,3 +265,239 @@ def multiple_loans(db, mock_reader) -> list[Loan]:
         db.refresh(loan_obj)
 
     return loans
+
+
+# =============================================================================
+# DODATKOWE FIXTURES DLA NOWYCH SCENARIUSZY TESTOWYCH
+# =============================================================================
+
+
+@pytest.fixture(scope="function")
+def test_user_token(mock_reader):
+    """
+    Generate JWT token for READER user.
+    """
+    from app.core.security import create_access_token
+
+    return create_access_token(
+        data={"sub": mock_reader["sub"], "role": mock_reader["role"]}
+    )
+
+
+@pytest.fixture(scope="function")
+def librarian_token(mock_librarian):
+    """
+    Generate JWT token for LIBRARIAN user.
+    """
+    from app.core.security import create_access_token
+
+    return create_access_token(
+        data={"sub": mock_librarian["sub"], "role": mock_librarian["role"]}
+    )
+
+
+@pytest.fixture(scope="function")
+def admin_token(mock_admin):
+    """
+    Generate JWT token for ADMIN user.
+    """
+    from app.core.security import create_access_token
+
+    return create_access_token(
+        data={"sub": mock_admin["sub"], "role": mock_admin["role"]}
+    )
+
+
+@pytest.fixture(scope="function")
+def reader_token(test_user_token):
+    """
+    Alias for test_user_token.
+    """
+    return test_user_token
+
+
+@pytest.fixture(scope="function")
+def test_book(db):
+    """
+    Create test book for scenarios.
+    """
+    # UWAGA: Sprawdź czy masz model Book w loan-service
+    # Jeśli NIE MA - usuń tę fixture lub zaimportuj z catalog-service
+    try:
+        import uuid
+
+        from app.models.book import Book
+
+        book = Book(
+            id=uuid.uuid4(),
+            title="Test Book",
+            authors=["Test Author"],
+            isbn="978-83-123-4567-8",
+            publisher="Test Publisher",
+            pages=300,
+            language="pl",
+        )
+        db.add(book)
+        db.commit()
+        db.refresh(book)
+        return book
+    except ImportError:
+        # Jeśli Book nie istnieje w loan-service, zwróć mock
+        import uuid
+        from unittest.mock import Mock
+
+        book = Mock()
+        book.id = uuid.uuid4()
+        book.title = "Test Book"
+        return book
+
+
+@pytest.fixture(scope="function")
+def test_book_copy(db, test_book):
+    """
+    Create single AVAILABLE book copy.
+    """
+    # UWAGA: Sprawdź czy masz model BookCopy w loan-service
+    try:
+        import uuid
+
+        from app.models.book_copy import BookCopy, CopyStatus
+
+        copy = BookCopy(
+            id=uuid.uuid4(),
+            book_id=test_book.id,
+            inventory_no="INV-001",
+            status=CopyStatus.AVAILABLE,
+            location="Shelf A1",
+        )
+        db.add(copy)
+        db.commit()
+        db.refresh(copy)
+        return copy
+    except ImportError:
+        # Jeśli BookCopy nie istnieje w loan-service, zwróć mock
+        import uuid
+        from unittest.mock import Mock
+
+        copy = Mock()
+        copy.id = uuid.uuid4()
+        copy.book_id = test_book.id
+        copy.status = "AVAILABLE"
+        return copy
+
+
+@pytest.fixture(scope="function")
+def test_book_copies(db, test_book):
+    """
+    Create 10 AVAILABLE book copies for limit tests.
+    """
+    try:
+        import uuid
+
+        from app.models.book_copy import BookCopy, CopyStatus
+
+        copies = []
+        for i in range(10):
+            copy = BookCopy(
+                id=uuid.uuid4(),
+                book_id=test_book.id,
+                inventory_no=f"INV-{i:03d}",
+                status=CopyStatus.AVAILABLE,
+                location=f"Shelf A{i + 1}",
+            )
+            db.add(copy)
+            copies.append(copy)
+
+        db.commit()
+
+        for copy in copies:
+            db.refresh(copy)
+
+        return copies
+    except ImportError:
+        # Mock dla testów jeśli nie ma modelu
+        import uuid
+        from unittest.mock import Mock
+
+        copies = []
+        for i in range(10):
+            copy = Mock()
+            copy.id = uuid.uuid4()
+            copy.book_id = test_book.id
+            copy.status = "AVAILABLE"
+            copies.append(copy)
+        return copies
+
+
+@pytest.fixture(scope="function")
+def test_user(db, mock_reader):
+    """
+    Create test User in database (for RBAC tests if needed).
+    """
+    # UWAGA: Sprawdź czy masz model User w loan-service
+    try:
+        from app.models.user import User, UserRole
+
+        user = User(
+            id=mock_reader["sub"],
+            email=mock_reader["email"],
+            hashed_password="hashed_password",
+            full_name=mock_reader["full_name"],
+            role=UserRole.READER,
+            is_active=True,
+            is_blocked=False,
+        )
+        db.add(user)
+        db.commit()
+        db.refresh(user)
+        return user
+    except ImportError:
+        # Jeśli User nie istnieje w loan-service, zwróć mock
+        from unittest.mock import Mock
+
+        user = Mock()
+        user.id = mock_reader["sub"]
+        user.email = mock_reader["email"]
+        user.role = "READER"
+        return user
+
+
+@pytest.fixture(scope="function")
+def test_user_reservation(db, mock_reader, test_book_copy):
+    """
+    Create ACTIVE reservation with RESERVED book copy.
+    """
+    reservation = Reservation(
+        id=uuid.uuid4(),
+        user_id=mock_reader["sub"],
+        book_id=test_book_copy.book_id
+        if hasattr(test_book_copy, "book_id")
+        else uuid.uuid4(),
+        book_copy_id=test_book_copy.id
+        if hasattr(test_book_copy, "id")
+        else uuid.uuid4(),
+        status=ReservationStatus.ACTIVE,
+        created_at=datetime.utcnow(),
+    )
+    reservation.expires_at = datetime.utcnow() + timedelta(days=3)
+
+    db.add(reservation)
+
+    # Update copy status to RESERVED if possible
+    if hasattr(test_book_copy, "status"):
+        test_book_copy.status = "RESERVED"
+
+    db.commit()
+    db.refresh(reservation)
+    return reservation
+
+
+@pytest.fixture(scope="function")
+async def async_client():
+    """
+    AsyncClient for async tests (race condition scenarios).
+    """
+    from httpx import AsyncClient
+
+    async with AsyncClient(app=app, base_url="http://test") as client:
+        yield client

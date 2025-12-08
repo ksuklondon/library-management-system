@@ -177,3 +177,55 @@ def auth_headers(client, sample_user):
     )
     token = response.json()["access_token"]
     return {"Authorization": f"Bearer {token}"}
+
+
+# =============================================================================
+# DODATKOWE FIXTURES DLA TESTÓW RBAC
+# =============================================================================
+
+
+@pytest.fixture
+def reader_token(client, sample_user):
+    """
+    Generate JWT token for READER user.
+    """
+    response = client.post(
+        "/api/auth/login",
+        json={"email": "test@example.com", "password": "TestPassword123"},
+    )
+    token = response.json()["access_token"]
+    return token
+
+
+@pytest.fixture
+def librarian_token(client, sample_librarian):
+    """
+    Generate JWT token for LIBRARIAN user.
+    """
+    response = client.post(
+        "/api/auth/login",
+        json={"email": "librarian@example.com", "password": "LibPassword123"},
+    )
+    token = response.json()["access_token"]
+    return token
+
+
+@pytest.fixture
+def admin_token(client, sample_admin):
+    """
+    Generate JWT token for ADMIN user.
+    """
+    response = client.post(
+        "/api/auth/login",
+        json={"email": "admin@example.com", "password": "AdminPassword123"},
+    )
+    token = response.json()["access_token"]
+    return token
+
+
+@pytest.fixture
+def test_user(sample_user):
+    """
+    Alias for sample_user (for consistency with test naming).
+    """
+    return sample_user
