@@ -2,6 +2,13 @@
 Pytest configuration and fixtures for Loan Service tests.
 
 Wymaganie: NF9 - Testy jednostkowe i integracyjne
+
+ULTIMATE FIX:
+- Dodano auth_headers_reader, auth_headers_librarian, auth_headers_admin fixtures
+- Dodano async_auth_reader, async_auth_librarian, async_auth_admin fixtures
+- Poprawione importy routerów (reservation_routes, loan_routes, fine_routes)
+- Naprawiony async_client fixture
+- Usunięto prefix /api z routerów
 """
 
 import uuid
@@ -9,6 +16,7 @@ from datetime import datetime, timedelta
 from typing import Any, Dict, Generator
 
 import pytest
+import pytest_asyncio  # CRITICAL: Import for async fixtures!
 from app.models.fine import Fine
 from app.models.loan import Loan, LoanStatus
 from app.models.reservation import Reservation, ReservationStatus
@@ -23,24 +31,14 @@ from backend.shared.database import Base, get_db
 # ---------------------------------------------------------
 # Testowa baza danych – SQLite w pamięci (NF9)
 # ---------------------------------------------------------
-# Użycie "sqlite:///:memory:" pozwala na szybkie testy bez
-# potrzeby stawiania zewnętrznej bazy PostgreSQL.
-# StaticPool → ten sam connection pool = jedna pamięć DB
 SQLALCHEMY_TEST_DATABASE_URL = "sqlite:///:memory:"
 
-
-# ---------------------------------------------------------
-# Silnik testowy SQLAlchemy
-# ---------------------------------------------------------
-# check_same_thread=False – wymagane dla FastAPI
-# StaticPool – utrzymuje tę samą bazę dla wielu połączeń
 engine = create_engine(
     SQLALCHEMY_TEST_DATABASE_URL,
     connect_args={"check_same_thread": False},
     poolclass=StaticPool,
 )
 
-# Sesja testowa SQLAlchemy
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
@@ -48,12 +46,6 @@ TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engin
 def db() -> Generator:
     """
     Fixture tworzący *świeżą* bazę danych przed każdym testem (NF9).
-
-    - Tworzy wszystkie tabele z Base.metadata
-    - Dostarcza sesję DB do testu
-    - Po zakończeniu testu:
-        - zamyka sesję
-        - usuwa wszystkie tabele (czyste środowisko)
     """
     Base.metadata.create_all(bind=engine)
 
@@ -66,49 +58,57 @@ def db() -> Generator:
 
 
 @pytest.fixture(scope="function")
+def db_session(db):
+    """Alias dla db fixture (niektóre testy używają db_session)."""
+    return db
+
+
+@pytest.fixture(scope="function")
 def test_app():
     """
     Fixture tworzący testową instancję FastAPI BEZ połączenia z PostgreSQL.
 
-    Zamiast importować app.main (który łączy się z PostgreSQL),
-    tworzymy czystą instancję FastAPI i dodajemy tylko routery.
+    FIXED: Poprawione nazwy importów routerów i usunięty prefix /api.
     """
     app = FastAPI()
 
-    # Import routerów bez uruchamiania całej aplikacji
+    # FIXED: Poprawione nazwy plików routerów
     try:
-        from app.api.reservations import router as reservations_router
+        from app.api.reservation_routes import router as reservations_router
 
         app.include_router(
-            reservations_router, prefix="/api/reservations", tags=["reservations"]
+            reservations_router, prefix="/reservations", tags=["reservations"]
         )
-    except (ImportError, AttributeError):
-        pass
+    except (ImportError, AttributeError) as e:
+        print(f"Warning: Could not load reservation router: {e}")
 
     try:
-        from app.api.loans import router as loans_router
+        from app.api.loan_routes import router as loans_router
 
-        app.include_router(loans_router, prefix="/api/loans", tags=["loans"])
-    except (ImportError, AttributeError):
-        pass
+        app.include_router(loans_router, prefix="/loans", tags=["loans"])
+    except (ImportError, AttributeError) as e:
+        print(f"Warning: Could not load loan router: {e}")
 
     try:
-        from app.api.fines import router as fines_router
+        from app.api.fine_routes import router as fines_router
 
-        app.include_router(fines_router, prefix="/api/fines", tags=["fines"])
-    except (ImportError, AttributeError):
-        pass
+        app.include_router(fines_router, prefix="/fines", tags=["fines"])
+    except (ImportError, AttributeError) as e:
+        print(f"Warning: Could not load fine router: {e}")
 
     return app
+
+
+@pytest.fixture(scope="function")
+def app_fixture(test_app):
+    """Alias dla test_app - niektóre testy używają app_fixture."""
+    return test_app
 
 
 @pytest.fixture(scope="function")
 def client(db, test_app) -> Generator:
     """
     Fixture tworzący TestClient FastAPI z podmienioną bazą danych (NF9).
-
-    - Nadpisuje zależność get_db → kieruje zapytania do testowej sesji
-    - Czyści dependency overrides po teście
     """
 
     def override_get_db():
@@ -132,9 +132,7 @@ def client(db, test_app) -> Generator:
 
 @pytest.fixture(scope="function")
 def mock_reader() -> Dict[str, Any]:
-    """
-    Fixture tworzący mock payload JWT dla READER (NF9).
-    """
+    """Fixture tworzący mock payload JWT dla READER (NF9)."""
     return {
         "sub": str(uuid.uuid4()),
         "email": "reader@example.com",
@@ -145,9 +143,7 @@ def mock_reader() -> Dict[str, Any]:
 
 @pytest.fixture(scope="function")
 def mock_librarian() -> Dict[str, Any]:
-    """
-    Fixture tworzący mock payload JWT dla LIBRARIAN (NF9).
-    """
+    """Fixture tworzący mock payload JWT dla LIBRARIAN (NF9)."""
     return {
         "sub": str(uuid.uuid4()),
         "email": "librarian@example.com",
@@ -158,9 +154,7 @@ def mock_librarian() -> Dict[str, Any]:
 
 @pytest.fixture(scope="function")
 def mock_admin() -> Dict[str, Any]:
-    """
-    Fixture tworzący mock payload JWT dla ADMIN (NF9).
-    """
+    """Fixture tworzący mock payload JWT dla ADMIN (NF9)."""
     return {
         "sub": str(uuid.uuid4()),
         "email": "admin@example.com",
@@ -176,13 +170,11 @@ def mock_admin() -> Dict[str, Any]:
 
 @pytest.fixture(scope="function")
 def test_reservation(db, mock_reader) -> Reservation:
-    """
-    Tworzy pojedynczą rezerwację testową (NF9).
-    Ustawia datę wygaśnięcia na +3 dni.
-    """
+    """Tworzy pojedynczą rezerwację testową (NF9)."""
     reservation = Reservation(
         user_id=mock_reader["sub"],
         book_id=uuid.uuid4(),
+        book_copy_id=uuid.uuid4(),
         status=ReservationStatus.ACTIVE,
     )
     reservation.expires_at = datetime.utcnow() + timedelta(days=3)
@@ -195,10 +187,7 @@ def test_reservation(db, mock_reader) -> Reservation:
 
 @pytest.fixture(scope="function")
 def test_loan(db, mock_reader) -> Loan:
-    """
-    Tworzy jedno aktywne wypożyczenie testowe (NF9).
-    Termin zwrotu: +14 dni.
-    """
+    """Tworzy jedno aktywne wypożyczenie testowe (NF9)."""
     loan = Loan(
         user_id=mock_reader["sub"],
         book_copy_id=uuid.uuid4(),
@@ -215,12 +204,7 @@ def test_loan(db, mock_reader) -> Loan:
 
 @pytest.fixture(scope="function")
 def test_overdue_loan(db, mock_reader) -> Loan:
-    """
-    Tworzy przetrzymane wypożyczenie testowe (NF9).
-    - borrowed_at: 20 dni temu
-    - due_date: 6 dni temu
-    - fine_amount: 6 * 2 zł
-    """
+    """Tworzy przetrzymane wypożyczenie testowe (NF9)."""
     loan = Loan(
         user_id=mock_reader["sub"],
         book_copy_id=uuid.uuid4(),
@@ -228,7 +212,7 @@ def test_overdue_loan(db, mock_reader) -> Loan:
         status=LoanStatus.OVERDUE,
     )
     loan.due_date = datetime.utcnow() - timedelta(days=6)
-    loan.fine_amount = 12.0  # 6 days * 2 zł
+    loan.fine_amount = 12.0
 
     db.add(loan)
     db.commit()
@@ -238,9 +222,7 @@ def test_overdue_loan(db, mock_reader) -> Loan:
 
 @pytest.fixture(scope="function")
 def test_fine(db, test_loan) -> Fine:
-    """
-    Tworzy testową karę przypisaną do wypożyczenia (NF9).
-    """
+    """Tworzy testową karę przypisaną do wypożyczenia (NF9)."""
     fine = Fine(
         loan_id=test_loan.id, user_id=test_loan.user_id, amount=10.0, paid=False
     )
@@ -253,16 +235,14 @@ def test_fine(db, test_loan) -> Fine:
 
 @pytest.fixture(scope="function")
 def multiple_reservations(db, mock_reader) -> list[Reservation]:
-    """
-    Tworzy 3 aktywne rezerwacje testowe (NF9).
-    Przydatne do testowania limitu 3 aktywnych rezerwacji (NF29).
-    """
+    """Tworzy 3 aktywne rezerwacje testowe (NF9)."""
     reservations = []
 
     for i in range(3):
         reservation = Reservation(
             user_id=mock_reader["sub"],
             book_id=uuid.uuid4(),
+            book_copy_id=uuid.uuid4(),
             status=ReservationStatus.ACTIVE,
         )
         reservation.expires_at = datetime.utcnow() + timedelta(days=3)
@@ -279,10 +259,7 @@ def multiple_reservations(db, mock_reader) -> list[Reservation]:
 
 @pytest.fixture(scope="function")
 def multiple_loans(db, mock_reader) -> list[Loan]:
-    """
-    Tworzy 5 aktywnych wypożyczeń testowych (NF9).
-    Przydatne do testowania limitu 5 wypożyczeń (NF29).
-    """
+    """Tworzy 5 aktywnych wypożyczeń testowych (NF9)."""
     loans = []
 
     for i in range(5):
@@ -305,17 +282,15 @@ def multiple_loans(db, mock_reader) -> list[Loan]:
 
 
 # =============================================================================
-# DODATKOWE FIXTURES DLA NOWYCH SCENARIUSZY TESTOWYCH
+# TOKEN FIXTURES
 # =============================================================================
 
 
 @pytest.fixture(scope="function")
 def test_user_token(mock_reader):
-    """
-    Generate JWT token for READER user.
-    """
+    """Generate JWT token for READER user."""
     try:
-        from app.core.security import create_access_token
+        from backend.auth_service.app.core.security import create_access_token
 
         return create_access_token(
             data={"sub": mock_reader["sub"], "role": mock_reader["role"]}
@@ -326,11 +301,9 @@ def test_user_token(mock_reader):
 
 @pytest.fixture(scope="function")
 def librarian_token(mock_librarian):
-    """
-    Generate JWT token for LIBRARIAN user.
-    """
+    """Generate JWT token for LIBRARIAN user."""
     try:
-        from app.core.security import create_access_token
+        from backend.auth_service.app.core.security import create_access_token
 
         return create_access_token(
             data={"sub": mock_librarian["sub"], "role": mock_librarian["role"]}
@@ -341,11 +314,9 @@ def librarian_token(mock_librarian):
 
 @pytest.fixture(scope="function")
 def admin_token(mock_admin):
-    """
-    Generate JWT token for ADMIN user.
-    """
+    """Generate JWT token for ADMIN user."""
     try:
-        from app.core.security import create_access_token
+        from backend.auth_service.app.core.security import create_access_token
 
         return create_access_token(
             data={"sub": mock_admin["sub"], "role": mock_admin["role"]}
@@ -356,150 +327,80 @@ def admin_token(mock_admin):
 
 @pytest.fixture(scope="function")
 def reader_token(test_user_token):
-    """
-    Alias for test_user_token.
-    """
+    """Alias for test_user_token."""
     return test_user_token
+
+
+# =============================================================================
+# TEST DATA FIXTURES
+# =============================================================================
 
 
 @pytest.fixture(scope="function")
 def test_book(db):
-    """
-    Create test book for scenarios.
-    """
-    try:
-        from app.models.book import Book
+    """Create test book for scenarios."""
+    from unittest.mock import Mock
 
-        book = Book(
-            id=uuid.uuid4(),
-            title="Test Book",
-            authors=["Test Author"],
-            isbn="978-83-123-4567-8",
-            publisher="Test Publisher",
-            pages=300,
-            language="pl",
-        )
-        db.add(book)
-        db.commit()
-        db.refresh(book)
-        return book
-    except ImportError:
-        # Mock jeśli Book nie istnieje w loan-service
-        from unittest.mock import Mock
-
-        book = Mock()
-        book.id = uuid.uuid4()
-        book.title = "Test Book"
-        return book
+    book = Mock()
+    book.id = uuid.uuid4()
+    book.title = "Test Book"
+    return book
 
 
 @pytest.fixture(scope="function")
 def test_book_copy(db, test_book):
-    """
-    Create single AVAILABLE book copy.
-    """
-    try:
-        from app.models.book_copy import BookCopy, CopyStatus
+    """Create single AVAILABLE book copy."""
+    from unittest.mock import Mock
 
-        copy = BookCopy(
-            id=uuid.uuid4(),
-            book_id=test_book.id,
-            inventory_no="INV-001",
-            status=CopyStatus.AVAILABLE,
-            location="Shelf A1",
-        )
-        db.add(copy)
-        db.commit()
-        db.refresh(copy)
-        return copy
-    except ImportError:
-        # Mock jeśli BookCopy nie istnieje
-        from unittest.mock import Mock
-
-        copy = Mock()
-        copy.id = uuid.uuid4()
-        copy.book_id = test_book.id if hasattr(test_book, "id") else uuid.uuid4()
-        copy.status = "AVAILABLE"
-        return copy
+    copy = Mock()
+    copy.id = uuid.uuid4()
+    copy.book_id = test_book.id if hasattr(test_book, "id") else uuid.uuid4()
+    copy.status = "AVAILABLE"
+    return copy
 
 
 @pytest.fixture(scope="function")
 def test_book_copies(db, test_book):
-    """
-    Create 10 AVAILABLE book copies for limit tests.
-    """
-    try:
-        from app.models.book_copy import BookCopy, CopyStatus
+    """Create 10 AVAILABLE book copies for limit tests."""
+    from unittest.mock import Mock
 
-        copies = []
-        for i in range(10):
-            copy = BookCopy(
-                id=uuid.uuid4(),
-                book_id=test_book.id,
-                inventory_no=f"INV-{i:03d}",
-                status=CopyStatus.AVAILABLE,
-                location=f"Shelf A{i + 1}",
-            )
-            db.add(copy)
-            copies.append(copy)
-
-        db.commit()
-
-        for copy in copies:
-            db.refresh(copy)
-
-        return copies
-    except ImportError:
-        # Mock dla testów
-        from unittest.mock import Mock
-
-        copies = []
-        for i in range(10):
-            copy = Mock()
-            copy.id = uuid.uuid4()
-            copy.book_id = test_book.id if hasattr(test_book, "id") else uuid.uuid4()
-            copy.status = "AVAILABLE"
-            copies.append(copy)
-        return copies
+    copies = []
+    for i in range(10):
+        copy = Mock()
+        copy.id = uuid.uuid4()
+        copy.book_id = test_book.id if hasattr(test_book, "id") else uuid.uuid4()
+        copy.status = "AVAILABLE"
+        copies.append(copy)
+    return copies
 
 
 @pytest.fixture(scope="function")
 def test_user(db, mock_reader):
-    """
-    Create test User in database (for integration tests).
-    """
-    try:
-        from app.models.user import User, UserRole
+    """Create test User mock (for integration tests)."""
+    from unittest.mock import Mock
 
-        user = User(
-            id=mock_reader["sub"],
-            email=mock_reader["email"],
-            hashed_password="hashed_password",
-            full_name=mock_reader["full_name"],
-            role=UserRole.READER,
-            is_active=True,
-            is_blocked=False,
-        )
-        db.add(user)
-        db.commit()
-        db.refresh(user)
-        return user
-    except ImportError:
-        # Mock jeśli User nie istnieje w loan-service
-        from unittest.mock import Mock
+    user = Mock()
+    user.id = mock_reader["sub"]
+    user.email = mock_reader["email"]
+    user.role = "READER"
+    return user
 
-        user = Mock()
-        user.id = mock_reader["sub"]
-        user.email = mock_reader["email"]
-        user.role = "READER"
-        return user
+
+@pytest.fixture(scope="function")
+def test_librarian(db, mock_librarian):
+    """Create test Librarian mock."""
+    from unittest.mock import Mock
+
+    user = Mock()
+    user.id = mock_librarian["sub"]
+    user.email = mock_librarian["email"]
+    user.role = "LIBRARIAN"
+    return user
 
 
 @pytest.fixture(scope="function")
 def test_user_reservation(db, mock_reader, test_book_copy):
-    """
-    Create ACTIVE reservation with RESERVED book copy.
-    """
+    """Create ACTIVE reservation with RESERVED book copy."""
     reservation = Reservation(
         id=uuid.uuid4(),
         user_id=mock_reader["sub"],
@@ -526,11 +427,245 @@ def test_user_reservation(db, mock_reader, test_book_copy):
 
 
 @pytest.fixture(scope="function")
-async def async_client(test_app):
+def async_client(test_app, db, mock_reader):
     """
-    AsyncClient for async tests (race condition scenarios).
+    AsyncClient for async tests with DEFAULT mock_reader auth.
+
+    HYBRID APPROACH:
+    - Has default mock_reader auth for backward compatibility
+    - Can be overridden by async_auth_* fixtures for specific roles
+
+    This allows both:
+    1. Old tests using test_user_token to work (gets mock_reader by default)
+    2. New tests using async_auth_librarian/admin for specific roles
     """
     from httpx import AsyncClient
 
-    async with AsyncClient(app=test_app, base_url="http://test") as client:
-        yield client
+    # Override get_db
+    def override_get_db():
+        try:
+            yield db
+        finally:
+            pass
+
+    # DEFAULT: Override get_current_user_payload with mock_reader
+    # This can be overridden later by async_auth_* fixtures
+    def override_get_current_user_payload():
+        return mock_reader
+
+    test_app.dependency_overrides[get_db] = override_get_db
+
+    # Import and override dependency with DEFAULT mock_reader
+    try:
+        from backend.shared.dependencies import get_current_user_payload
+
+        test_app.dependency_overrides[get_current_user_payload] = (
+            override_get_current_user_payload
+        )
+    except ImportError:
+        pass
+
+    # Return AsyncClient instance
+    return AsyncClient(app=test_app, base_url="http://test")
+
+
+# =============================================================================
+# AUTH HEADERS FIXTURES - CRITICAL FOR ROUTE TESTS!
+# =============================================================================
+
+
+@pytest.fixture(scope="function")
+def auth_headers_reader(test_app, mock_reader, reader_token):
+    """
+    Authorization headers for READER role.
+
+    Returns: dict with Authorization header
+    Usage: client.post("/endpoint/", headers=auth_headers_reader)
+
+    CRITICAL: Override get_current_user_payload dla TestClient (sync)
+    """
+    # Import dependency
+    try:
+        from backend.shared.dependencies import get_current_user_payload
+    except ImportError:
+        try:
+            from shared.auth import get_current_user_payload
+        except ImportError:
+            # Fallback - just return headers without override
+            return {"Authorization": f"Bearer {reader_token}"}
+
+    # Override dependency to return mock_reader
+    def override_get_current_user():
+        return mock_reader
+
+    test_app.dependency_overrides[get_current_user_payload] = override_get_current_user
+
+    # Return headers
+    return {"Authorization": f"Bearer {reader_token}"}
+
+
+@pytest.fixture(scope="function")
+def auth_headers_librarian(test_app, mock_librarian, librarian_token):
+    """
+    Authorization headers for LIBRARIAN role.
+
+    Returns: dict with Authorization header
+    Usage: client.post("/endpoint/", headers=auth_headers_librarian)
+
+    CRITICAL: Override get_current_user_payload dla TestClient (sync)
+    """
+    # Import dependency
+    try:
+        from backend.shared.dependencies import get_current_user_payload
+    except ImportError:
+        try:
+            from shared.auth import get_current_user_payload
+        except ImportError:
+            # Fallback - just return headers without override
+            return {"Authorization": f"Bearer {librarian_token}"}
+
+    # Override dependency to return mock_librarian
+    def override_get_current_user():
+        return mock_librarian
+
+    test_app.dependency_overrides[get_current_user_payload] = override_get_current_user
+
+    # Return headers
+    return {"Authorization": f"Bearer {librarian_token}"}
+
+
+@pytest.fixture(scope="function")
+def auth_headers_admin(test_app, mock_admin, admin_token):
+    """
+    Authorization headers for ADMIN role.
+
+    Returns: dict with Authorization header
+    Usage: client.post("/endpoint/", headers=auth_headers_admin)
+
+    CRITICAL: Override get_current_user_payload dla TestClient (sync)
+    """
+    # Import dependency
+    try:
+        from backend.shared.dependencies import get_current_user_payload
+    except ImportError:
+        try:
+            from shared.auth import get_current_user_payload
+        except ImportError:
+            # Fallback - just return headers without override
+            return {"Authorization": f"Bearer {admin_token}"}
+
+    # Override dependency to return mock_admin
+    def override_get_current_user():
+        return mock_admin
+
+    test_app.dependency_overrides[get_current_user_payload] = override_get_current_user
+
+    # Return headers
+    return {"Authorization": f"Bearer {admin_token}"}
+
+
+# =============================================================================
+# ASYNC-COMPATIBLE AUTH FIXTURES (for async_client with manual override)
+# =============================================================================
+
+
+@pytest_asyncio.fixture
+async def async_auth_reader(test_app, mock_reader, reader_token):
+    """
+    Async auth fixture for READER role with async_client.
+
+    Usage:
+        async def test_something(async_client, async_auth_reader):
+            headers = async_auth_reader
+            response = await async_client.post("/endpoint/", headers=headers)
+    """
+    # Import dependency
+    try:
+        from backend.shared.dependencies import get_current_user_payload
+    except ImportError:
+        try:
+            from shared.auth import get_current_user_payload
+        except ImportError:
+            # Fallback - FIXED: use yield not return!
+            yield {"Authorization": f"Bearer {reader_token}"}
+            return
+
+    # Override dependency
+    def override_get_current_user():
+        return mock_reader
+
+    test_app.dependency_overrides[get_current_user_payload] = override_get_current_user
+
+    yield {"Authorization": f"Bearer {reader_token}"}
+
+    # Cleanup
+    if get_current_user_payload in test_app.dependency_overrides:
+        del test_app.dependency_overrides[get_current_user_payload]
+
+
+@pytest_asyncio.fixture
+async def async_auth_librarian(test_app, mock_librarian, librarian_token):
+    """
+    Async auth fixture for LIBRARIAN role with async_client.
+
+    Usage:
+        async def test_something(async_client, async_auth_librarian):
+            headers = async_auth_librarian
+            response = await async_client.post("/endpoint/", headers=headers)
+    """
+    # Import dependency
+    try:
+        from backend.shared.dependencies import get_current_user_payload
+    except ImportError:
+        try:
+            from shared.auth import get_current_user_payload
+        except ImportError:
+            # Fallback - FIXED: use yield not return!
+            yield {"Authorization": f"Bearer {librarian_token}"}
+            return
+
+    # Override dependency
+    def override_get_current_user():
+        return mock_librarian
+
+    test_app.dependency_overrides[get_current_user_payload] = override_get_current_user
+
+    yield {"Authorization": f"Bearer {librarian_token}"}
+
+    # Cleanup
+    if get_current_user_payload in test_app.dependency_overrides:
+        del test_app.dependency_overrides[get_current_user_payload]
+
+
+@pytest_asyncio.fixture
+async def async_auth_admin(test_app, mock_admin, admin_token):
+    """
+    Async auth fixture for ADMIN role with async_client.
+
+    Usage:
+        async def test_something(async_client, async_auth_admin):
+            headers = async_auth_admin
+            response = await async_client.post("/endpoint/", headers=headers)
+    """
+    # Import dependency
+    try:
+        from backend.shared.dependencies import get_current_user_payload
+    except ImportError:
+        try:
+            from shared.auth import get_current_user_payload
+        except ImportError:
+            # Fallback - FIXED: use yield not return!
+            yield {"Authorization": f"Bearer {admin_token}"}
+            return
+
+    # Override dependency
+    def override_get_current_user():
+        return mock_admin
+
+    test_app.dependency_overrides[get_current_user_payload] = override_get_current_user
+
+    yield {"Authorization": f"Bearer {admin_token}"}
+
+    # Cleanup
+    if get_current_user_payload in test_app.dependency_overrides:
+        del test_app.dependency_overrides[get_current_user_payload]
