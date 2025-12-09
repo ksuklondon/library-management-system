@@ -24,9 +24,8 @@ class BookBase(BaseModel):
         max_length=500,
         description="Autorzy (rozdzieleni przecinkami)",
     )
-    isbn: Optional[str] = Field(
-        None, min_length=10, max_length=20, description="Numer ISBN"
-    )
+    # ZMIENIONE: Usunięte min_length i max_length - custom validator sprawdzi to
+    isbn: Optional[str] = Field(None, description="Numer ISBN")
     publisher: Optional[str] = Field(None, max_length=255, description="Wydawca")
     pages: Optional[int] = Field(None, gt=0, description="Liczba stron")
     language: Optional[str] = Field("pl", max_length=50, description="Język publikacji")
@@ -75,13 +74,31 @@ class BookUpdate(BaseModel):
 
     title: Optional[str] = Field(None, min_length=1, max_length=500)
     authors: Optional[str] = Field(None, min_length=1, max_length=500)
-    isbn: Optional[str] = Field(None, min_length=10, max_length=20)
+    # ZMIENIONE: Usunięte min_length i max_length
+    isbn: Optional[str] = Field(None, description="Numer ISBN")
     publisher: Optional[str] = Field(None, max_length=255)
     pages: Optional[int] = Field(None, gt=0)
     language: Optional[str] = Field(None, max_length=50)
     cover_url: Optional[str] = Field(None, max_length=500)
     description: Optional[str] = Field(None)
     genre: Optional[str] = Field(None, max_length=100)
+
+    @field_validator("isbn")
+    @classmethod
+    def validate_isbn(cls, v: Optional[str]) -> Optional[str]:
+        """Walidacja ISBN dla update - ta sama logika jak w BookBase."""
+        if v is None:
+            return v
+
+        cleaned = v.replace("-", "").replace(" ", "")
+
+        if len(cleaned) not in [10, 13]:
+            raise ValueError("ISBN musi mieć 10 lub 13 cyfr")
+
+        if not cleaned.isdigit():
+            raise ValueError("ISBN może zawierać tylko cyfry")
+
+        return v
 
 
 class BookResponse(BookBase):

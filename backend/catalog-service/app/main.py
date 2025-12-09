@@ -18,6 +18,8 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, status
 from fastapi.middleware.cors import CORSMiddleware
 
+# DODANE: Import routera
+from app.api import api_router
 from backend.shared.config import is_development, settings, validate_config
 from backend.shared.database import Base, check_connection, engine
 
@@ -75,6 +77,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# DODANE: Rejestracja routerów API
+app.include_router(api_router, prefix="/api")
 
 
 @app.get("/", status_code=status.HTTP_200_OK)

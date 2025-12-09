@@ -5,8 +5,6 @@ Wymaganie: Punkt 5 - Opis metod i podejść do testowania
 Konfiguracja testów jednostkowych i integracyjnych.
 """
 
-from unittest.mock import Mock
-
 import pytest
 from app.models.book import Book
 from app.models.book_copy import BookCopy, CopyStatus
@@ -54,20 +52,27 @@ def test_app():
     """
     app = FastAPI()
 
-    # Import routerów bez uruchamiania całej aplikacji
+    # Import routerów z poprawnych ścieżek
     try:
-        from app.api.books import router as books_router
+        from app.api.book_routes import router as books_router
 
         app.include_router(books_router, prefix="/api/books", tags=["books"])
-    except (ImportError, AttributeError):
-        pass
+    except (ImportError, AttributeError) as e:
+        print(f"Warning: Could not import book_routes: {e}")
 
     try:
-        from app.api.copies import router as copies_router
+        from app.api.catalog_routes import router as catalog_router
+
+        app.include_router(catalog_router, prefix="/api/catalog", tags=["catalog"])
+    except (ImportError, AttributeError) as e:
+        print(f"Warning: Could not import catalog_routes: {e}")
+
+    try:
+        from app.api.copy_routes import router as copies_router
 
         app.include_router(copies_router, prefix="/api/copies", tags=["copies"])
-    except (ImportError, AttributeError):
-        pass
+    except (ImportError, AttributeError) as e:
+        print(f"Warning: Could not import copy_routes: {e}")
 
     return app
 
@@ -106,42 +111,47 @@ def app_fixture(test_app):
 def mock_librarian():
     """
     Mock użytkownika LIBRARIAN dla testów dependency overrides.
+    Zwraca dict zamiast Mock object - routery oczekują dict z kluczem 'sub'.
+    UUID musi być w poprawnym formacie dla konwersji UUID(current_user.get("sub")).
     """
-    mock = Mock()
-    mock.id = "librarian-uuid-1234"
-    mock.email = "librarian@library.com"
-    mock.role = "LIBRARIAN"
-    mock.is_active = True
-    mock.is_blocked = False
-    return mock
+    return {
+        "sub": "00000000-0000-0000-0000-000000000001",  # Poprawny format UUID
+        "email": "librarian@library.com",
+        "role": "LIBRARIAN",
+        "is_active": True,
+        "is_blocked": False,
+    }
 
 
 @pytest.fixture
 def mock_admin():
     """
     Mock użytkownika ADMIN dla testów dependency overrides.
+    Zwraca dict zamiast Mock object - routery oczekują dict z kluczem 'sub'.
+    UUID musi być w poprawnym formacie dla konwersji UUID(current_user.get("sub")).
     """
-    mock = Mock()
-    mock.id = "admin-uuid-5678"
-    mock.email = "admin@library.com"
-    mock.role = "ADMIN"
-    mock.is_active = True
-    mock.is_blocked = False
-    return mock
+    return {
+        "sub": "00000000-0000-0000-0000-000000000002",  # Poprawny format UUID
+        "email": "admin@library.com",
+        "role": "ADMIN",
+        "is_active": True,
+        "is_blocked": False,
+    }
 
 
 @pytest.fixture
 def mock_reader():
     """
     Mock użytkownika READER dla testów dependency overrides.
+    Zwraca dict zamiast Mock object - routery oczekują dict z kluczem 'sub'.
     """
-    mock = Mock()
-    mock.id = "reader-uuid-9012"
-    mock.email = "reader@library.com"
-    mock.role = "READER"
-    mock.is_active = True
-    mock.is_blocked = False
-    return mock
+    return {
+        "sub": "00000000-0000-0000-0000-000000000003",  # Poprawny format UUID
+        "email": "reader@library.com",
+        "role": "READER",
+        "is_active": True,
+        "is_blocked": False,
+    }
 
 
 @pytest.fixture
@@ -235,7 +245,9 @@ def reader_token():
     try:
         from app.core.security import create_access_token
 
-        return create_access_token(data={"sub": "reader-uuid-9012", "role": "READER"})
+        return create_access_token(
+            data={"sub": "00000000-0000-0000-0000-000000000003", "role": "READER"}
+        )
     except ImportError:
         return "mock-reader-token"
 
@@ -249,7 +261,7 @@ def librarian_token():
         from app.core.security import create_access_token
 
         return create_access_token(
-            data={"sub": "librarian-uuid-1234", "role": "LIBRARIAN"}
+            data={"sub": "00000000-0000-0000-0000-000000000001", "role": "LIBRARIAN"}
         )
     except ImportError:
         return "mock-librarian-token"
@@ -263,7 +275,9 @@ def admin_token():
     try:
         from app.core.security import create_access_token
 
-        return create_access_token(data={"sub": "admin-uuid-5678", "role": "ADMIN"})
+        return create_access_token(
+            data={"sub": "00000000-0000-0000-0000-000000000002", "role": "ADMIN"}
+        )
     except ImportError:
         return "mock-admin-token"
 

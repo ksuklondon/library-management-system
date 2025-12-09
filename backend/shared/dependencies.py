@@ -229,12 +229,18 @@ async def get_current_user_payload(
 # DEPENDENCIES - RBAC (Role-Based Access Control)
 # ==========================================
 
+# Cache dla require_role - klucz: tuple ról, wartość: dependency function
+_role_dependencies_cache = {}
+
 
 def require_role(allowed_roles: List[str]):
     """
     Factory function - tworzy dependency sprawdzający rolę użytkownika.
 
     Implementuje RBAC - Role-Based Access Control (Wymaganie NF5).
+
+    WAŻNE: Używa cache - ta sama lista ról zwraca tę samą dependency function.
+    To pozwala na dependency_overrides w testach.
 
     Args:
         allowed_roles: Lista dozwolonych ról (np. ["ADMIN", "LIBRARIAN"])
@@ -261,6 +267,12 @@ def require_role(allowed_roles: List[str]):
             # Admin i bibliotekarz mogą dodawać książki
             return {"message": "Book created"}
     """
+    # Tworzymy klucz cache (tuple posortowanych ról)
+    cache_key = tuple(sorted(allowed_roles))
+
+    # Jeśli już mamy dependency dla tych ról, zwróć z cache
+    if cache_key in _role_dependencies_cache:
+        return _role_dependencies_cache[cache_key]
 
     async def role_checker(
         user_payload: Dict[str, Any] = Depends(get_current_user_payload),
@@ -290,6 +302,9 @@ def require_role(allowed_roles: List[str]):
 
         # Rola OK - zwracamy payload
         return user_payload
+
+    # Zapisz w cache
+    _role_dependencies_cache[cache_key] = role_checker
 
     return role_checker
 

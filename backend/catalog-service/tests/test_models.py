@@ -5,6 +5,8 @@ Wymaganie: Punkt 5 - Opis metod i podejść do testowania
 Testy jednostkowe dla modeli danych.
 """
 
+from uuid import UUID
+
 from app.models.book import Book
 from app.models.book_copy import BookCopy, CopyStatus
 
@@ -79,14 +81,21 @@ class TestBookModel:
 
     def test_book_soft_delete(self, db_session, sample_book):
         """Test soft delete książki (NF19)."""
+        book_id = sample_book.id  # Zapisz ID przed modyfikacją
+
         sample_book.is_deleted = True
-        sample_book.deleted_by = "admin-uuid-123"
+        sample_book.deleted_by = UUID("00000000-0000-0000-0000-000000000003")
 
         db_session.commit()
-        db_session.refresh(sample_book)
 
-        assert sample_book.is_deleted is True
-        assert sample_book.deleted_by == "admin-uuid-123"
+        # Nie używamy refresh() przez problem UUID w SQLite
+        # Odczytaj książkę z bazy ponownie
+        from app.models.book import Book
+
+        deleted_book = db_session.query(Book).filter(Book.id == book_id).first()
+
+        assert deleted_book.is_deleted is True
+        assert deleted_book.deleted_by == UUID("00000000-0000-0000-0000-000000000003")
 
     def test_book_repr(self, sample_book):
         """Test reprezentacji tekstowej książki."""

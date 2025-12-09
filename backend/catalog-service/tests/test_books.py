@@ -67,7 +67,7 @@ class TestCreateBook:
 
         app_fixture.dependency_overrides.clear()
 
-    def test_create_book_invalid_isbn(self, client, mock_librarian):
+    def test_create_book_invalid_isbn(self, client, mock_librarian, app_fixture):
         """Test walidacji ISBN (NF7 - walidacja danych)."""
         book_data = {
             "title": "Test Book",
@@ -75,10 +75,18 @@ class TestCreateBook:
             "isbn": "invalid-isbn",  # Za krótki
         }
 
+        from backend.shared.dependencies import require_role
+
+        app_fixture.dependency_overrides[require_role(["LIBRARIAN", "ADMIN"])] = (
+            lambda: mock_librarian
+        )
+
         response = client.post("/api/books/", json=book_data)
 
         # Pydantic validation powinno odrzucić
         assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+
+        app_fixture.dependency_overrides.clear()
 
 
 class TestUpdateBook:
@@ -164,10 +172,13 @@ class TestDeleteBook:
 
         assert response.status_code == status.HTTP_204_NO_CONTENT
 
-        # Sprawdź soft delete
-        db_session.refresh(sample_book)
-        assert sample_book.is_deleted is True
-        # Note: mock_admin.id to string, deleted_by to UUID - może być problem w teście
+        # Sprawdź soft delete - nie używamy refresh() przez problem UUID w SQLite
+        # Odczytaj książkę z bazy ponownie
+        from app.models.book import Book
+
+        deleted_book = db_session.query(Book).filter(Book.id == sample_book.id).first()
+        assert deleted_book.is_deleted is True
+        assert deleted_book.deleted_by is not None
 
         app_fixture.dependency_overrides.clear()
 
