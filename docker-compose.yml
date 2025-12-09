@@ -1,257 +1,125 @@
-# ==========================================
-# SYSTEM ZARZĄDZANIA BIBLIOTEKĄ - Docker Compose
-# ==========================================
-# Ten plik konfiguruje i uruchamia wszystkie serwisy projektu:
-# - PostgreSQL (baza danych)
-# - Auth Service (autoryzacja)
-# - Catalog Service (katalog książek)
-# - Loan Service (wypożyczenia i rezerwacje)
-# - Frontend (React - opcjonalnie)
-#
-# URUCHOMIENIE:
-#   docker compose up          - uruchom wszystko (foreground)
-#   docker compose up -d       - uruchom w tle (background)
-#   docker compose down        - zatrzymaj wszystko
-#   docker compose logs -f     - zobacz logi na żywo
-#
-# WYMAGANIA: Docker i Docker Compose zainstalowane
-# ==========================================
-
 version: '3.9'
 
-# ==========================================
-# SERWISY
-# ==========================================
 services:
 
-  # ==========================================
-  # POSTGRESQL - Baza danych (Wymaganie NF14)
-  # ==========================================
   postgres:
-    # Obraz PostgreSQL 15 (Alpine = mniejszy rozmiar)
     image: postgres:15-alpine
-
-    # Nazwa kontenera (łatwiej identyfikować)
     container_name: library-postgres
-
-    # Automatyczne restartowanie przy awarii
     restart: unless-stopped
-
-    # Zmienne środowiskowe z pliku .env
     environment:
-      # Użytkownik bazy danych
       POSTGRES_USER: ${POSTGRES_USER:-admin}
-
-      # Hasło użytkownika
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-admin123}
-
-      # Nazwa bazy danych
       POSTGRES_DB: ${POSTGRES_DB:-biblioteka}
-
-      # Metoda autentykacji (bezpieczniejsza niż md5)
       POSTGRES_HOST_AUTH_METHOD: scram-sha-256
       POSTGRES_INITDB_ARGS: "--auth-host=scram-sha-256"
-
-    # Mapowanie portów: host:container
-    # Dostęp z localhost:5432
     ports:
       - "5432:5432"
-
-    # Wolumeny (dane przetrwają restart kontenera)
     volumes:
-      # Dane bazy danych (persistent storage)
       - postgres_data:/var/lib/postgresql/data
-
-      # Skrypt inicjalizacyjny (opcjonalnie)
-      # - ./backend/shared/init.sql:/docker-entrypoint-initdb.d/init.sql
-
-    # Health check - sprawdza czy baza działa (Wymaganie NF28)
     healthcheck:
-      # Komenda sprawdzająca połączenie
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-admin} -d ${POSTGRES_DB:-biblioteka}"]
-
-      # Interwał sprawdzania (co 10 sekund)
       interval: 10s
-
-      # Timeout pojedynczego sprawdzenia
       timeout: 5s
-
-      # Ile prób przed uznaniem za "unhealthy"
       retries: 5
-
-    # Sieć wewnętrzna
     networks:
       - library-network
 
-  # ==========================================
-  # AUTH SERVICE - Serwis Autoryzacji (Port 8001)
-  # ==========================================
-  # Odpowiedzialny za: rejestrację, logowanie, JWT, zarządzanie użytkownikami
-  # Wymagania: F1, F2, F2a, F3, F19, F20, F26, F27, F28
   auth-service:
-    # Budowanie z Dockerfile
     build:
       context: ./backend/auth-service
       dockerfile: Dockerfile
-
     container_name: library-auth-service
     restart: unless-stopped
-
-    # Zmienne środowiskowe
     environment:
-      # ===== BAZA DANYCH =====
       DATABASE_URL: postgresql://${POSTGRES_USER:-admin}:${POSTGRES_PASSWORD:-admin123}@postgres:5432/${POSTGRES_DB:-biblioteka}
-
-      # ===== JWT (Wymaganie NF4) =====
       SECRET_KEY: ${SECRET_KEY:-super-secret-key-change-in-production-min-32-chars}
       ALGORITHM: ${ALGORITHM:-HS256}
       ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES:-30}
       REFRESH_TOKEN_EXPIRE_DAYS: ${REFRESH_TOKEN_EXPIRE_DAYS:-14}
-
-      # ===== APLIKACJA =====
       SERVICE_NAME: auth-service
       PORT: 8001
       ENVIRONMENT: ${ENVIRONMENT:-development}
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
-
-      # ===== CORS (Wymaganie NF6) =====
       ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:3000,http://localhost:5173}
-
-      # ===== RATE LIMITING (Wymaganie NF21) =====
       RATE_LIMIT_ENABLED: ${RATE_LIMIT_ENABLED:-true}
       RATE_LIMIT_REQUESTS_PER_MINUTE: ${RATE_LIMIT_REQUESTS_PER_MINUTE:-100}
       RATE_LIMIT_LOGIN_REQUESTS_PER_MINUTE: ${RATE_LIMIT_LOGIN_REQUESTS_PER_MINUTE:-5}
-
-    # Port dostępowy
     ports:
       - "${AUTH_SERVICE_PORT:-8001}:8001"
-
-    # Czekaj aż PostgreSQL będzie gotowy
     depends_on:
       postgres:
         condition: service_healthy
-
-    # Health check (Wymaganie NF28)
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 40s
-
     networks:
       - library-network
-
-    # Wolumeny (opcjonalnie - dla hot-reload w development)
     volumes:
       - ./backend/auth-service/app:/app/app:ro
 
-  # ==========================================
-  # CATALOG SERVICE - Serwis Katalogu (Port 8002)
-  # ==========================================
-  # Odpowiedzialny za: książki, egzemplarze, wyszukiwanie, filtrowanie
-  # Wymagania: F4, F5, F6, F7, F15, F16
   catalog-service:
     build:
       context: ./backend/catalog-service
       dockerfile: Dockerfile
-
     container_name: library-catalog-service
     restart: unless-stopped
-
     environment:
-      # ===== BAZA DANYCH =====
       DATABASE_URL: postgresql://${POSTGRES_USER:-admin}:${POSTGRES_PASSWORD:-admin123}@postgres:5432/${POSTGRES_DB:-biblioteka}
-
-      # ===== JWT (do weryfikacji tokenów) =====
       SECRET_KEY: ${SECRET_KEY:-super-secret-key-change-in-production-min-32-chars}
       ALGORITHM: ${ALGORITHM:-HS256}
-
-      # ===== APLIKACJA =====
       SERVICE_NAME: catalog-service
       PORT: 8002
       ENVIRONMENT: ${ENVIRONMENT:-development}
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
-
-      # ===== CORS =====
       ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:3000,http://localhost:5173}
-
-      # ===== AUTH SERVICE URL (dla weryfikacji użytkowników) =====
       AUTH_SERVICE_URL: http://auth-service:8001
-
     ports:
       - "${CATALOG_SERVICE_PORT:-8002}:8002"
-
     depends_on:
       postgres:
         condition: service_healthy
       auth-service:
         condition: service_healthy
-
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8002/health"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 40s
-
     networks:
       - library-network
-
     volumes:
       - ./backend/catalog-service/app:/app/app:ro
 
-  # ==========================================
-  # LOAN SERVICE - Serwis Wypożyczeń (Port 8003)
-  # ==========================================
-  # Odpowiedzialny za: rezerwacje, wypożyczenia, zwroty, kary
-  # Wymagania: F8, F9, F10, F11, F12, F12a, F13, F14, F17, F18
   loan-service:
     build:
       context: ./backend/loan-service
       dockerfile: Dockerfile
-
     container_name: library-loan-service
     restart: unless-stopped
-
     environment:
-      # ===== BAZA DANYCH =====
       DATABASE_URL: postgresql://${POSTGRES_USER:-admin}:${POSTGRES_PASSWORD:-admin123}@postgres:5432/${POSTGRES_DB:-biblioteka}
-
-      # ===== JWT =====
       SECRET_KEY: ${SECRET_KEY:-super-secret-key-change-in-production-min-32-chars}
       ALGORITHM: ${ALGORITHM:-HS256}
-
-      # ===== APLIKACJA =====
       SERVICE_NAME: loan-service
       PORT: 8003
       ENVIRONMENT: ${ENVIRONMENT:-development}
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
-
-      # ===== CORS =====
       ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:3000,http://localhost:5173}
-
-      # ===== INNE SERWISY =====
       AUTH_SERVICE_URL: http://auth-service:8001
       CATALOG_SERVICE_URL: http://catalog-service:8002
-
-      # ===== REGUŁY BIZNESOWE (Wymaganie F29) =====
-      # Rezerwacje (Wymaganie F8)
       RESERVATION_DURATION_DAYS: ${RESERVATION_DURATION_DAYS:-3}
       MAX_RESERVATIONS_PER_USER: ${MAX_RESERVATIONS_PER_USER:-3}
-
-      # Wypożyczenia (Wymaganie F11)
       LOAN_DURATION_DAYS: ${LOAN_DURATION_DAYS:-14}
       MAX_LOANS_PER_USER: ${MAX_LOANS_PER_USER:-5}
       ALLOW_LOAN_EXTENSION: ${ALLOW_LOAN_EXTENSION:-true}
-
-      # Kary (Wymaganie NF29)
       FINE_PER_DAY: ${FINE_PER_DAY:-1.00}
       MAX_FINE_AMOUNT: ${MAX_FINE_AMOUNT:-100.00}
-
     ports:
       - "${LOAN_SERVICE_PORT:-8003}:8003"
-
     depends_on:
       postgres:
         condition: service_healthy
@@ -259,97 +127,41 @@ services:
         condition: service_healthy
       catalog-service:
         condition: service_healthy
-
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8003/health"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 40s
-
     networks:
       - library-network
-
     volumes:
       - ./backend/loan-service/app:/app/app:ro
 
-  # ==========================================
-  # FRONTEND - Aplikacja React (Port 3000)
-  # ==========================================
-  # OPCJONALNIE - odkomentuj gdy będzie gotowy frontend (Milestone 5)
-  # frontend:
-  #   build:
-  #     context: ./frontend
-  #     dockerfile: Dockerfile
-  #
-  #   container_name: library-frontend
-  #   restart: unless-stopped
-  #
-  #   environment:
-  #     # URL do API
-  #     VITE_API_URL: http://localhost:8000
-  #     VITE_AUTH_SERVICE_URL: http://localhost:8001
-  #     VITE_CATALOG_SERVICE_URL: http://localhost:8002
-  #     VITE_LOAN_SERVICE_URL: http://localhost:8003
-  #
-  #   ports:
-  #     - "${FRONTEND_PORT:-3000}:3000"
-  #
-  #   depends_on:
-  #     - auth-service
-  #     - catalog-service
-  #     - loan-service
-  #
-  #   networks:
-  #     - library-network
-  #
-  #   volumes:
-  #     - ./frontend/src:/app/src:ro
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: library-frontend
+    restart: unless-stopped
+    environment:
+      VITE_API_BASE_URL: http://localhost:8000
+      VITE_AUTH_SERVICE_URL: http://auth-service:8001
+      VITE_CATALOG_SERVICE_URL: http://catalog-service:8002
+      VITE_LOAN_SERVICE_URL: http://loan-service:8003
+    ports:
+      - "${FRONTEND_PORT:-3000}:80"
+    depends_on:
+      - auth-service
+      - catalog-service
+      - loan-service
+    networks:
+      - library-network
 
-  # ==========================================
-  # PGADMIN - Narzędzie do zarządzania PostgreSQL (OPCJONALNIE)
-  # ==========================================
-  # Odkomentuj jeśli chcesz GUI do bazy danych
-  # Dostęp: http://localhost:5050
-  # pgadmin:
-  #   image: dpage/pgadmin4:latest
-  #   container_name: library-pgadmin
-  #   restart: unless-stopped
-  #
-  #   environment:
-  #     PGADMIN_DEFAULT_EMAIL: admin@biblioteca.pl
-  #     PGADMIN_DEFAULT_PASSWORD: admin123
-  #     PGADMIN_CONFIG_SERVER_MODE: 'False'
-  #
-  #   ports:
-  #     - "5050:80"
-  #
-  #   depends_on:
-  #     - postgres
-  #
-  #   networks:
-  #     - library-network
-  #
-  #   volumes:
-  #     - pgadmin_data:/var/lib/pgadmin
-
-# ==========================================
-# WOLUMENY (Persistent Storage)
-# ==========================================
-# Dane przetrwają restart i usunięcie kontenerów
 volumes:
-  # Dane PostgreSQL
   postgres_data:
     driver: local
 
-  # Dane PgAdmin (jeśli używasz)
-  # pgadmin_data:
-  #   driver: local
-
-# ==========================================
-# SIECI
-# ==========================================
-# Wewnętrzna sieć dla komunikacji między serwisami
 networks:
   library-network:
     driver: bridge
