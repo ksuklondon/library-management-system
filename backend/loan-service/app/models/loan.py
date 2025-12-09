@@ -141,9 +141,18 @@ class Loan(Base):
         """
         Sprawdź czy książkę można zwrócić (F12).
 
-        Zwrócić można tylko aktywne wypożyczenie, które nie zostało jeszcze zwrócone.
+        Zwrócić można wypożyczenie które:
+        - jest w statusie ACTIVE lub OVERDUE (przetrzymane też można zwrócić!),
+        - nie zostało jeszcze zwrócone (returned_at is None),
+        - nie jest oznaczone jako usunięte.
+
+        FIX: Dodano obsługę OVERDUE statusu - książki przetrzymane też można zwracać!
         """
-        return self.is_active()
+        return (
+            self.status in [LoanStatus.ACTIVE, LoanStatus.OVERDUE]
+            and not self.is_deleted
+            and self.returned_at is None
+        )
 
     def can_be_extended(self) -> bool:
         """
@@ -210,16 +219,28 @@ class Loan(Base):
 
         Kara: 2 zł za każdy dzień przetrzymania.
         Funkcja przydaje się np. do wyliczania dynamicznej kary
-        przed zwrotem książki.
+        przed zwrotem książki lub w czasie trwania wypożyczenia.
 
         Returns:
             Kwota kary w złotych (float).
+
+        FIX: Poprawiono logikę - teraz działa dla statusów ACTIVE i OVERDUE.
+        Wcześniej is_overdue() wymagało status == ACTIVE, co blokowało
+        wyliczanie kary dla loans już oznaczonych jako OVERDUE.
         """
-        if not self.is_overdue():
+        # Jeśli już zwrócono - nie liczymy nowej kary (używamy fine_amount)
+        if self.returned_at is not None:
             return 0.0
 
-        days_overdue = (datetime.utcnow() - self.due_date).days
-        return days_overdue * 2.0
+        # Jeśli loan jest aktywny lub overdue i przekroczono termin
+        if (
+            self.status in [LoanStatus.ACTIVE, LoanStatus.OVERDUE]
+            and datetime.utcnow() > self.due_date
+        ):
+            days_overdue = (datetime.utcnow() - self.due_date).days
+            return max(0.0, days_overdue * 2.0)
+
+        return 0.0
 
     def __repr__(self) -> str:
         """
