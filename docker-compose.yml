@@ -1,168 +1,81 @@
 version: '3.9'
 
 services:
-
+  # === PostgreSQL Database ===
   postgres:
-    image: postgres:15-alpine
-    container_name: library-postgres
+    image: postgres:15
+    container_name: postgres
     restart: unless-stopped
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-admin}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-admin123}
-      POSTGRES_DB: ${POSTGRES_DB:-biblioteka}
-      POSTGRES_HOST_AUTH_METHOD: scram-sha-256
-      POSTGRES_INITDB_ARGS: "--auth-host=scram-sha-256"
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin123
+      POSTGRES_DB: biblioteka
     ports:
       - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-admin} -d ${POSTGRES_DB:-biblioteka}"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      - postgres-data:/var/lib/postgresql/data
     networks:
-      - library-network
+      - backend-network
 
+  # === Auth Service ===
   auth-service:
     build:
       context: ./backend/auth-service
-      dockerfile: Dockerfile
-    container_name: library-auth-service
-    restart: unless-stopped
-    environment:
-      DATABASE_URL: postgresql://${POSTGRES_USER:-admin}:${POSTGRES_PASSWORD:-admin123}@postgres:5432/${POSTGRES_DB:-biblioteka}
-      SECRET_KEY: ${SECRET_KEY:-super-secret-key-change-in-production-min-32-chars}
-      ALGORITHM: ${ALGORITHM:-HS256}
-      ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES:-30}
-      REFRESH_TOKEN_EXPIRE_DAYS: ${REFRESH_TOKEN_EXPIRE_DAYS:-14}
-      SERVICE_NAME: auth-service
-      PORT: 8001
-      ENVIRONMENT: ${ENVIRONMENT:-development}
-      LOG_LEVEL: ${LOG_LEVEL:-INFO}
-      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:3000,http://localhost:5173}
-      RATE_LIMIT_ENABLED: ${RATE_LIMIT_ENABLED:-true}
-      RATE_LIMIT_REQUESTS_PER_MINUTE: ${RATE_LIMIT_REQUESTS_PER_MINUTE:-100}
-      RATE_LIMIT_LOGIN_REQUESTS_PER_MINUTE: ${RATE_LIMIT_LOGIN_REQUESTS_PER_MINUTE:-5}
-    ports:
-      - "${AUTH_SERVICE_PORT:-8001}:8001"
+    container_name: auth-service
     depends_on:
-      postgres:
-        condition: service_healthy
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
+      - postgres
+    ports:
+      - "8001:8001"
     networks:
-      - library-network
-    volumes:
-      - ./backend/auth-service/app:/app/app:ro
+      - backend-network
+    environment:
+      DATABASE_URL: postgres://admin:admin123@postgres:5432/biblioteka
 
+  # === Catalog Service ===
   catalog-service:
     build:
       context: ./backend/catalog-service
-      dockerfile: Dockerfile
-    container_name: library-catalog-service
-    restart: unless-stopped
-    environment:
-      DATABASE_URL: postgresql://${POSTGRES_USER:-admin}:${POSTGRES_PASSWORD:-admin123}@postgres:5432/${POSTGRES_DB:-biblioteka}
-      SECRET_KEY: ${SECRET_KEY:-super-secret-key-change-in-production-min-32-chars}
-      ALGORITHM: ${ALGORITHM:-HS256}
-      SERVICE_NAME: catalog-service
-      PORT: 8002
-      ENVIRONMENT: ${ENVIRONMENT:-development}
-      LOG_LEVEL: ${LOG_LEVEL:-INFO}
-      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:3000,http://localhost:5173}
-      AUTH_SERVICE_URL: http://auth-service:8001
-    ports:
-      - "${CATALOG_SERVICE_PORT:-8002}:8002"
+    container_name: catalog-service
     depends_on:
-      postgres:
-        condition: service_healthy
-      auth-service:
-        condition: service_healthy
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8002/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
+      - postgres
+    ports:
+      - "8002:8002"
     networks:
-      - library-network
-    volumes:
-      - ./backend/catalog-service/app:/app/app:ro
+      - backend-network
+    environment:
+      DATABASE_URL: postgres://admin:admin123@postgres:5432/biblioteka
 
+  # === Loan Service ===
   loan-service:
     build:
       context: ./backend/loan-service
-      dockerfile: Dockerfile
-    container_name: library-loan-service
-    restart: unless-stopped
-    environment:
-      DATABASE_URL: postgresql://${POSTGRES_USER:-admin}:${POSTGRES_PASSWORD:-admin123}@postgres:5432/${POSTGRES_DB:-biblioteka}
-      SECRET_KEY: ${SECRET_KEY:-super-secret-key-change-in-production-min-32-chars}
-      ALGORITHM: ${ALGORITHM:-HS256}
-      SERVICE_NAME: loan-service
-      PORT: 8003
-      ENVIRONMENT: ${ENVIRONMENT:-development}
-      LOG_LEVEL: ${LOG_LEVEL:-INFO}
-      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:3000,http://localhost:5173}
-      AUTH_SERVICE_URL: http://auth-service:8001
-      CATALOG_SERVICE_URL: http://catalog-service:8002
-      RESERVATION_DURATION_DAYS: ${RESERVATION_DURATION_DAYS:-3}
-      MAX_RESERVATIONS_PER_USER: ${MAX_RESERVATIONS_PER_USER:-3}
-      LOAN_DURATION_DAYS: ${LOAN_DURATION_DAYS:-14}
-      MAX_LOANS_PER_USER: ${MAX_LOANS_PER_USER:-5}
-      ALLOW_LOAN_EXTENSION: ${ALLOW_LOAN_EXTENSION:-true}
-      FINE_PER_DAY: ${FINE_PER_DAY:-1.00}
-      MAX_FINE_AMOUNT: ${MAX_FINE_AMOUNT:-100.00}
-    ports:
-      - "${LOAN_SERVICE_PORT:-8003}:8003"
+    container_name: loan-service
     depends_on:
-      postgres:
-        condition: service_healthy
-      auth-service:
-        condition: service_healthy
-      catalog-service:
-        condition: service_healthy
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8003/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
+      - postgres
+    ports:
+      - "8003:8003"
     networks:
-      - library-network
-    volumes:
-      - ./backend/loan-service/app:/app/app:ro
+      - backend-network
+    environment:
+      DATABASE_URL: postgres://admin:admin123@postgres:5432/biblioteka
 
+  # === Frontend (Vite + NGINX) ===
   frontend:
     build:
       context: ./frontend
-      dockerfile: Dockerfile
-    container_name: library-frontend
-    restart: unless-stopped
-    environment:
-      VITE_API_BASE_URL: http://localhost:8000
-      VITE_AUTH_SERVICE_URL: http://auth-service:8001
-      VITE_CATALOG_SERVICE_URL: http://catalog-service:8002
-      VITE_LOAN_SERVICE_URL: http://loan-service:8003
-    ports:
-      - "${FRONTEND_PORT:-3000}:80"
+    container_name: frontend
     depends_on:
       - auth-service
       - catalog-service
       - loan-service
+    ports:
+      - "3000:80"  # przeglądarka:kontener
     networks:
-      - library-network
+      - backend-network
 
 volumes:
-  postgres_data:
-    driver: local
+  postgres-data:
 
 networks:
-  library-network:
+  backend-network:
     driver: bridge
-    name: library-network

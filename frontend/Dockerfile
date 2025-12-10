@@ -9,10 +9,10 @@ COPY package*.json ./
 # Instalujemy zależności
 RUN npm install
 
-# Kopiujemy resztę projektu
+# Kopiujemy pliki projektu (w tym .env)
 COPY . .
 
-# Tworzymy build produkcyjny
+# Tworzymy build produkcyjny – Vite przeczyta zmienne z .env
 RUN npm run build
 
 # Etap 2: Serwowanie przez nginx
