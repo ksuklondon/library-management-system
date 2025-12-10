@@ -1,73 +1,58 @@
-# ==========================================
-# CATALOG SERVICE - Dockerfile
-# ==========================================
-# Buduje obraz Docker dla serwisu katalogu książek
+# ===============================
+# 🔹 Base image with system deps
+# ===============================
+FROM python:3.11-slim AS base
 
-# ==========================================
-# ETAP 1: BASE - Obraz bazowy Python
-# ==========================================
-FROM python:3.11-slim as base
-
-# Metadane obrazu
 LABEL maintainer="library-system@example.com"
 LABEL service="catalog-service"
 LABEL version="1.0.0"
 
-# Ustawienie zmiennych środowiskowych
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     PIP_NO_CACHE_DIR=1 \
-    PIP_DISABLE_PIP_VERSION_CHECK=1
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    PYTHONPATH=/app
 
-# Instalacja zależności systemowych
 RUN apt-get update && apt-get install -y \
     gcc \
     postgresql-client \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# ==========================================
-# ETAP 2: DEPENDENCIES - Instalacja bibliotek Python
-# ==========================================
-FROM base as dependencies
+# ===============================
+# 🔹 Dependencies layer
+# ===============================
+FROM base AS dependencies
 
-# Utwórz katalog roboczy
 WORKDIR /app
 
-# Skopiuj tylko requirements.txt (cache layer)
-COPY requirements.txt .
+# Kopiuj requirements z catalog-service
+COPY catalog-service/requirements.txt .
 
-# Zainstaluj zależności Python
 RUN pip install --upgrade pip && \
     pip install -r requirements.txt
 
-# ==========================================
-# ETAP 3: APPLICATION - Kod aplikacji
-# ==========================================
-FROM dependencies as application
+# ===============================
+# 🔹 Final application image
+# ===============================
+FROM dependencies AS application
 
-# Skopiuj cały kod aplikacji
-COPY . .
+WORKDIR /app
 
-# Skopiuj shared modules (wspólny kod)
-COPY ../shared /app/shared
+# Kopiuj kod catalog-service
+COPY catalog-service/ /app/
 
-# Utwórz użytkownika non-root (bezpieczeństwo)
+# Kopiuj wspólny moduł shared
+COPY shared/ /app/shared/
+
 RUN useradd -m -u 1000 appuser && \
     chown -R appuser:appuser /app
 
-# Przełącz na użytkownika non-root
 USER appuser
 
-# Eksponuj port serwisu
 EXPOSE 8002
 
-# Health check (sprawdza czy serwis działa)
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
     CMD curl -f http://localhost:8002/health || exit 1
 
-# ==========================================
-# URUCHOMIENIE APLIKACJI
-# ==========================================
-# Komenda startowa - uruchamia FastAPI przez uvicorn
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8002", "--reload"]

@@ -26,7 +26,7 @@ class TestCreateBook:
         }
 
         # Mock autoryzacji
-        from backend.shared.dependencies import require_role
+        from shared.dependencies import require_role
 
         app_fixture.dependency_overrides[require_role(["LIBRARIAN", "ADMIN"])] = (
             lambda: mock_librarian
@@ -54,7 +54,7 @@ class TestCreateBook:
             "publisher": "Test Publisher",
         }
 
-        from backend.shared.dependencies import require_role
+        from shared.dependencies import require_role
 
         app_fixture.dependency_overrides[require_role(["LIBRARIAN", "ADMIN"])] = (
             lambda: mock_librarian
@@ -75,7 +75,7 @@ class TestCreateBook:
             "isbn": "invalid-isbn",  # Za krótki
         }
 
-        from backend.shared.dependencies import require_role
+        from shared.dependencies import require_role
 
         app_fixture.dependency_overrides[require_role(["LIBRARIAN", "ADMIN"])] = (
             lambda: mock_librarian
@@ -100,7 +100,7 @@ class TestUpdateBook:
         """Test pomyślnej aktualizacji książki (F15)."""
         update_data = {"title": "Updated Title", "pages": 350}
 
-        from backend.shared.dependencies import require_role
+        from shared.dependencies import require_role
 
         app_fixture.dependency_overrides[require_role(["LIBRARIAN", "ADMIN"])] = (
             lambda: mock_librarian
@@ -121,7 +121,7 @@ class TestUpdateBook:
         fake_uuid = "00000000-0000-0000-0000-000000000000"
         update_data = {"title": "New Title"}
 
-        from backend.shared.dependencies import require_role
+        from shared.dependencies import require_role
 
         app_fixture.dependency_overrides[require_role(["LIBRARIAN", "ADMIN"])] = (
             lambda: mock_librarian
@@ -142,7 +142,7 @@ class TestUpdateBook:
 
         update_data = {"isbn": book2.isbn}  # ISBN książki 2
 
-        from backend.shared.dependencies import require_role
+        from shared.dependencies import require_role
 
         app_fixture.dependency_overrides[require_role(["LIBRARIAN", "ADMIN"])] = (
             lambda: mock_librarian
@@ -164,7 +164,7 @@ class TestDeleteBook:
         self, client, db_session, sample_book, mock_admin, app_fixture
     ):
         """Test pomyślnego usunięcia książki (F15 - ADMIN, NF19 - soft delete)."""
-        from backend.shared.dependencies import require_role
+        from shared.dependencies import require_role
 
         app_fixture.dependency_overrides[require_role(["ADMIN"])] = lambda: mock_admin
 
@@ -192,7 +192,7 @@ class TestDeleteBook:
         sample_book_copy.status = CopyStatus.BORROWED
         db_session.commit()
 
-        from backend.shared.dependencies import require_role
+        from shared.dependencies import require_role
 
         app_fixture.dependency_overrides[require_role(["ADMIN"])] = lambda: mock_admin
 
@@ -208,7 +208,7 @@ class TestDeleteBook:
         """Test usuwania nieistniejącej książki."""
         fake_uuid = "00000000-0000-0000-0000-000000000000"
 
-        from backend.shared.dependencies import require_role
+        from shared.dependencies import require_role
 
         app_fixture.dependency_overrides[require_role(["ADMIN"])] = lambda: mock_admin
 
@@ -228,7 +228,7 @@ class TestGetAllBooks:
         self, client, db_session, multiple_books, mock_librarian, app_fixture
     ):
         """Test pobierania wszystkich książek dla zarządzania (F15)."""
-        from backend.shared.dependencies import require_role
+        from shared.dependencies import require_role
 
         app_fixture.dependency_overrides[require_role(["LIBRARIAN", "ADMIN"])] = (
             lambda: mock_librarian
@@ -250,7 +250,7 @@ class TestGetAllBooks:
         sample_book.is_deleted = True
         db_session.commit()
 
-        from backend.shared.dependencies import require_role
+        from shared.dependencies import require_role
 
         app_fixture.dependency_overrides[require_role(["LIBRARIAN", "ADMIN"])] = (
             lambda: mock_admin

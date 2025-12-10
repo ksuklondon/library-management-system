@@ -25,7 +25,7 @@ class TestLibrarianWorkflow:
         3. Sprawdź czy książka widoczna w katalogu
         4. Sprawdź dostępność
         """
-        from backend.shared.dependencies import require_role
+        from shared.dependencies import require_role
 
         app_fixture.dependency_overrides[require_role(["LIBRARIAN", "ADMIN"])] = (
             lambda: mock_librarian
@@ -137,7 +137,7 @@ class TestBookLifecycle:
         5. Admin usuwa książkę (soft delete)
         6. Sprawdź czy nie widoczna w katalogu
         """
-        from backend.shared.dependencies import require_role
+        from shared.dependencies import require_role
 
         # KROK 1: Dodaj książkę
         app_fixture.dependency_overrides[require_role(["LIBRARIAN", "ADMIN"])] = (
@@ -207,7 +207,7 @@ class TestPaginationFlow:
         2. Przeglądaj stronami (10 na stronę)
         3. Sprawdź wszystkie strony
         """
-        from backend.shared.dependencies import require_role
+        from shared.dependencies import require_role
 
         app_fixture.dependency_overrides[require_role(["LIBRARIAN", "ADMIN"])] = (
             lambda: mock_librarian

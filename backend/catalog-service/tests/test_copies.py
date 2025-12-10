@@ -24,7 +24,7 @@ class TestCreateBookCopy:
             "location": "Shelf A-2",
         }
 
-        from backend.shared.dependencies import require_role
+        from shared.dependencies import require_role
 
         app_fixture.dependency_overrides[require_role(["LIBRARIAN", "ADMIN"])] = (
             lambda: mock_librarian
@@ -46,7 +46,7 @@ class TestCreateBookCopy:
         fake_uuid = "00000000-0000-0000-0000-000000000000"
         copy_data = {"book_id": fake_uuid, "inventory_no": "INV-2024-999"}
 
-        from backend.shared.dependencies import require_role
+        from shared.dependencies import require_role
 
         app_fixture.dependency_overrides[require_role(["LIBRARIAN", "ADMIN"])] = (
             lambda: mock_librarian
@@ -73,7 +73,7 @@ class TestCreateBookCopy:
             "inventory_no": sample_book_copy.inventory_no,  # Duplikat!
         }
 
-        from backend.shared.dependencies import require_role
+        from shared.dependencies import require_role
 
         app_fixture.dependency_overrides[require_role(["LIBRARIAN", "ADMIN"])] = (
             lambda: mock_librarian
@@ -146,7 +146,7 @@ class TestUpdateBookCopy:
         """Test pomyślnej aktualizacji egzemplarza (F16)."""
         update_data = {"location": "Shelf B-5"}
 
-        from backend.shared.dependencies import require_role
+        from shared.dependencies import require_role
 
         app_fixture.dependency_overrides[require_role(["LIBRARIAN", "ADMIN"])] = (
             lambda: mock_librarian
@@ -184,7 +184,7 @@ class TestUpdateBookCopy:
         # Próba zmiany na istniejący numer
         update_data = {"inventory_no": "INV-SECOND"}
 
-        from backend.shared.dependencies import require_role
+        from shared.dependencies import require_role
 
         app_fixture.dependency_overrides[require_role(["LIBRARIAN", "ADMIN"])] = (
             lambda: mock_librarian
@@ -208,7 +208,7 @@ class TestUpdateCopyStatus:
         """Test pomyślnej zmiany statusu egzemplarza (F16)."""
         status_data = {"status": "DAMAGED"}
 
-        from backend.shared.dependencies import require_role
+        from shared.dependencies import require_role
 
         app_fixture.dependency_overrides[require_role(["LIBRARIAN", "ADMIN"])] = (
             lambda: mock_librarian
@@ -234,7 +234,7 @@ class TestUpdateCopyStatus:
 
         status_data = {"status": "DAMAGED"}
 
-        from backend.shared.dependencies import require_role
+        from shared.dependencies import require_role
 
         app_fixture.dependency_overrides[require_role(["LIBRARIAN", "ADMIN"])] = (
             lambda: mock_librarian
@@ -259,7 +259,7 @@ class TestDeleteBookCopy:
         self, client, db_session, sample_book_copy, mock_admin, app_fixture
     ):
         """Test pomyślnego usunięcia egzemplarza (F16 - ADMIN, NF19 - soft delete)."""
-        from backend.shared.dependencies import require_role
+        from shared.dependencies import require_role
 
         app_fixture.dependency_overrides[require_role(["ADMIN"])] = lambda: mock_admin
 
@@ -281,7 +281,7 @@ class TestDeleteBookCopy:
         sample_book_copy.status = CopyStatus.BORROWED
         db_session.commit()
 
-        from backend.shared.dependencies import require_role
+        from shared.dependencies import require_role
 
         app_fixture.dependency_overrides[require_role(["ADMIN"])] = lambda: mock_admin
 

@@ -18,8 +18,8 @@ from sqlalchemy.orm import Session
 
 from app.models.book import Book
 from app.schemas.book import BookCreate, BookResponse, BookUpdate
-from backend.shared.database import get_db
-from backend.shared.dependencies import require_role
+from shared.database import get_db
+from shared.dependencies import require_role
 
 router = APIRouter()
 

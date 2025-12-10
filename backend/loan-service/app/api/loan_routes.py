@@ -24,8 +24,8 @@ from sqlalchemy.orm import Session
 
 from app.models.loan import Loan, LoanStatus
 from app.schemas.loan import LoanCreate, LoanExtend, LoanResponse, LoanUpdate
-from backend.shared.database import get_db
-from backend.shared.dependencies import get_current_user_payload, require_role
+from shared.database import get_db
+from shared.dependencies import get_current_user_payload, require_role
 
 router = APIRouter()
 

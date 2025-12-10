@@ -33,8 +33,8 @@ from app.schemas.user import UserResponse
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from backend.shared.database import get_db
-from backend.shared.dependencies import get_current_user_payload
+from shared.database import get_db
+from shared.dependencies import get_current_user_payload
 
 router = APIRouter()
 

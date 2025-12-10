@@ -1,0 +1,56 @@
+# ==========================================
+# SHARED MODULES - Python dependencies
+# ==========================================
+# Wspólne zależności używane przez:
+# - shared/database.py
+# - shared/dependencies.py
+#
+# Importowane przez wszystkie serwisy:
+# auth-service, catalog-service, loan-service
+# ==========================================
+
+
+# ==========================================
+# ORM + PostgreSQL
+# ==========================================
+sqlalchemy==2.0.34
+# ORM do obsługi bazy danych (silnik, sesje, modele)
+
+psycopg2-binary==2.9.9
+# Sterownik PostgreSQL wymagany przez SQLAlchemy
+
+
+# ==========================================
+# FastAPI – dependencies (Depends, HTTPException)
+# ==========================================
+fastapi==0.115.3
+# Wymagane, bo shared/dependencies.py importuje:
+# from fastapi import Depends, HTTPException, status
+# from fastapi.security import HTTPBearer
+
+
+# ==========================================
+# JWT / Security
+# ==========================================
+python-jose[cryptography]==3.3.0
+# Obsługa JWT (jwt.encode / jwt.decode)
+# Wykorzystywane w:
+# - create_access_token
+# - verify_token
+
+
+# ==========================================
+# Konfiguracja aplikacji
+# ==========================================
+pydantic-settings==2.5.2
+# Używane w shared.config (settings)
+# dependencies.py importuje:
+# from shared.config import settings
+
+
+# ==========================================
+# Walidacja (opcjonalnie, ale bezpiecznie)
+# ==========================================
+pydantic==2.9.2
+# Może być używane w shared.config / payloadach JWT
+# i zapobiega problemom wersji między serwisami

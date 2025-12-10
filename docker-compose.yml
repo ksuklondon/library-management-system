@@ -1,5 +1,3 @@
-version: '3.9'
-
 services:
   # === PostgreSQL Database ===
   postgres:
@@ -16,62 +14,81 @@ services:
       - postgres-data:/var/lib/postgresql/data
     networks:
       - backend-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d biblioteka"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   # === Auth Service ===
   auth-service:
     build:
-      context: ./backend/auth-service
+      context: ./backend
+      dockerfile: auth-service/Dockerfile
     container_name: auth-service
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     ports:
       - "8001:8001"
     networks:
       - backend-network
     environment:
-      DATABASE_URL: postgres://admin:admin123@postgres:5432/biblioteka
+      DATABASE_URL: postgresql://admin:admin123@postgres:5432/biblioteka
+      PYTHONPATH: /app
+    restart: unless-stopped
 
   # === Catalog Service ===
   catalog-service:
     build:
-      context: ./backend/catalog-service
+      context: ./backend
+      dockerfile: catalog-service/Dockerfile
     container_name: catalog-service
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     ports:
       - "8002:8002"
     networks:
       - backend-network
     environment:
-      DATABASE_URL: postgres://admin:admin123@postgres:5432/biblioteka
+      DATABASE_URL: postgresql://admin:admin123@postgres:5432/biblioteka
+      PYTHONPATH: /app
+    restart: unless-stopped
 
   # === Loan Service ===
   loan-service:
     build:
-      context: ./backend/loan-service
+      context: ./backend
+      dockerfile: loan-service/Dockerfile
     container_name: loan-service
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     ports:
       - "8003:8003"
     networks:
       - backend-network
     environment:
-      DATABASE_URL: postgres://admin:admin123@postgres:5432/biblioteka
+      DATABASE_URL: postgresql://admin:admin123@postgres:5432/biblioteka
+      PYTHONPATH: /app
+    restart: unless-stopped
 
   # === Frontend (Vite + NGINX) ===
   frontend:
     build:
       context: ./frontend
+      dockerfile: Dockerfile
     container_name: frontend
     depends_on:
       - auth-service
       - catalog-service
       - loan-service
     ports:
-      - "3000:80"  # przeglądarka:kontener
+      - "3000:80"
     networks:
       - backend-network
+    restart: unless-stopped
 
 volumes:
   postgres-data:

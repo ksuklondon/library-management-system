@@ -12,7 +12,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 import logging
 
-from backend.shared.database import engine, Base
+from shared.database import engine, Base
 from app.api import reservation_routes, loan_routes, fine_routes
 
 # Konfiguracja logowania — zapisuje kluczowe informacje o starcie/wyłączeniu serwisu i błędach

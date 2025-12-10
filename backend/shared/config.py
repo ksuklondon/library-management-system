@@ -12,7 +12,7 @@ Odpowiada za:
 
 Użycie:
 ```python
-from backend.shared.config import settings
+from shared.config import settings
 
 print(settings.DATABASE_URL)
 print(settings.SECRET_KEY)
@@ -247,7 +247,7 @@ def get_settings() -> Settings:
 
         Użycie:
     ```python
-        from backend.shared.config import get_settings
+        from shared.config import get_settings
 
         settings = get_settings()
         print(settings.DATABASE_URL)
@@ -264,7 +264,7 @@ def get_settings() -> Settings:
 # ==========================================
 
 # Możesz importować bezpośrednio:
-# from backend.shared.config import settings
+# from shared.config import settings
 settings = get_settings()
 
 # ==========================================
@@ -281,7 +281,7 @@ def is_production() -> bool:
 
         Użycie:
     ```python
-        from backend.shared.config import is_production
+        from shared.config import is_production
 
         if is_production():
             # Włącz HTTPS, wyłącz debug, etc.
@@ -324,7 +324,7 @@ def validate_config() -> None:
 
         Użycie w main.py:
     ```python
-        from backend.shared.config import validate_config
+        from shared.config import validate_config
 
         # Na starcie aplikacji:
         validate_config()

@@ -14,7 +14,7 @@ from sqlalchemy import Boolean, DateTime, Enum, ForeignKey, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from backend.shared.database import Base
+from shared.database import Base
 
 if TYPE_CHECKING:
     from app.models.book import Book

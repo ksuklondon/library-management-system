@@ -220,7 +220,7 @@ class TestLogout:
 
         FIXED: Dodano dependency override dla get_current_user_payload.
         """
-        from backend.shared.dependencies import get_current_user_payload
+        from shared.dependencies import get_current_user_payload
 
         # Nadpisujemy get_current_user_payload dla /logout endpoint
         mock_payload = {
@@ -255,7 +255,7 @@ class TestGetCurrentUser:
 
         FIXED: Dodano dependency override dla get_current_user_payload.
         """
-        from backend.shared.dependencies import get_current_user_payload
+        from shared.dependencies import get_current_user_payload
 
         # Nadpisujemy get_current_user_payload
         mock_payload = {

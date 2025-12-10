@@ -16,7 +16,7 @@ from sqlalchemy import engine_from_config, pool
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # Import Base z shared database
-from backend.shared.database import Base  # noqa: E402
+from shared.database import Base  # noqa: E402
 
 # Import konfiguracji Alembic
 config = context.config

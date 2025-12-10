@@ -13,7 +13,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 # przez Alembica przy generowaniu migracji (autogenerate).
 from app.models.user import User  # noqa: E402, F401
 
-from backend.shared.database import Base  # noqa: E402
+from shared.database import Base  # noqa: E402
 
 # Obiekt konfiguracji Alembica – wczytywany z pliku alembic.ini.
 config = context.config

@@ -20,8 +20,8 @@ from fastapi.middleware.cors import CORSMiddleware
 
 # DODANE: Import routera
 from app.api import api_router
-from backend.shared.config import is_development, settings, validate_config
-from backend.shared.database import Base, check_connection, engine
+from shared.config import is_development, settings, validate_config
+from shared.database import Base, check_connection, engine
 
 logging.basicConfig(
     level=getattr(logging, settings.LOG_LEVEL),

@@ -14,7 +14,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
-from backend.shared.database import Base, get_db
+from shared.database import Base, get_db
 
 # Database URL dla testów (in-memory SQLite)
 SQLALCHEMY_TEST_DATABASE_URL = "sqlite:///:memory:"

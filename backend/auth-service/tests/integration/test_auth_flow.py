@@ -11,7 +11,7 @@ class TestCompleteAuthFlow:
 
     def test_register_login_access_profile_logout(self, client, app_fixture):
         """Test full auth cycle - FIXED with dependency override."""
-        from backend.shared.dependencies import get_current_user_payload
+        from shared.dependencies import get_current_user_payload
 
         # 1. Rejestracja nowego użytkownika
         user_data = {
@@ -65,7 +65,7 @@ class TestUserManagementFlow:
         """Test admin creates librarian, librarian blocks user - FIXED."""
         from app.models.user import UserRole
 
-        from backend.shared.dependencies import get_current_user_payload
+        from shared.dependencies import get_current_user_payload
 
         # Nadpisanie zależności - "udajemy" zalogowanego ADMINA
         mock_payload = {
@@ -132,7 +132,7 @@ class TestTokenRefreshFlow:
         self, client, sample_user, app_fixture
     ):
         """Test login, refresh token, and use new token - FIXED."""
-        from backend.shared.dependencies import get_current_user_payload
+        from shared.dependencies import get_current_user_payload
 
         # 1. Logowanie istniejącego użytkownika
         login_response = client.post(
@@ -184,7 +184,7 @@ class TestPasswordChangeFlow:
         self, client, db_session, sample_user, app_fixture
     ):
         """Test password change flow - FIXED."""
-        from backend.shared.dependencies import get_current_user_payload
+        from shared.dependencies import get_current_user_payload
 
         # Udajemy, że aktualnie zalogowany użytkownik to sample_user
         mock_payload = {
@@ -234,7 +234,7 @@ class TestBlockedUserFlow:
         """Test blocking user prevents login - FIXED."""
         from app.models.user import UserRole
 
-        from backend.shared.dependencies import get_current_user_payload
+        from shared.dependencies import get_current_user_payload
 
         # 1. Upewniamy się, że przed blokadą logowanie działa
         login_before = client.post(

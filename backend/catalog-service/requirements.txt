@@ -1,46 +1,27 @@
-# ==========================================
-# CATALOG SERVICE - Zależności Python
-# ==========================================
-# Instalacja: pip install -r requirements.txt
-
-# ==========================================
-# FRAMEWORK - FastAPI
-# ==========================================
+# --- Framework webowy i serwer ASGI ---
 fastapi==0.115.3
 uvicorn[standard]==0.30.6
 
-# ==========================================
-# BAZA DANYCH - PostgreSQL + ORM
-# ==========================================
+# --- Baza danych (ORM + migracje + sterownik PostgreSQL) ---
 sqlalchemy==2.0.34
 psycopg2-binary==2.9.9
 alembic==1.13.2
 
-# ==========================================
-# WALIDACJA - Pydantic
-# ==========================================
-pydantic==2.9.2
+# --- Walidacja i konfiguracja ---
+pydantic[email]==2.9.2        # Z email-validatorem
 pydantic-settings==2.5.2
 
-# ==========================================
-# BEZPIECZEŃSTWO - JWT (do weryfikacji tokenów)
-# ==========================================
+# --- Bezpieczeństwo i JWT ---
 python-jose[cryptography]==3.3.0
 
-# ==========================================
-# HTTP CLIENT - Komunikacja z auth-service
-# ==========================================
+# --- Komunikacja z innymi mikroserwisami ---
 httpx==0.26.0
 requests==2.31.0
 
-# ==========================================
-# INNE
-# ==========================================
+# --- Obsługa formularzy i plików ---
 python-multipart==0.0.9
 
-# ==========================================
-# TESTOWANIE
-# ==========================================
+# --- Testowanie ---
 pytest==7.4.3
 pytest-asyncio==0.21.1
 pytest-cov==4.1.0

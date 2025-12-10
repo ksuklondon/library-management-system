@@ -18,8 +18,8 @@ from sqlalchemy.orm import Session
 from app.core.security import hash_password
 from app.models.user import User, UserRole
 from app.schemas.user import UserCreate, UserResponse, UserUpdate
-from backend.shared.database import get_db
-from backend.shared.dependencies import (  # ZMIANA!
+from shared.database import get_db
+from shared.dependencies import (  # ZMIANA!
     get_current_user_payload,
     require_role,
 )

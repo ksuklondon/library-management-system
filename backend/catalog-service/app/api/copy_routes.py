@@ -24,8 +24,8 @@ from app.schemas.book_copy import (
     BookCopyUpdate,
     CopyStatusUpdate,
 )
-from backend.shared.database import get_db
-from backend.shared.dependencies import require_role
+from shared.database import get_db
+from shared.dependencies import require_role
 
 router = APIRouter()
 

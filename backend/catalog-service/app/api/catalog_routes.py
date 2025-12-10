@@ -25,7 +25,7 @@ from app.models.book import Book
 from app.models.book_copy import BookCopy, CopyStatus
 from app.schemas.book import BookListResponse, BookResponse
 from app.schemas.catalog import SearchQuery
-from backend.shared.database import get_db
+from shared.database import get_db
 
 router = APIRouter()
 

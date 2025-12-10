@@ -19,7 +19,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
-from backend.shared.database import Base, get_db
+from shared.database import Base, get_db
 
 # =============================================================================
 # TEST DATABASE (SQLite in-memory)
@@ -94,7 +94,7 @@ def client(db, test_app):
 def async_client(test_app, db, mock_reader):
     from httpx import AsyncClient
 
-    from backend.shared.dependencies import get_current_user_payload
+    from shared.dependencies import get_current_user_payload
 
     def override_get_db():
         yield db

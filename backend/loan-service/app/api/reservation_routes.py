@@ -26,8 +26,8 @@ from app.schemas.reservation import (
     ReservationResponse,
     ReservationUpdate,
 )
-from backend.shared.database import get_db
-from backend.shared.dependencies import get_current_user_payload, require_role
+from shared.database import get_db
+from shared.dependencies import get_current_user_payload, require_role
 
 router = APIRouter()
 

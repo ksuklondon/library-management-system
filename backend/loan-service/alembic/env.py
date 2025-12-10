@@ -27,7 +27,7 @@ from app.models.loan import Loan  # noqa: E402, F401
 # jakie tabele istnieją i mógł generować migracje (autogenerate=True).
 from app.models.reservation import Reservation  # noqa: E402, F401
 
-from backend.shared.database import Base  # noqa: E402
+from shared.database import Base  # noqa: E402
 
 # Obiekt konfiguracji Alembic — czyta ustawienia z alembic.ini
 config = context.config

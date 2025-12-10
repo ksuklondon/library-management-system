@@ -1,20 +1,32 @@
-fastapi==0.115.3               # Główny framework backendowy – API, routing, walidacja danych
-uvicorn[standard]==0.30.6      # Serwer ASGI do uruchamiania aplikacji FastAPI
+# --- Framework webowy i serwer ASGI ---
+fastapi==0.115.3               # Główny framework API
+uvicorn[standard]==0.30.6      # Serwer ASGI
 
-sqlalchemy==2.0.34             # ORM i narzędzia do pracy z bazą danych
-psycopg2-binary==2.9.9         # Sterownik PostgreSQL dla Pythona
-alembic==1.13.2                # Migracje bazy danych (integrowane z SQLAlchemy)
+# --- Baza danych (ORM + migracje + sterownik PostgreSQL) ---
+sqlalchemy==2.0.34
+psycopg2-binary==2.9.9
+alembic==1.13.2
 
-pydantic==2.9.2                # Walidacja i serializacja danych (modele API)
-pydantic-settings==2.5.2       # Obsługa ustawień konfiguracyjnych (.env) z Pydantic
+# --- Walidacja i konfiguracja ---
+pydantic[email]==2.9.2         # Z email-validatorem
+pydantic-settings==2.5.2
 
-httpx==0.26.0                  # Klient HTTP (asynchroniczny i synchroniczny)
-requests==2.31.0               # Popularny klient HTTP (synchroniczny)
+# --- Autoryzacja i bezpieczeństwo (WYMAGANE dla shared/dependencies.py) ---
+python-jose[cryptography]==3.3.0  # JWT token handling
+passlib[bcrypt]==1.7.4            # Password hashing
+python-dotenv==1.2.1              # Environment variables
 
-python-multipart==0.0.9        # Obsługa multipart/form-data (upload plików)
+# --- Komunikacja z auth-service i innymi ---
+httpx==0.26.0
+requests==2.31.0
 
-apscheduler==3.10.4            # Harmonogram zadań (cron, interwały, jednorazowe joby)
+# --- Obsługa plików i formularzy ---
+python-multipart==0.0.9
 
-pytest==7.4.3                  # Framework do testów jednostkowych
-pytest-asyncio==0.21.1         # Wsparcie dla testów asynchronicznych (async/await)
-pytest-cov==4.1.0              # Pokrycie kodu testami (coverage)
+# --- Harmonogramowanie zadań (np. kary, przypomnienia) ---
+apscheduler==3.10.4
+
+# --- Testowanie ---
+pytest==7.4.3
+pytest-asyncio==0.21.1
+pytest-cov==4.1.0

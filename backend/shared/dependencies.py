@@ -11,7 +11,7 @@ Odpowiada za:
 - Dependency injection dla FastAPI endpoints
 
 Użycie w endpointach:
-    from backend.shared.dependencies import get_current_user, require_role
+    from shared.dependencies import get_current_user, require_role
 
     @app.get("/admin-only")
     def admin_endpoint(current_user = Depends(require_role(["ADMIN"]))):
@@ -26,7 +26,7 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError, jwt
 
 # Import z naszych modułów
-from backend.shared.config import settings
+from shared.config import settings
 
 # ==========================================
 # SECURITY SCHEME - Bearer Token

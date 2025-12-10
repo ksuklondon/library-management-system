@@ -30,7 +30,7 @@ class TestGetAllUsers:
         """
         Bibliotekarz (LIBRARIAN) powinien móc pobrać listę wszystkich użytkowników.
         """
-        from backend.shared.dependencies import get_current_user_payload
+        from shared.dependencies import get_current_user_payload
 
         mock_payload = {
             "sub": str(sample_librarian.id),
@@ -50,7 +50,7 @@ class TestGetAllUsers:
         """
         Sprawdzamy, czy endpoint poprawnie obsługuje parametry paginacji (skip, limit).
         """
-        from backend.shared.dependencies import get_current_user_payload
+        from shared.dependencies import get_current_user_payload
 
         mock_payload = {
             "sub": str(sample_librarian.id),
@@ -76,7 +76,7 @@ class TestGetUserById:
         Powinno się udać pobranie istniejącego użytkownika po ID,
         jeśli dzwoni LIBRARIAN (ma odpowiednie uprawnienia).
         """
-        from backend.shared.dependencies import get_current_user_payload
+        from shared.dependencies import get_current_user_payload
 
         mock_payload = {
             "sub": str(sample_librarian.id),
@@ -98,7 +98,7 @@ class TestGetUserById:
         """
         fake_uuid = "00000000-0000-0000-0000-000000000000"
 
-        from backend.shared.dependencies import get_current_user_payload
+        from shared.dependencies import get_current_user_payload
 
         mock_payload = {
             "sub": str(sample_librarian.id),
@@ -127,7 +127,7 @@ class TestCreateUser:
             "full_name": "Created User",
         }
 
-        from backend.shared.dependencies import get_current_user_payload
+        from shared.dependencies import get_current_user_payload
 
         mock_payload = {
             "sub": str(sample_admin.id),
@@ -152,7 +152,7 @@ class TestCreateUser:
         """
         user_data = {"email": "test@example.com", "password": "Password123"}
 
-        from backend.shared.dependencies import get_current_user_payload
+        from shared.dependencies import get_current_user_payload
 
         mock_payload = {
             "sub": str(sample_admin.id),
@@ -177,7 +177,7 @@ class TestUpdateUser:
         """
         update_data = {"full_name": "Updated Name"}
 
-        from backend.shared.dependencies import get_current_user_payload
+        from shared.dependencies import get_current_user_payload
 
         mock_payload = {
             "sub": str(sample_user.id),
@@ -207,7 +207,7 @@ class TestUpdateUser:
         """
         update_data = {"full_name": "Hacker Name"}
 
-        from backend.shared.dependencies import get_current_user_payload
+        from shared.dependencies import get_current_user_payload
 
         mock_payload = {
             "sub": str(sample_user.id),
@@ -232,7 +232,7 @@ class TestUpdateUser:
         """
         update_data = {"email": "librarian@example.com"}
 
-        from backend.shared.dependencies import get_current_user_payload
+        from shared.dependencies import get_current_user_payload
 
         mock_payload = {
             "sub": str(sample_user.id),
@@ -257,7 +257,7 @@ class TestDeleteUser:
         """
         ADMIN powinien móc usunąć (soft-delete) innego użytkownika.
         """
-        from backend.shared.dependencies import get_current_user_payload
+        from shared.dependencies import get_current_user_payload
 
         mock_payload = {
             "sub": str(sample_admin.id),
@@ -277,7 +277,7 @@ class TestDeleteUser:
         ADMIN nie może usunąć własnego konta – zabezpieczenie przed
         przypadkowym usunięciem ostatniego administratora.
         """
-        from backend.shared.dependencies import get_current_user_payload
+        from shared.dependencies import get_current_user_payload
 
         mock_payload = {
             "sub": str(sample_admin.id),
@@ -303,7 +303,7 @@ class TestBlockUser:
         LIBRARIAN (lub ADMIN) powinien móc zablokować użytkownika.
         Po operacji pole is_blocked w odpowiedzi powinno być True.
         """
-        from backend.shared.dependencies import get_current_user_payload
+        from shared.dependencies import get_current_user_payload
 
         mock_payload = {
             "sub": str(sample_librarian.id),
@@ -324,7 +324,7 @@ class TestBlockUser:
         Użytkownik z rolą LIBRARIAN nie może zablokować własnego konta.
         Oczekiwany wynik: 400 BAD REQUEST.
         """
-        from backend.shared.dependencies import get_current_user_payload
+        from shared.dependencies import get_current_user_payload
 
         mock_payload = {
             "sub": str(sample_librarian.id),
@@ -353,7 +353,7 @@ class TestUnblockUser:
         sample_user.is_blocked = True
         db_session.commit()
 
-        from backend.shared.dependencies import get_current_user_payload
+        from shared.dependencies import get_current_user_payload
 
         mock_payload = {
             "sub": str(sample_librarian.id),

@@ -14,8 +14,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 import logging
 
-from backend.shared.config import settings, validate_config, is_development
-from backend.shared.database import engine, Base, check_connection
+from shared.config import settings, validate_config, is_development
+from shared.database import engine, Base, check_connection
 from app.api import api_router
 
 # Konfiguracja globalnego logowania dla serwisu.

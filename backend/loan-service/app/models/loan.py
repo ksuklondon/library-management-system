@@ -21,7 +21,7 @@ from sqlalchemy import Enum as SQLEnum
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
-from backend.shared.database import Base
+from shared.database import Base
 
 
 class LoanStatus(str, enum.Enum):

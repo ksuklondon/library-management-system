@@ -24,7 +24,7 @@ from sqlalchemy import Boolean, DateTime, Float, ForeignKey, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
-from backend.shared.database import Base
+from shared.database import Base
 
 
 class Fine(Base):
