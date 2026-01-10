@@ -2,6 +2,7 @@
 Schemas dla Loan - wypożyczenia książek.
 
 Wymaganie: F11-F14 - Wypożyczenia
+Wymaganie: F8 - Realizacja rezerwacji (NOWE - checkout)
 Wymaganie: NF7 - Walidacja danych wejściowych
 
 Schematy Pydantic używane do:
@@ -10,15 +11,17 @@ Schematy Pydantic używane do:
 - zwracania ustrukturyzowanych odpowiedzi z danymi wypożyczeń.
 """
 
-from pydantic import BaseModel, Field, field_validator
-from typing import Optional
+import uuid
 from datetime import datetime
 from enum import Enum
-import uuid
+from typing import Optional
+
+from pydantic import BaseModel, Field, field_validator
 
 
 class LoanStatus(str, Enum):
     """Status wypożyczenia (F11-F14)."""
+
     ACTIVE = "ACTIVE"
     RETURNED = "RETURNED"
     OVERDUE = "OVERDUE"
@@ -36,14 +39,14 @@ class LoanCreate(BaseModel):
     - opcjonalnie można podać własny due_date (termin zwrotu),
       w przeciwnym wypadku model domenowy ustawi domyślnie +14 dni.
     """
+
     user_id: str = Field(..., description="ID użytkownika wypożyczającego")
     book_copy_id: uuid.UUID = Field(..., description="ID egzemplarza książki")
     due_date: Optional[datetime] = Field(
-        None,
-        description="Termin zwrotu (domyślnie +14 dni, jeśli nie podano)"
+        None, description="Termin zwrotu (domyślnie +14 dni, jeśli nie podano)"
     )
 
-    @field_validator('user_id')
+    @field_validator("user_id")
     @classmethod
     def validate_user_id(cls, v):
         """Walidacja user_id (NF7) – nie może być puste."""
@@ -51,7 +54,7 @@ class LoanCreate(BaseModel):
             raise ValueError("ID użytkownika jest wymagane")
         return v
 
-    @field_validator('book_copy_id')
+    @field_validator("book_copy_id")
     @classmethod
     def validate_book_copy_id(cls, v):
         """Walidacja book_copy_id (NF7) – musi zostać przekazane poprawne UUID."""
@@ -65,7 +68,60 @@ class LoanCreate(BaseModel):
             "example": {
                 "user_id": "user-uuid-123",
                 "book_copy_id": "123e4567-e89b-12d3-a456-426614174000",
-                "due_date": "2024-11-29T23:59:59"
+                "due_date": "2024-11-29T23:59:59",
+            }
+        }
+
+
+class LoanCheckout(BaseModel):
+    """
+    Schema do wypożyczenia książki na podstawie rezerwacji (F8 + F11).
+
+    NOWE - endpoint POST /checkout
+
+    Wymagania:
+    - F8: Realizacja rezerwacji
+    - F11: Utworzenie wypożyczenia
+    - NF7: Walidacja danych
+
+    Proces:
+    1. Bibliotekarz otrzymuje reservation_id od czytelnika
+    2. System weryfikuje rezerwację (czy istnieje, czy ACTIVE)
+    3. Tworzy wypożyczenie na podstawie danych z rezerwacji
+    4. Zmienia status rezerwacji na COMPLETED
+    """
+
+    reservation_id: uuid.UUID = Field(..., description="ID rezerwacji do realizacji")
+    due_days: int = Field(
+        default=14, ge=1, le=30, description="Liczba dni wypożyczenia (domyślnie 14)"
+    )
+    book_copy_id: Optional[uuid.UUID] = Field(
+        None,
+        description="ID konkretnego egzemplarza (opcjonalne - jeśli nie podano, system wybierze z rezerwacji)",
+    )
+
+    @field_validator("reservation_id")
+    @classmethod
+    def validate_reservation_id(cls, v):
+        """Walidacja reservation_id (NF7)."""
+        if v is None:
+            raise ValueError("ID rezerwacji jest wymagane")
+        return v
+
+    @field_validator("due_days")
+    @classmethod
+    def validate_due_days(cls, v):
+        """Walidacja liczby dni (NF7)."""
+        if v < 1 or v > 30:
+            raise ValueError("Liczba dni wypożyczenia musi być między 1 a 30")
+        return v
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "reservation_id": "123e4567-e89b-12d3-a456-426614174000",
+                "due_days": 14,
+                "book_copy_id": "copy-uuid-456",
             }
         }
 
@@ -82,16 +138,16 @@ class LoanUpdate(BaseModel):
     - due_date – nowy termin zwrotu (np. ręczne przedłużenie),
     - status – zmiana statusu (np. na RETURNED).
     """
+
     returned_at: Optional[datetime] = Field(None, description="Data zwrotu książki")
-    due_date: Optional[datetime] = Field(None, description="Nowy termin zwrotu (przedłużenie)")
+    due_date: Optional[datetime] = Field(
+        None, description="Nowy termin zwrotu (przedłużenie)"
+    )
     status: Optional[LoanStatus] = Field(None, description="Nowy status wypożyczenia")
 
     class Config:
         json_schema_extra = {
-            "example": {
-                "returned_at": "2024-11-20T15:30:00",
-                "status": "RETURNED"
-            }
+            "example": {"returned_at": "2024-11-20T15:30:00", "status": "RETURNED"}
         }
 
 
@@ -101,18 +157,16 @@ class LoanExtend(BaseModel):
 
     Wymaganie: F14 - Przedłużenie wypożyczenia
 
-    Używana np. w dedykowanym endpointzie:
+    Używana np. w dedykowanym endpointcie:
     - użytkownik/bibliotekarz podaje liczbę dni przedłużenia,
     - serwis sprawdza reguły biznesowe i wywołuje metodę extend_loan w modelu Loan.
     """
+
     days: int = Field(
-        default=7,
-        ge=1,
-        le=14,
-        description="Liczba dni przedłużenia (1-14)"
+        default=7, ge=1, le=14, description="Liczba dni przedłużenia (1-14)"
     )
 
-    @field_validator('days')
+    @field_validator("days")
     @classmethod
     def validate_days(cls, v):
         """Walidacja liczby dni (NF7) – tylko wartości z zakresu 1–14 są akceptowane."""
@@ -121,11 +175,7 @@ class LoanExtend(BaseModel):
         return v
 
     class Config:
-        json_schema_extra = {
-            "example": {
-                "days": 7
-            }
-        }
+        json_schema_extra = {"example": {"days": 7}}
 
 
 class LoanResponse(BaseModel):
@@ -140,6 +190,7 @@ class LoanResponse(BaseModel):
     - aktualną kwotę kary (jeśli istnieje),
     - znaczniki czasowe utworzenia i aktualizacji rekordu.
     """
+
     id: uuid.UUID
     user_id: str
     book_copy_id: uuid.UUID
@@ -165,6 +216,6 @@ class LoanResponse(BaseModel):
                 "status": "ACTIVE",
                 "fine_amount": 0.0,
                 "created_at": "2024-11-15T10:00:00",
-                "updated_at": "2024-11-15T10:00:00"
+                "updated_at": "2024-11-15T10:00:00",
             }
         }

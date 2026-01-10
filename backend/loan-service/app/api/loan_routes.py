@@ -7,6 +7,8 @@ Wymaganie: F11-F14 - Wypożyczenia książek:
     - F13: Przeglądanie historii wypożyczeń
     - F14: Przedłużenie wypożyczenia
 
+Wymaganie: F8 - Realizacja rezerwacji (NOWE - checkout endpoint)
+
 Wymaganie: NF5 - RBAC (Role-Based Access Control):
     - dostęp do operacji zależny od roli (READER/LIBRARIAN/ADMIN)
 
@@ -20,12 +22,19 @@ from datetime import datetime, timedelta
 from typing import Any, Dict, List
 
 from fastapi import APIRouter, Depends, HTTPException, status
+from shared.database import get_db
+from shared.dependencies import get_current_user_payload, require_role
 from sqlalchemy.orm import Session
 
 from app.models.loan import Loan, LoanStatus
-from app.schemas.loan import LoanCreate, LoanExtend, LoanResponse, LoanUpdate
-from shared.database import get_db
-from shared.dependencies import get_current_user_payload, require_role
+from app.models.reservation import Reservation, ReservationStatus
+from app.schemas.loan import (
+    LoanCheckout,
+    LoanCreate,
+    LoanExtend,
+    LoanResponse,
+    LoanUpdate,
+)
 
 router = APIRouter()
 
@@ -90,6 +99,131 @@ async def create_loan(
     # Jeśli podano due_date – użyj go, w przeciwnym razie +14 dni (NF29)
     loan.due_date = loan_data.due_date or (datetime.utcnow() + timedelta(days=14))
 
+    db.add(loan)
+    db.commit()
+    db.refresh(loan)
+
+    return loan
+
+
+@router.post(
+    "/checkout", response_model=LoanResponse, status_code=status.HTTP_201_CREATED
+)
+async def checkout_loan_from_reservation(
+    checkout_data: LoanCheckout,
+    current_user: Dict[str, Any] = Depends(require_role(["LIBRARIAN", "ADMIN"])),
+    db: Session = Depends(get_db),
+):
+    """
+    Wypożycz książkę na podstawie rezerwacji (F8 + F11).
+
+    NOWY ENDPOINT - integruje rezerwacje z wypożyczeniami!
+
+    Proces:
+    1. Czytelnik przychodzi z reservation_id
+    2. Bibliotekarz wywołuje ten endpoint
+    3. System weryfikuje rezerwację
+    4. Tworzy wypożyczenie
+    5. Zmienia status rezerwacji na COMPLETED
+
+    Wymagania:
+    - F8: Realizacja rezerwacji
+    - F11: Utworzenie wypożyczenia
+    - NF5: Tylko LIBRARIAN/ADMIN
+    - NF29: Limit 5 aktywnych wypożyczeń na użytkownika
+    """
+    # KROK 1: Pobierz i zweryfikuj rezerwację
+    reservation = (
+        db.query(Reservation)
+        .filter(Reservation.id == checkout_data.reservation_id, ~Reservation.is_deleted)
+        .first()
+    )
+
+    if not reservation:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Rezerwacja nie została znaleziona",
+        )
+
+    # Sprawdź czy rezerwacja jest aktywna
+    if reservation.status != ReservationStatus.ACTIVE:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Rezerwacja ma status {reservation.status.value} - można wypożyczyć tylko rezerwacje ACTIVE",
+        )
+
+    # Sprawdź czy rezerwacja nie wygasła
+    if reservation.is_expired():
+        reservation.mark_as_expired()
+        db.commit()
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Rezerwacja wygasła - nie można jej zrealizować",
+        )
+
+    # KROK 2: Sprawdź limit wypożyczeń użytkownika (NF29)
+    user_id = reservation.user_id
+    active_loans = (
+        db.query(Loan)
+        .filter(
+            Loan.user_id == user_id,
+            Loan.status == LoanStatus.ACTIVE,
+            ~Loan.is_deleted,
+        )
+        .count()
+    )
+
+    if active_loans >= 5:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Użytkownik osiągnął limit 5 aktywnych wypożyczeń",
+        )
+
+    # KROK 3: Określ book_copy_id
+    # Jeśli bibliotekarz podał konkretny egzemplarz - użyj go
+    # Jeśli nie - użyj tego z rezerwacji (jeśli został przypisany)
+    # Jeśli ani jedno ani drugie - błąd
+    book_copy_id = checkout_data.book_copy_id or reservation.book_copy_id
+
+    if not book_copy_id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Brak przypisanego egzemplarza - podaj book_copy_id w requeście",
+        )
+
+    # KROK 4: Sprawdź czy użytkownik nie ma już wypożyczonego tego egzemplarza
+    existing_loan = (
+        db.query(Loan)
+        .filter(
+            Loan.user_id == user_id,
+            Loan.book_copy_id == book_copy_id,
+            Loan.status == LoanStatus.ACTIVE,
+            ~Loan.is_deleted,
+        )
+        .first()
+    )
+
+    if existing_loan:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Użytkownik ma już wypożyczony ten egzemplarz",
+        )
+
+    # KROK 5: Utwórz wypożyczenie (F11)
+    loan = Loan(
+        user_id=user_id,
+        book_copy_id=book_copy_id,
+        borrowed_at=datetime.utcnow(),
+        status=LoanStatus.ACTIVE,
+    )
+
+    # Ustaw due_date na podstawie due_days
+    loan.due_date = datetime.utcnow() + timedelta(days=checkout_data.due_days)
+
+    # KROK 6: Zmień status rezerwacji na COMPLETED (F8)
+    reservation.complete()
+
+    # KROK 7: Zapisz zmiany
     db.add(loan)
     db.commit()
     db.refresh(loan)
