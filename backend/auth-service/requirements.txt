@@ -13,6 +13,7 @@ pydantic-settings==2.5.2      # Obsługa konfiguracji przez zmienne środowiskow
 
 # --- Bezpieczeństwo i JWT ---
 passlib[bcrypt]==1.7.4        # Haszowanie haseł użytkowników (bcrypt)
+bcrypt==3.2.2                 # ← DODAJ TĘ LINIJKĘ! Kompatybilna wersja z passlib
 python-jose[cryptography]==3.3.0  # Generowanie i weryfikacja tokenów JWT
 
 # --- Komunikacja HTTP (np. z innymi mikroserwisami) ---

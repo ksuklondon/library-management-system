@@ -8,6 +8,8 @@ Schematy Pydantic związane z procesem uwierzytelniania i autoryzacji:
 
 from typing import Optional
 
+# DODANO IMPORT dla UserRoleEnum
+from app.schemas.user import UserRoleEnum
 from pydantic import BaseModel, EmailStr, Field
 
 
@@ -81,12 +83,20 @@ class RegisterRequest(BaseModel):
     """
     Żądanie rejestracji nowego użytkownika.
     Używane w publicznym endpointcie /auth/register.
+
+    ZMIANA: Dodano opcjonalne pole 'role' - pozwala na tworzenie użytkowników
+    z określoną rolą (ADMIN, LIBRARIAN, READER). Domyślnie READER.
     """
 
     email: EmailStr = Field(..., description="Email użytkownika")
     password: str = Field(..., min_length=8, description="Hasło (min 8 znaków)")
     full_name: Optional[str] = Field(
         None, max_length=255, description="Imię i nazwisko"
+    )
+    # NOWE POLE: role (opcjonalne, domyślnie READER)
+    role: Optional[UserRoleEnum] = Field(
+        default=UserRoleEnum.READER,
+        description="Rola użytkownika (ADMIN, LIBRARIAN, READER)",
     )
 
     class Config:
@@ -95,5 +105,6 @@ class RegisterRequest(BaseModel):
                 "email": "newuser@example.com",
                 "password": "SecurePass123",
                 "full_name": "Jan Kowalski",
+                "role": "READER",  # DODANO do przykładu
             }
         }

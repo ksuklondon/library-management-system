@@ -56,12 +56,33 @@ dist-ssr/
 build/
 *.local
 
-# Environment variables
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+# ============================================
+# ENVIRONMENT VARIABLES - CRITICAL!
+# ============================================
+# UWAGA: Pliki .env zawierają sekrety (SECRET_KEY, hasła DB, itp.)
+# NIE COMMITUJ ich do repozytorium!
+
+# Ignoruj wszystkie pliki .env
+*.env
+
+# Ignoruj .env w mikrousługach
+backend/**/.env
+backend/*/.env
+backend/auth-service/.env
+backend/catalog-service/.env
+backend/loan-service/.env
+
+# Ignoruj .env w frontendzie
+frontend/.env
+frontend/.env.local
+frontend/.env.development.local
+frontend/.env.test.local
+frontend/.env.production.local
+
+# WYJĄTEK: Pliki .env.example MOŻNA commitować (to szablony)
+!*.env.example
+!backend/**/.env.example
+!backend/*/.env.example
 
 # ============================================
 # IDE / EDITORS
@@ -94,6 +115,10 @@ desktop.ini
 *.sqlite
 *.sqlite3
 
+# Docker volumes (dane PostgreSQL)
+postgres-data/
+**/postgres-data/
+
 # ============================================
 # DOCKER
 # ============================================
@@ -107,6 +132,12 @@ docker-compose.override.yml
 secrets/
 *.p12
 *.pfx
+
+# JWT keys (jeśli używasz plików zamiast zmiennych)
+*.jwt
+jwt/
+private_key.pem
+public_key.pem
 
 # ============================================
 # LOGS
@@ -137,3 +168,13 @@ static_collected/
 # ============================================
 *.backup
 backups/
+
+# ============================================
+# PROJECT-SPECIFIC
+# ============================================
+# Jeśli generujesz dokumentację lokalnie
+docs/_build/
+docs/api/_build/
+
+# Jeśli używasz Alembic do migracji (nie commituj bazy lokalnej)
+# alembic/versions/*.pyc  # uncomment jeśli potrzebne

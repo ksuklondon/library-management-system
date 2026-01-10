@@ -4,6 +4,8 @@ backend/shared/dependencies.py
 FastAPI Dependencies - JWT, RBAC, Current User.
 Współdzielone przez wszystkie serwisy (auth, catalog, loan).
 
+FIXED: Zmieniono 'user_id' na 'sub' zgodnie ze standardem JWT (RFC 7519)
+
 Odpowiada za:
 - Weryfikację tokenów JWT (Wymaganie NF4)
 - Sprawdzanie ról użytkowników - RBAC (Wymaganie NF5)
@@ -47,7 +49,7 @@ def create_access_token(
     Tworzy JWT access token.
 
     Args:
-        data: Dane do zakodowania w tokenie (user_id, email, role, etc.)
+        data: Dane do zakodowania w tokenie (sub, email, role, etc.)
         expires_delta: Czas ważności tokenu (domyślnie z settings)
 
     Returns:
@@ -56,7 +58,7 @@ def create_access_token(
     Przykład:
         token = create_access_token(
             data={
-                "user_id": "uuid-here",
+                "sub": "uuid-here",
                 "email": "jan@example.com",
                 "role": "READER"
             }
@@ -93,13 +95,13 @@ def create_refresh_token(data: Dict[str, Any]) -> str:
     Refresh token ma dłuższy czas ważności (14 dni).
 
     Args:
-        data: Dane do zakodowania (zazwyczaj tylko user_id)
+        data: Dane do zakodowania (zazwyczaj tylko sub/user_id)
 
     Returns:
         str: Zakodowany refresh token
 
     Przykład:
-        refresh = create_refresh_token({"user_id": "uuid-here"})
+        refresh = create_refresh_token({"sub": "uuid-here"})
     """
     to_encode = data.copy()
 
@@ -118,6 +120,8 @@ def verify_token(token: str) -> Dict[str, Any]:
     """
     Weryfikuje i dekoduje JWT token.
 
+    FIXED: Sprawdza 'sub' zamiast 'user_id' (zgodnie ze standardem JWT RFC 7519)
+
     Args:
         token: JWT token do weryfikacji
 
@@ -129,7 +133,7 @@ def verify_token(token: str) -> Dict[str, Any]:
 
     Przykład:
         payload = verify_token("eyJhbGciOiJIUzI1NiI...")
-        # {'user_id': 'uuid', 'email': 'jan@example.com', 'role': 'READER'}
+        # {'sub': 'uuid', 'email': 'jan@example.com', 'role': 'READER'}
     """
     try:
         # Dekodujemy token
@@ -140,8 +144,9 @@ def verify_token(token: str) -> Dict[str, Any]:
         # Konwertujemy Mapping na Dict
         payload_dict = cast(Dict[str, Any], payload)
 
-        # Sprawdzamy czy token ma wymagane pola
-        if payload_dict.get("user_id") is None:
+        # FIXED: Sprawdzamy 'sub' zamiast 'user_id'
+        # 'sub' (subject) to standardowe pole JWT dla identyfikatora użytkownika
+        if payload_dict.get("sub") is None:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Token nieprawidłowy: brak user_id",
@@ -169,6 +174,8 @@ async def get_current_user_id(
     """
     Dependency - pobiera ID aktualnie zalogowanego użytkownika z tokenu JWT.
 
+    FIXED: Używa 'sub' zamiast 'user_id'
+
     Args:
         credentials: Token Bearer z nagłówka Authorization
 
@@ -190,8 +197,8 @@ async def get_current_user_id(
     # Weryfikujemy i dekodujemy token
     payload = verify_token(token)
 
-    # Zwracamy user_id
-    user_id = payload.get("user_id")
+    # FIXED: Zwracamy 'sub' zamiast 'user_id'
+    user_id = payload.get("sub")
     if not user_id:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -205,7 +212,7 @@ async def get_current_user_payload(
     credentials: HTTPAuthorizationCredentials = Depends(security),
 ) -> Dict[str, Any]:
     """
-    Dependency - pobiera pełny payload tokenu JWT (user_id, email, role).
+    Dependency - pobiera pełny payload tokenu JWT (sub, email, role).
 
     Args:
         credentials: Token Bearer z nagłówka Authorization
@@ -216,7 +223,7 @@ async def get_current_user_payload(
     Użycie:
         @app.get("/profile")
         def get_profile(user: dict = Depends(get_current_user_payload)):
-            # user = {"user_id": "...", "email": "...", "role": "READER"}
+            # user = {"sub": "...", "email": "...", "role": "READER"}
             return user
     """
     token = credentials.credentials

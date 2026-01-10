@@ -7,7 +7,9 @@ Endpointy związane z uwierzytelnianiem użytkowników:
 - /logout   – wylogowanie (logiczne; w tej wersji bez blacklisty),
 - /me       – pobranie informacji o aktualnie zalogowanym użytkowniku.
 
-FIXED VERSION: Dodano konwersję str -> UUID w endpoint /me.
+FIXED VERSION:
+- Dodano konwersję str -> UUID w endpoint /me.
+- Dodano obsługę pola 'role' w rejestracji użytkownika.
 """
 
 from datetime import timedelta
@@ -21,7 +23,7 @@ from app.core.security import (
     verify_password,
     verify_token,
 )
-from app.models.user import User
+from app.models.user import User, UserRole
 from app.schemas.auth import (
     LoginRequest,
     LoginResponse,
@@ -31,10 +33,9 @@ from app.schemas.auth import (
 )
 from app.schemas.user import UserResponse
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
-
 from shared.database import get_db
 from shared.dependencies import get_current_user_payload
+from sqlalchemy.orm import Session
 
 router = APIRouter()
 
@@ -51,7 +52,8 @@ def register(user_data: RegisterRequest, db: Session = Depends(get_db)):
 
     - sprawdza, czy email nie jest już zajęty,
     - haszuje hasło,
-    - tworzy rekord w bazie danych.
+    - tworzy rekord w bazie danych,
+    - NOWE: obsługuje opcjonalne pole 'role' (domyślnie READER).
     """
     existing_user = db.query(User).filter(User.email == user_data.email).first()
 
@@ -61,10 +63,21 @@ def register(user_data: RegisterRequest, db: Session = Depends(get_db)):
             detail="Email już istnieje w systemie",
         )
 
+    # ZMIANA: Dodano obsługę pola 'role'
+    # Konwersja UserRoleEnum (string enum) -> UserRole (model enum)
+    user_role = UserRole.READER  # domyślnie
+    if user_data.role:
+        try:
+            user_role = UserRole[user_data.role.value]
+        except (KeyError, AttributeError):
+            # Jeśli konwersja się nie powiedzie, użyj domyślnej wartości
+            user_role = UserRole.READER
+
     new_user = User(
         email=user_data.email,
         hashed_password=hash_password(user_data.password),
         full_name=user_data.full_name,
+        role=user_role,  # DODANO: przekazywanie roli
     )
 
     db.add(new_user)
