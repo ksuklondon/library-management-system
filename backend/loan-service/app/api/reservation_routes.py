@@ -18,6 +18,8 @@ from datetime import datetime
 from typing import Any, Dict, List
 
 from fastapi import APIRouter, Depends, HTTPException, status
+from shared.database import get_db
+from shared.dependencies import get_current_user_payload, require_role
 from sqlalchemy.orm import Session
 
 from app.models.reservation import Reservation, ReservationStatus
@@ -26,8 +28,6 @@ from app.schemas.reservation import (
     ReservationResponse,
     ReservationUpdate,
 )
-from shared.database import get_db
-from shared.dependencies import get_current_user_payload, require_role
 
 router = APIRouter()
 
@@ -109,22 +109,21 @@ async def get_user_reservations(
     """
     Pobierz rezerwacje użytkownika (F9).
 
-    Wymagania:
-    - F9: Przeglądanie własnych rezerwacji
-    - NF5: RBAC – użytkownik widzi tylko swoje rezerwacje,
-      LIBRARIAN/ADMIN może przeglądać rezerwacje dowolnego użytkownika.
+    - READER może przeglądać tylko swoje
+    - LIBRARIAN/ADMIN mogą przeglądać wszystkich
     """
     current_user_id = current_user.get("sub")
     current_user_role = current_user.get("role")
 
-    # Sprawdź uprawnienia (NF5 – ograniczenie dostępu do cudzych rezerwacji)
-    if current_user_id != user_id and current_user_role not in ["LIBRARIAN", "ADMIN"]:
+    is_self = str(current_user_id) == str(user_id)
+    is_privileged = current_user_role in ["LIBRARIAN", "ADMIN"]
+
+    if not is_self and not is_privileged:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Nie masz uprawnień do przeglądania rezerwacji innych użytkowników",
         )
 
-    # Pobierz rezerwacje (F9) – tylko te, które nie zostały soft-usunięte
     reservations = (
         db.query(Reservation)
         .filter(Reservation.user_id == user_id, ~Reservation.is_deleted)
