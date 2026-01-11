@@ -1,0 +1,755 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
+<meta name="generator" content="pdoc3 0.11.6">
+<title>app.models.reservation API documentation</title>
+<meta name="description" content="Model Reservation - rezerwacje książek …">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/sanitize.min.css" integrity="sha512-y1dtMcuvtTMJc1yPgEqF0ZjQbhnc/bFhyvIyVNb9Zk5mIGtqVaAB1Ttl28su8AvFMOY0EwRbAe+HCLqj6W7/KA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/typography.min.css" integrity="sha512-Y1DYSb995BAfxobCkKepB1BqJJTPrOp3zPL74AWFugHHmmdcvO+C48WLrUOlhGMc0QG7AE3f7gmvvcrmX2fDoA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:1.5em;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:2em 0 .50em 0}h3{font-size:1.4em;margin:1.6em 0 .7em 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .2s ease-in-out}a:visited{color:#503}a:hover{color:#b62}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900;font-weight:bold}pre code{font-size:.8em;line-height:1.4em;padding:1em;display:block}code{background:#f3f3f3;font-family:"DejaVu Sans Mono",monospace;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source > summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible;min-width:max-content}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em 1em;margin:1em 0}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul ul{padding-left:1em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" integrity="sha512-D9gUyxqja7hBtkWpPWGt9wfbfaMGVt9gnyCvYa+jojwwPHLCzUm5i8rpk7vD7wNee9bA35eYIjobYPaQuKS1MQ==" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => {
+hljs.configure({languages: ['bash', 'css', 'diff', 'graphql', 'ini', 'javascript', 'json', 'plaintext', 'python', 'python-repl', 'rust', 'shell', 'sql', 'typescript', 'xml', 'yaml']});
+hljs.highlightAll();
+/* Collapse source docstrings */
+setTimeout(() => {
+[...document.querySelectorAll('.hljs.language-python > .hljs-string')]
+.filter(el => el.innerHTML.length > 200 && ['"""', "'''"].includes(el.innerHTML.substring(0, 3)))
+.forEach(el => {
+let d = document.createElement('details');
+d.classList.add('hljs-string');
+d.innerHTML = '<summary>"""</summary>' + el.innerHTML.substring(3);
+el.replaceWith(d);
+});
+}, 100);
+})</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>app.models.reservation</code></h1>
+</header>
+<section id="section-intro">
+<p>Model Reservation - rezerwacje książek.</p>
+<p>Wymaganie: F8-F10 - Rezerwacje książek
+Wymaganie: NF19 - Soft delete
+Wymaganie: NF29 - Reguły biznesowe (max 3 rezerwacje na użytkownika)</p>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="app.models.reservation.Reservation"><code class="flex name class">
+<span>class <span class="ident">Reservation</span></span>
+<span>(</span><span>**kwargs)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Reservation(Base):
+    &#34;&#34;&#34;
+    Model Reservation - reprezentuje rezerwację książki przez użytkownika.
+
+    Wymagania:
+    - F8: Rezerwacja książki
+    - F9: Przeglądanie rezerwacji
+    - F10: Anulowanie rezerwacji
+    - NF29: Max 3 aktywne rezerwacje na użytkownika
+    &#34;&#34;&#34;
+
+    __tablename__ = &#34;reservations&#34;
+
+    # Identyfikator rezerwacji (UUID, klucz główny).
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, nullable=False
+    )
+
+    # Identyfikator użytkownika (np. UUID z auth-service trzymany jako string).
+    user_id: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
+
+    # Identyfikator książki (pozycja w katalogu, nie konkretny egzemplarz).
+    book_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), nullable=False, index=True
+    )
+
+    # Identyfikator konkretnego egzemplarza (opcjonalnie, gdy egzemplarz został już przydzielony).
+    book_copy_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), nullable=True
+    )
+
+    # Status rezerwacji – jeden z ReservationStatus.
+    status: Mapped[ReservationStatus] = mapped_column(
+        SQLEnum(ReservationStatus, name=&#34;reservation_status&#34;),
+        nullable=False,
+        default=ReservationStatus.ACTIVE,
+        index=True,
+    )
+
+    # Data utworzenia rezerwacji.
+    reserved_at: Mapped[datetime] = mapped_column(
+        DateTime, nullable=False, default=datetime.utcnow
+    )
+
+    # Data wygaśnięcia rezerwacji (np. po 3 dniach, jeśli nie została zrealizowana).
+    expires_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+
+    # Soft delete (NF19) – zamiast usuwać, oznaczamy rekord jako usunięty.
+    is_deleted: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+
+    # Informacja kto usunął rezerwację (np. admin z panelu).
+    deleted_by: Mapped[str | None] = mapped_column(String(255), nullable=True)
+
+    # Znaczniki czasu utworzenia i ostatniej aktualizacji rekordu.
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, nullable=False, default=datetime.utcnow
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow
+    )
+
+    def __init__(self, **kwargs):
+        &#34;&#34;&#34;
+        Konstruktor z automatycznym ustawieniem expires_at.
+
+        Domyślnie: rezerwacja wygasa po 3 dniach (NF29 – reguła biznesowa).
+        Jeśli expires_at nie zostanie podane jawnie, ustawiamy je na &#34;teraz + 3 dni&#34;.
+        &#34;&#34;&#34;
+        super().__init__(**kwargs)
+        if not self.expires_at:
+            self.expires_at = datetime.utcnow() + timedelta(days=3)
+
+    def is_active(self) -&gt; bool:
+        &#34;&#34;&#34;
+        Sprawdza, czy rezerwacja jest aktualnie aktywna (F8).
+
+        Warunki:
+        - status == ACTIVE,
+        - rekord nie jest oznaczony jako usunięty (is_deleted == False),
+        - obecny czas jest wcześniejszy niż expires_at.
+        &#34;&#34;&#34;
+        return (
+            self.status == ReservationStatus.ACTIVE
+            and not self.is_deleted
+            and datetime.utcnow() &lt; self.expires_at
+        )
+
+    def can_be_cancelled(self) -&gt; bool:
+        &#34;&#34;&#34;
+        Sprawdza, czy rezerwację można anulować (F10).
+
+        Rezerwacja może być anulowana tylko wtedy, gdy:
+        - jest w statusie ACTIVE,
+        - nie została oznaczona jako usunięta.
+        &#34;&#34;&#34;
+        return self.status == ReservationStatus.ACTIVE and not self.is_deleted
+
+    def is_expired(self) -&gt; bool:
+        &#34;&#34;&#34;
+        Sprawdza czy rezerwacja wygasła.
+
+        Logika:
+        - aktualny czas &gt;= expires_at,
+        - status nadal ACTIVE (czyli rezerwacja nie została jeszcze &#34;oficjalnie&#34; wygaszona).
+        &#34;&#34;&#34;
+        return (
+            datetime.utcnow() &gt;= self.expires_at
+            and self.status == ReservationStatus.ACTIVE
+        )
+
+    def cancel(self) -&gt; None:
+        &#34;&#34;&#34;
+        Anuluj rezerwację (F10).
+
+        Ustawia status na CANCELLED, jeśli rezerwacja może być anulowana.
+        Aktualizuje pole updated_at.
+        &#34;&#34;&#34;
+        if self.can_be_cancelled():
+            self.status = ReservationStatus.CANCELLED
+            self.updated_at = datetime.utcnow()
+
+    def complete(self) -&gt; None:
+        &#34;&#34;&#34;
+        Oznacz rezerwację jako zrealizowaną.
+
+        Używane w momencie, gdy na podstawie tej rezerwacji
+        została utworzona transakcja wypożyczenia (Loan).
+        &#34;&#34;&#34;
+        if self.status == ReservationStatus.ACTIVE:
+            self.status = ReservationStatus.COMPLETED
+            self.updated_at = datetime.utcnow()
+
+    def mark_as_expired(self) -&gt; None:
+        &#34;&#34;&#34;
+        Oznacz rezerwację jako wygasłą.
+
+        Wywoływane np. przez proces cykliczny (scheduler), który
+        sprawdza rezerwacje po expires_at i aktualizuje ich status.
+        &#34;&#34;&#34;
+        if self.is_expired():
+            self.status = ReservationStatus.EXPIRED
+            self.updated_at = datetime.utcnow()
+
+    def __repr__(self) -&gt; str:
+        &#34;&#34;&#34;
+        Reprezentacja tekstowa obiektu – pomocna przy logowaniu i debugowaniu.
+        &#34;&#34;&#34;
+        return f&#34;&lt;Reservation(id={self.id}, user_id={self.user_id}, book_id={self.book_id}, status={self.status})&gt;&#34;</code></pre>
+</details>
+<div class="desc"><p>Model Reservation - reprezentuje rezerwację książki przez użytkownika.</p>
+<p>Wymagania:
+- F8: Rezerwacja książki
+- F9: Przeglądanie rezerwacji
+- F10: Anulowanie rezerwacji
+- NF29: Max 3 aktywne rezerwacje na użytkownika</p>
+<p>Konstruktor z automatycznym ustawieniem expires_at.</p>
+<p>Domyślnie: rezerwacja wygasa po 3 dniach (NF29 – reguła biznesowa).
+Jeśli expires_at nie zostanie podane jawnie, ustawiamy je na "teraz + 3 dni".</p></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>sqlalchemy.orm.decl_api.Base</li>
+</ul>
+<h3>Instance variables</h3>
+<dl>
+<dt id="app.models.reservation.Reservation.book_copy_id"><code class="name">var <span class="ident">book_copy_id</span> : sqlalchemy.orm.base.Mapped[uuid.UUID | None]</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def __get__(
+    self, instance: Optional[object], owner: Any
+) -&gt; Union[InstrumentedAttribute[_T_co], _T_co]:
+    if instance is None:
+        return self
+
+    dict_ = instance_dict(instance)
+    if self.impl.supports_population and self.key in dict_:
+        return dict_[self.key]  # type: ignore[no-any-return]
+    else:
+        try:
+            state = instance_state(instance)
+        except AttributeError as err:
+            raise orm_exc.UnmappedInstanceError(instance) from err
+        return self.impl.get(state, dict_)  # type: ignore[no-any-return]</code></pre>
+</details>
+<div class="desc"></div>
+</dd>
+<dt id="app.models.reservation.Reservation.book_id"><code class="name">var <span class="ident">book_id</span> : sqlalchemy.orm.base.Mapped[uuid.UUID]</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def __get__(
+    self, instance: Optional[object], owner: Any
+) -&gt; Union[InstrumentedAttribute[_T_co], _T_co]:
+    if instance is None:
+        return self
+
+    dict_ = instance_dict(instance)
+    if self.impl.supports_population and self.key in dict_:
+        return dict_[self.key]  # type: ignore[no-any-return]
+    else:
+        try:
+            state = instance_state(instance)
+        except AttributeError as err:
+            raise orm_exc.UnmappedInstanceError(instance) from err
+        return self.impl.get(state, dict_)  # type: ignore[no-any-return]</code></pre>
+</details>
+<div class="desc"></div>
+</dd>
+<dt id="app.models.reservation.Reservation.created_at"><code class="name">var <span class="ident">created_at</span> : sqlalchemy.orm.base.Mapped[datetime.datetime]</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def __get__(
+    self, instance: Optional[object], owner: Any
+) -&gt; Union[InstrumentedAttribute[_T_co], _T_co]:
+    if instance is None:
+        return self
+
+    dict_ = instance_dict(instance)
+    if self.impl.supports_population and self.key in dict_:
+        return dict_[self.key]  # type: ignore[no-any-return]
+    else:
+        try:
+            state = instance_state(instance)
+        except AttributeError as err:
+            raise orm_exc.UnmappedInstanceError(instance) from err
+        return self.impl.get(state, dict_)  # type: ignore[no-any-return]</code></pre>
+</details>
+<div class="desc"></div>
+</dd>
+<dt id="app.models.reservation.Reservation.deleted_by"><code class="name">var <span class="ident">deleted_by</span> : sqlalchemy.orm.base.Mapped[str | None]</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def __get__(
+    self, instance: Optional[object], owner: Any
+) -&gt; Union[InstrumentedAttribute[_T_co], _T_co]:
+    if instance is None:
+        return self
+
+    dict_ = instance_dict(instance)
+    if self.impl.supports_population and self.key in dict_:
+        return dict_[self.key]  # type: ignore[no-any-return]
+    else:
+        try:
+            state = instance_state(instance)
+        except AttributeError as err:
+            raise orm_exc.UnmappedInstanceError(instance) from err
+        return self.impl.get(state, dict_)  # type: ignore[no-any-return]</code></pre>
+</details>
+<div class="desc"></div>
+</dd>
+<dt id="app.models.reservation.Reservation.expires_at"><code class="name">var <span class="ident">expires_at</span> : sqlalchemy.orm.base.Mapped[datetime.datetime]</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def __get__(
+    self, instance: Optional[object], owner: Any
+) -&gt; Union[InstrumentedAttribute[_T_co], _T_co]:
+    if instance is None:
+        return self
+
+    dict_ = instance_dict(instance)
+    if self.impl.supports_population and self.key in dict_:
+        return dict_[self.key]  # type: ignore[no-any-return]
+    else:
+        try:
+            state = instance_state(instance)
+        except AttributeError as err:
+            raise orm_exc.UnmappedInstanceError(instance) from err
+        return self.impl.get(state, dict_)  # type: ignore[no-any-return]</code></pre>
+</details>
+<div class="desc"></div>
+</dd>
+<dt id="app.models.reservation.Reservation.id"><code class="name">var <span class="ident">id</span> : sqlalchemy.orm.base.Mapped[uuid.UUID]</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def __get__(
+    self, instance: Optional[object], owner: Any
+) -&gt; Union[InstrumentedAttribute[_T_co], _T_co]:
+    if instance is None:
+        return self
+
+    dict_ = instance_dict(instance)
+    if self.impl.supports_population and self.key in dict_:
+        return dict_[self.key]  # type: ignore[no-any-return]
+    else:
+        try:
+            state = instance_state(instance)
+        except AttributeError as err:
+            raise orm_exc.UnmappedInstanceError(instance) from err
+        return self.impl.get(state, dict_)  # type: ignore[no-any-return]</code></pre>
+</details>
+<div class="desc"></div>
+</dd>
+<dt id="app.models.reservation.Reservation.is_deleted"><code class="name">var <span class="ident">is_deleted</span> : sqlalchemy.orm.base.Mapped[bool]</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def __get__(
+    self, instance: Optional[object], owner: Any
+) -&gt; Union[InstrumentedAttribute[_T_co], _T_co]:
+    if instance is None:
+        return self
+
+    dict_ = instance_dict(instance)
+    if self.impl.supports_population and self.key in dict_:
+        return dict_[self.key]  # type: ignore[no-any-return]
+    else:
+        try:
+            state = instance_state(instance)
+        except AttributeError as err:
+            raise orm_exc.UnmappedInstanceError(instance) from err
+        return self.impl.get(state, dict_)  # type: ignore[no-any-return]</code></pre>
+</details>
+<div class="desc"></div>
+</dd>
+<dt id="app.models.reservation.Reservation.reserved_at"><code class="name">var <span class="ident">reserved_at</span> : sqlalchemy.orm.base.Mapped[datetime.datetime]</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def __get__(
+    self, instance: Optional[object], owner: Any
+) -&gt; Union[InstrumentedAttribute[_T_co], _T_co]:
+    if instance is None:
+        return self
+
+    dict_ = instance_dict(instance)
+    if self.impl.supports_population and self.key in dict_:
+        return dict_[self.key]  # type: ignore[no-any-return]
+    else:
+        try:
+            state = instance_state(instance)
+        except AttributeError as err:
+            raise orm_exc.UnmappedInstanceError(instance) from err
+        return self.impl.get(state, dict_)  # type: ignore[no-any-return]</code></pre>
+</details>
+<div class="desc"></div>
+</dd>
+<dt id="app.models.reservation.Reservation.status"><code class="name">var <span class="ident">status</span> : sqlalchemy.orm.base.Mapped[<a title="app.models.reservation.ReservationStatus" href="#app.models.reservation.ReservationStatus">ReservationStatus</a>]</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def __get__(
+    self, instance: Optional[object], owner: Any
+) -&gt; Union[InstrumentedAttribute[_T_co], _T_co]:
+    if instance is None:
+        return self
+
+    dict_ = instance_dict(instance)
+    if self.impl.supports_population and self.key in dict_:
+        return dict_[self.key]  # type: ignore[no-any-return]
+    else:
+        try:
+            state = instance_state(instance)
+        except AttributeError as err:
+            raise orm_exc.UnmappedInstanceError(instance) from err
+        return self.impl.get(state, dict_)  # type: ignore[no-any-return]</code></pre>
+</details>
+<div class="desc"></div>
+</dd>
+<dt id="app.models.reservation.Reservation.updated_at"><code class="name">var <span class="ident">updated_at</span> : sqlalchemy.orm.base.Mapped[datetime.datetime]</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def __get__(
+    self, instance: Optional[object], owner: Any
+) -&gt; Union[InstrumentedAttribute[_T_co], _T_co]:
+    if instance is None:
+        return self
+
+    dict_ = instance_dict(instance)
+    if self.impl.supports_population and self.key in dict_:
+        return dict_[self.key]  # type: ignore[no-any-return]
+    else:
+        try:
+            state = instance_state(instance)
+        except AttributeError as err:
+            raise orm_exc.UnmappedInstanceError(instance) from err
+        return self.impl.get(state, dict_)  # type: ignore[no-any-return]</code></pre>
+</details>
+<div class="desc"></div>
+</dd>
+<dt id="app.models.reservation.Reservation.user_id"><code class="name">var <span class="ident">user_id</span> : sqlalchemy.orm.base.Mapped[str]</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def __get__(
+    self, instance: Optional[object], owner: Any
+) -&gt; Union[InstrumentedAttribute[_T_co], _T_co]:
+    if instance is None:
+        return self
+
+    dict_ = instance_dict(instance)
+    if self.impl.supports_population and self.key in dict_:
+        return dict_[self.key]  # type: ignore[no-any-return]
+    else:
+        try:
+            state = instance_state(instance)
+        except AttributeError as err:
+            raise orm_exc.UnmappedInstanceError(instance) from err
+        return self.impl.get(state, dict_)  # type: ignore[no-any-return]</code></pre>
+</details>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="app.models.reservation.Reservation.can_be_cancelled"><code class="name flex">
+<span>def <span class="ident">can_be_cancelled</span></span>(<span>self) ‑> bool</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def can_be_cancelled(self) -&gt; bool:
+    &#34;&#34;&#34;
+    Sprawdza, czy rezerwację można anulować (F10).
+
+    Rezerwacja może być anulowana tylko wtedy, gdy:
+    - jest w statusie ACTIVE,
+    - nie została oznaczona jako usunięta.
+    &#34;&#34;&#34;
+    return self.status == ReservationStatus.ACTIVE and not self.is_deleted</code></pre>
+</details>
+<div class="desc"><p>Sprawdza, czy rezerwację można anulować (F10).</p>
+<p>Rezerwacja może być anulowana tylko wtedy, gdy:
+- jest w statusie ACTIVE,
+- nie została oznaczona jako usunięta.</p></div>
+</dd>
+<dt id="app.models.reservation.Reservation.cancel"><code class="name flex">
+<span>def <span class="ident">cancel</span></span>(<span>self) ‑> None</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def cancel(self) -&gt; None:
+    &#34;&#34;&#34;
+    Anuluj rezerwację (F10).
+
+    Ustawia status na CANCELLED, jeśli rezerwacja może być anulowana.
+    Aktualizuje pole updated_at.
+    &#34;&#34;&#34;
+    if self.can_be_cancelled():
+        self.status = ReservationStatus.CANCELLED
+        self.updated_at = datetime.utcnow()</code></pre>
+</details>
+<div class="desc"><p>Anuluj rezerwację (F10).</p>
+<p>Ustawia status na CANCELLED, jeśli rezerwacja może być anulowana.
+Aktualizuje pole updated_at.</p></div>
+</dd>
+<dt id="app.models.reservation.Reservation.complete"><code class="name flex">
+<span>def <span class="ident">complete</span></span>(<span>self) ‑> None</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def complete(self) -&gt; None:
+    &#34;&#34;&#34;
+    Oznacz rezerwację jako zrealizowaną.
+
+    Używane w momencie, gdy na podstawie tej rezerwacji
+    została utworzona transakcja wypożyczenia (Loan).
+    &#34;&#34;&#34;
+    if self.status == ReservationStatus.ACTIVE:
+        self.status = ReservationStatus.COMPLETED
+        self.updated_at = datetime.utcnow()</code></pre>
+</details>
+<div class="desc"><p>Oznacz rezerwację jako zrealizowaną.</p>
+<p>Używane w momencie, gdy na podstawie tej rezerwacji
+została utworzona transakcja wypożyczenia (Loan).</p></div>
+</dd>
+<dt id="app.models.reservation.Reservation.is_active"><code class="name flex">
+<span>def <span class="ident">is_active</span></span>(<span>self) ‑> bool</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def is_active(self) -&gt; bool:
+    &#34;&#34;&#34;
+    Sprawdza, czy rezerwacja jest aktualnie aktywna (F8).
+
+    Warunki:
+    - status == ACTIVE,
+    - rekord nie jest oznaczony jako usunięty (is_deleted == False),
+    - obecny czas jest wcześniejszy niż expires_at.
+    &#34;&#34;&#34;
+    return (
+        self.status == ReservationStatus.ACTIVE
+        and not self.is_deleted
+        and datetime.utcnow() &lt; self.expires_at
+    )</code></pre>
+</details>
+<div class="desc"><p>Sprawdza, czy rezerwacja jest aktualnie aktywna (F8).</p>
+<p>Warunki:
+- status == ACTIVE,
+- rekord nie jest oznaczony jako usunięty (is_deleted == False),
+- obecny czas jest wcześniejszy niż expires_at.</p></div>
+</dd>
+<dt id="app.models.reservation.Reservation.is_expired"><code class="name flex">
+<span>def <span class="ident">is_expired</span></span>(<span>self) ‑> bool</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def is_expired(self) -&gt; bool:
+    &#34;&#34;&#34;
+    Sprawdza czy rezerwacja wygasła.
+
+    Logika:
+    - aktualny czas &gt;= expires_at,
+    - status nadal ACTIVE (czyli rezerwacja nie została jeszcze &#34;oficjalnie&#34; wygaszona).
+    &#34;&#34;&#34;
+    return (
+        datetime.utcnow() &gt;= self.expires_at
+        and self.status == ReservationStatus.ACTIVE
+    )</code></pre>
+</details>
+<div class="desc"><p>Sprawdza czy rezerwacja wygasła.</p>
+<p>Logika:
+- aktualny czas &gt;= expires_at,
+- status nadal ACTIVE (czyli rezerwacja nie została jeszcze "oficjalnie" wygaszona).</p></div>
+</dd>
+<dt id="app.models.reservation.Reservation.mark_as_expired"><code class="name flex">
+<span>def <span class="ident">mark_as_expired</span></span>(<span>self) ‑> None</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def mark_as_expired(self) -&gt; None:
+    &#34;&#34;&#34;
+    Oznacz rezerwację jako wygasłą.
+
+    Wywoływane np. przez proces cykliczny (scheduler), który
+    sprawdza rezerwacje po expires_at i aktualizuje ich status.
+    &#34;&#34;&#34;
+    if self.is_expired():
+        self.status = ReservationStatus.EXPIRED
+        self.updated_at = datetime.utcnow()</code></pre>
+</details>
+<div class="desc"><p>Oznacz rezerwację jako wygasłą.</p>
+<p>Wywoływane np. przez proces cykliczny (scheduler), który
+sprawdza rezerwacje po expires_at i aktualizuje ich status.</p></div>
+</dd>
+</dl>
+</dd>
+<dt id="app.models.reservation.ReservationStatus"><code class="flex name class">
+<span>class <span class="ident">ReservationStatus</span></span>
+<span>(</span><span>*args, **kwds)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class ReservationStatus(str, enum.Enum):
+    &#34;&#34;&#34;
+    Status rezerwacji (F8-F10).
+
+    ACTIVE     – rezerwacja aktywna, oczekuje na realizację,
+    CANCELLED  – rezerwacja anulowana przez użytkownika/system,
+    EXPIRED    – rezerwacja wygasła (minął czas ważności),
+    COMPLETED  – rezerwacja zrealizowana (powiązane wypożyczenie).
+    &#34;&#34;&#34;
+
+    ACTIVE = &#34;ACTIVE&#34;
+    CANCELLED = &#34;CANCELLED&#34;
+    EXPIRED = &#34;EXPIRED&#34;
+    COMPLETED = &#34;COMPLETED&#34;</code></pre>
+</details>
+<div class="desc"><p>Status rezerwacji (F8-F10).</p>
+<p>ACTIVE
+– rezerwacja aktywna, oczekuje na realizację,
+CANCELLED
+– rezerwacja anulowana przez użytkownika/system,
+EXPIRED
+– rezerwacja wygasła (minął czas ważności),
+COMPLETED
+– rezerwacja zrealizowana (powiązane wypożyczenie).</p></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>builtins.str</li>
+<li>enum.Enum</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="app.models.reservation.ReservationStatus.ACTIVE"><code class="name">var <span class="ident">ACTIVE</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.models.reservation.ReservationStatus.CANCELLED"><code class="name">var <span class="ident">CANCELLED</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.models.reservation.ReservationStatus.COMPLETED"><code class="name">var <span class="ident">COMPLETED</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.models.reservation.ReservationStatus.EXPIRED"><code class="name">var <span class="ident">EXPIRED</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="app.models" href="index.html">app.models</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="app.models.reservation.Reservation" href="#app.models.reservation.Reservation">Reservation</a></code></h4>
+<ul class="two-column">
+<li><code><a title="app.models.reservation.Reservation.book_copy_id" href="#app.models.reservation.Reservation.book_copy_id">book_copy_id</a></code></li>
+<li><code><a title="app.models.reservation.Reservation.book_id" href="#app.models.reservation.Reservation.book_id">book_id</a></code></li>
+<li><code><a title="app.models.reservation.Reservation.can_be_cancelled" href="#app.models.reservation.Reservation.can_be_cancelled">can_be_cancelled</a></code></li>
+<li><code><a title="app.models.reservation.Reservation.cancel" href="#app.models.reservation.Reservation.cancel">cancel</a></code></li>
+<li><code><a title="app.models.reservation.Reservation.complete" href="#app.models.reservation.Reservation.complete">complete</a></code></li>
+<li><code><a title="app.models.reservation.Reservation.created_at" href="#app.models.reservation.Reservation.created_at">created_at</a></code></li>
+<li><code><a title="app.models.reservation.Reservation.deleted_by" href="#app.models.reservation.Reservation.deleted_by">deleted_by</a></code></li>
+<li><code><a title="app.models.reservation.Reservation.expires_at" href="#app.models.reservation.Reservation.expires_at">expires_at</a></code></li>
+<li><code><a title="app.models.reservation.Reservation.id" href="#app.models.reservation.Reservation.id">id</a></code></li>
+<li><code><a title="app.models.reservation.Reservation.is_active" href="#app.models.reservation.Reservation.is_active">is_active</a></code></li>
+<li><code><a title="app.models.reservation.Reservation.is_deleted" href="#app.models.reservation.Reservation.is_deleted">is_deleted</a></code></li>
+<li><code><a title="app.models.reservation.Reservation.is_expired" href="#app.models.reservation.Reservation.is_expired">is_expired</a></code></li>
+<li><code><a title="app.models.reservation.Reservation.mark_as_expired" href="#app.models.reservation.Reservation.mark_as_expired">mark_as_expired</a></code></li>
+<li><code><a title="app.models.reservation.Reservation.reserved_at" href="#app.models.reservation.Reservation.reserved_at">reserved_at</a></code></li>
+<li><code><a title="app.models.reservation.Reservation.status" href="#app.models.reservation.Reservation.status">status</a></code></li>
+<li><code><a title="app.models.reservation.Reservation.updated_at" href="#app.models.reservation.Reservation.updated_at">updated_at</a></code></li>
+<li><code><a title="app.models.reservation.Reservation.user_id" href="#app.models.reservation.Reservation.user_id">user_id</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="app.models.reservation.ReservationStatus" href="#app.models.reservation.ReservationStatus">ReservationStatus</a></code></h4>
+<ul class="">
+<li><code><a title="app.models.reservation.ReservationStatus.ACTIVE" href="#app.models.reservation.ReservationStatus.ACTIVE">ACTIVE</a></code></li>
+<li><code><a title="app.models.reservation.ReservationStatus.CANCELLED" href="#app.models.reservation.ReservationStatus.CANCELLED">CANCELLED</a></code></li>
+<li><code><a title="app.models.reservation.ReservationStatus.COMPLETED" href="#app.models.reservation.ReservationStatus.COMPLETED">COMPLETED</a></code></li>
+<li><code><a title="app.models.reservation.ReservationStatus.EXPIRED" href="#app.models.reservation.ReservationStatus.EXPIRED">EXPIRED</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.11.6</a>.</p>
+</footer>
+</body>
+</html>

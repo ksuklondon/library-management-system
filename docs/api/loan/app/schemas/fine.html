@@ -1,0 +1,463 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
+<meta name="generator" content="pdoc3 0.11.6">
+<title>app.schemas.fine API documentation</title>
+<meta name="description" content="Schemas dla Fine - kary za przetrzymanie …">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/sanitize.min.css" integrity="sha512-y1dtMcuvtTMJc1yPgEqF0ZjQbhnc/bFhyvIyVNb9Zk5mIGtqVaAB1Ttl28su8AvFMOY0EwRbAe+HCLqj6W7/KA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/typography.min.css" integrity="sha512-Y1DYSb995BAfxobCkKepB1BqJJTPrOp3zPL74AWFugHHmmdcvO+C48WLrUOlhGMc0QG7AE3f7gmvvcrmX2fDoA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:1.5em;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:2em 0 .50em 0}h3{font-size:1.4em;margin:1.6em 0 .7em 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .2s ease-in-out}a:visited{color:#503}a:hover{color:#b62}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900;font-weight:bold}pre code{font-size:.8em;line-height:1.4em;padding:1em;display:block}code{background:#f3f3f3;font-family:"DejaVu Sans Mono",monospace;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source > summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible;min-width:max-content}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em 1em;margin:1em 0}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul ul{padding-left:1em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" integrity="sha512-D9gUyxqja7hBtkWpPWGt9wfbfaMGVt9gnyCvYa+jojwwPHLCzUm5i8rpk7vD7wNee9bA35eYIjobYPaQuKS1MQ==" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => {
+hljs.configure({languages: ['bash', 'css', 'diff', 'graphql', 'ini', 'javascript', 'json', 'plaintext', 'python', 'python-repl', 'rust', 'shell', 'sql', 'typescript', 'xml', 'yaml']});
+hljs.highlightAll();
+/* Collapse source docstrings */
+setTimeout(() => {
+[...document.querySelectorAll('.hljs.language-python > .hljs-string')]
+.filter(el => el.innerHTML.length > 200 && ['"""', "'''"].includes(el.innerHTML.substring(0, 3)))
+.forEach(el => {
+let d = document.createElement('details');
+d.classList.add('hljs-string');
+d.innerHTML = '<summary>"""</summary>' + el.innerHTML.substring(3);
+el.replaceWith(d);
+});
+}, 100);
+})</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>app.schemas.fine</code></h1>
+</header>
+<section id="section-intro">
+<p>Schemas dla Fine - kary za przetrzymanie.</p>
+<p>Wymaganie: F27 - Płatność kar
+Wymaganie: NF7 - Walidacja danych wejściowych</p>
+<p>Schematy Pydantic wykorzystywane w Loan Service do:
+- tworzenia nowych kar,
+- walidacji danych wejściowych (kwoty, użytkownika, id wypożyczenia),
+- rejestrowania płatności,
+- zwracania danych o karach w odpowiedziach API.</p>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="app.schemas.fine.FineCreate"><code class="flex name class">
+<span>class <span class="ident">FineCreate</span></span>
+<span>(</span><span>**data: Any)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class FineCreate(BaseModel):
+    &#34;&#34;&#34;
+    Schema do tworzenia kary (F27).
+
+    Używana przez endpoint odpowiedzialny za naliczanie kar.
+    Zawiera:
+    - ID wypożyczenia, którego dotyczy kara,
+    - ID użytkownika,
+    - kwotę naliczonej kary.
+
+    Wymaganie: F27 – naliczanie kar.
+    Walidacja (NF7):
+    - amount nie może być ujemny,
+    - amount nie może być przesadnie wysoki,
+    - user_id musi być poprawny i niepusty.
+    &#34;&#34;&#34;
+    loan_id: uuid.UUID = Field(..., description=&#34;ID wypożyczenia, za które naliczana jest kara&#34;)
+    user_id: str = Field(..., description=&#34;ID użytkownika&#34;)
+    amount: float = Field(..., ge=0.0, description=&#34;Kwota kary w złotych&#34;)
+
+    @field_validator(&#39;amount&#39;)
+    @classmethod
+    def validate_amount(cls, v):
+        &#34;&#34;&#34;
+        Walidacja kwoty kary (NF7):
+        - nie może być ujemna,
+        - nie powinna przekraczać górnego limitu bezpieczeństwa,
+        - zwracana kwota jest zaokrąglana do 2 miejsc.
+        &#34;&#34;&#34;
+        if v &lt; 0:
+            raise ValueError(&#34;Kwota kary nie może być ujemna&#34;)
+        if v &gt; 10000:
+            raise ValueError(&#34;Kwota kary jest zbyt wysoka (max 10000 zł)&#34;)
+        return round(v, 2)
+
+    @field_validator(&#39;user_id&#39;)
+    @classmethod
+    def validate_user_id(cls, v):
+        &#34;&#34;&#34;Walidacja user_id (NF7) – nie może być puste.&#34;&#34;&#34;
+        if not v or not v.strip():
+            raise ValueError(&#34;ID użytkownika jest wymagane&#34;)
+        return v
+
+    class Config:
+        # Przykład używany w dokumentacji (Swagger/ReDoc)
+        json_schema_extra = {
+            &#34;example&#34;: {
+                &#34;loan_id&#34;: &#34;123e4567-e89b-12d3-a456-426614174000&#34;,
+                &#34;user_id&#34;: &#34;user-uuid-123&#34;,
+                &#34;amount&#34;: 14.00
+            }
+        }</code></pre>
+</details>
+<div class="desc"><p>Schema do tworzenia kary (F27).</p>
+<p>Używana przez endpoint odpowiedzialny za naliczanie kar.
+Zawiera:
+- ID wypożyczenia, którego dotyczy kara,
+- ID użytkownika,
+- kwotę naliczonej kary.</p>
+<p>Wymaganie: F27 – naliczanie kar.
+Walidacja (NF7):
+- amount nie może być ujemny,
+- amount nie może być przesadnie wysoki,
+- user_id musi być poprawny i niepusty.</p>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<code>ValidationError</code>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><code>self</code> is explicitly positional-only to allow <code>self</code> as a field name.</p></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>pydantic.main.BaseModel</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="app.schemas.fine.FineCreate.Config"><code class="name">var <span class="ident">Config</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.fine.FineCreate.amount"><code class="name">var <span class="ident">amount</span> : float</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.fine.FineCreate.loan_id"><code class="name">var <span class="ident">loan_id</span> : uuid.UUID</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.fine.FineCreate.model_computed_fields"><code class="name">var <span class="ident">model_computed_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.fine.FineCreate.model_config"><code class="name">var <span class="ident">model_config</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.fine.FineCreate.model_fields"><code class="name">var <span class="ident">model_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.fine.FineCreate.user_id"><code class="name">var <span class="ident">user_id</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Static methods</h3>
+<dl>
+<dt id="app.schemas.fine.FineCreate.validate_amount"><code class="name flex">
+<span>def <span class="ident">validate_amount</span></span>(<span>v)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Walidacja kwoty kary (NF7):
+- nie może być ujemna,
+- nie powinna przekraczać górnego limitu bezpieczeństwa,
+- zwracana kwota jest zaokrąglana do 2 miejsc.</p></div>
+</dd>
+<dt id="app.schemas.fine.FineCreate.validate_user_id"><code class="name flex">
+<span>def <span class="ident">validate_user_id</span></span>(<span>v)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Walidacja user_id (NF7) – nie może być puste.</p></div>
+</dd>
+</dl>
+</dd>
+<dt id="app.schemas.fine.FinePayment"><code class="flex name class">
+<span>class <span class="ident">FinePayment</span></span>
+<span>(</span><span>**data: Any)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class FinePayment(BaseModel):
+    &#34;&#34;&#34;
+    Schema do rejestrowania płatności kary (F27).
+
+    Używana w endpointach opłacania kary.
+    Zawiera opcjonalną metodę płatności (np. &#39;cash&#39;, &#39;card&#39;, &#39;transfer&#39;).
+    &#34;&#34;&#34;
+    payment_method: Optional[str] = Field(
+        None,
+        description=&#34;Metoda płatności: cash, card, transfer&#34;
+    )
+
+    @field_validator(&#39;payment_method&#39;)
+    @classmethod
+    def validate_payment_method(cls, v):
+        &#34;&#34;&#34;
+        Walidacja metody płatności (NF7):
+        - jeśli podano, musi być jedną z dopuszczalnych metod.
+        &#34;&#34;&#34;
+        if v is not None:
+            allowed_methods = [&#39;cash&#39;, &#39;card&#39;, &#39;transfer&#39;]
+            if v.lower() not in allowed_methods:
+                raise ValueError(f&#34;Metoda płatności musi być jedną z: {&#39;, &#39;.join(allowed_methods)}&#34;)
+            return v.lower()
+        return v
+
+    class Config:
+        json_schema_extra = {
+            &#34;example&#34;: {
+                &#34;payment_method&#34;: &#34;cash&#34;
+            }
+        }</code></pre>
+</details>
+<div class="desc"><p>Schema do rejestrowania płatności kary (F27).</p>
+<p>Używana w endpointach opłacania kary.
+Zawiera opcjonalną metodę płatności (np. 'cash', 'card', 'transfer').</p>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<code>ValidationError</code>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><code>self</code> is explicitly positional-only to allow <code>self</code> as a field name.</p></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>pydantic.main.BaseModel</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="app.schemas.fine.FinePayment.Config"><code class="name">var <span class="ident">Config</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.fine.FinePayment.model_computed_fields"><code class="name">var <span class="ident">model_computed_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.fine.FinePayment.model_config"><code class="name">var <span class="ident">model_config</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.fine.FinePayment.model_fields"><code class="name">var <span class="ident">model_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.fine.FinePayment.payment_method"><code class="name">var <span class="ident">payment_method</span> : str | None</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Static methods</h3>
+<dl>
+<dt id="app.schemas.fine.FinePayment.validate_payment_method"><code class="name flex">
+<span>def <span class="ident">validate_payment_method</span></span>(<span>v)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Walidacja metody płatności (NF7):
+- jeśli podano, musi być jedną z dopuszczalnych metod.</p></div>
+</dd>
+</dl>
+</dd>
+<dt id="app.schemas.fine.FineResponse"><code class="flex name class">
+<span>class <span class="ident">FineResponse</span></span>
+<span>(</span><span>**data: Any)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class FineResponse(BaseModel):
+    &#34;&#34;&#34;
+    Schema odpowiedzi z danymi kary (F27).
+
+    Wymagania:
+    - F27 – zwracanie listy kar oraz danych szczegółowych użytkownika.
+
+    Zawiera:
+    - kwotę kary,
+    - status płatności,
+    - datę opłacenia,
+    - metadane czasowe.
+
+    Używana w odpowiedziach API np.:
+    - GET /api/fines
+    - GET /api/fines/{id}
+    &#34;&#34;&#34;
+    id: uuid.UUID
+    loan_id: uuid.UUID
+    user_id: str
+    amount: float
+    paid: bool
+    paid_at: Optional[datetime] = None
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        # Pozwala automatycznie tworzyć schema z modeli SQLAlchemy
+        from_attributes = True
+        json_schema_extra = {
+            &#34;example&#34;: {
+                &#34;id&#34;: &#34;123e4567-e89b-12d3-a456-426614174000&#34;,
+                &#34;loan_id&#34;: &#34;loan-uuid-456&#34;,
+                &#34;user_id&#34;: &#34;user-uuid-123&#34;,
+                &#34;amount&#34;: 14.00,
+                &#34;paid&#34;: False,
+                &#34;paid_at&#34;: None,
+                &#34;created_at&#34;: &#34;2024-11-15T10:00:00&#34;,
+                &#34;updated_at&#34;: &#34;2024-11-15T10:00:00&#34;
+            }
+        }</code></pre>
+</details>
+<div class="desc"><p>Schema odpowiedzi z danymi kary (F27).</p>
+<p>Wymagania:
+- F27 – zwracanie listy kar oraz danych szczegółowych użytkownika.</p>
+<p>Zawiera:
+- kwotę kary,
+- status płatności,
+- datę opłacenia,
+- metadane czasowe.</p>
+<p>Używana w odpowiedziach API np.:
+- GET /api/fines
+- GET /api/fines/{id}</p>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<code>ValidationError</code>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><code>self</code> is explicitly positional-only to allow <code>self</code> as a field name.</p></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>pydantic.main.BaseModel</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="app.schemas.fine.FineResponse.Config"><code class="name">var <span class="ident">Config</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.fine.FineResponse.amount"><code class="name">var <span class="ident">amount</span> : float</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.fine.FineResponse.created_at"><code class="name">var <span class="ident">created_at</span> : datetime.datetime</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.fine.FineResponse.id"><code class="name">var <span class="ident">id</span> : uuid.UUID</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.fine.FineResponse.loan_id"><code class="name">var <span class="ident">loan_id</span> : uuid.UUID</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.fine.FineResponse.model_computed_fields"><code class="name">var <span class="ident">model_computed_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.fine.FineResponse.model_config"><code class="name">var <span class="ident">model_config</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.fine.FineResponse.model_fields"><code class="name">var <span class="ident">model_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.fine.FineResponse.paid"><code class="name">var <span class="ident">paid</span> : bool</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.fine.FineResponse.paid_at"><code class="name">var <span class="ident">paid_at</span> : datetime.datetime | None</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.fine.FineResponse.updated_at"><code class="name">var <span class="ident">updated_at</span> : datetime.datetime</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.fine.FineResponse.user_id"><code class="name">var <span class="ident">user_id</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="app.schemas" href="index.html">app.schemas</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="app.schemas.fine.FineCreate" href="#app.schemas.fine.FineCreate">FineCreate</a></code></h4>
+<ul class="">
+<li><code><a title="app.schemas.fine.FineCreate.Config" href="#app.schemas.fine.FineCreate.Config">Config</a></code></li>
+<li><code><a title="app.schemas.fine.FineCreate.amount" href="#app.schemas.fine.FineCreate.amount">amount</a></code></li>
+<li><code><a title="app.schemas.fine.FineCreate.loan_id" href="#app.schemas.fine.FineCreate.loan_id">loan_id</a></code></li>
+<li><code><a title="app.schemas.fine.FineCreate.model_computed_fields" href="#app.schemas.fine.FineCreate.model_computed_fields">model_computed_fields</a></code></li>
+<li><code><a title="app.schemas.fine.FineCreate.model_config" href="#app.schemas.fine.FineCreate.model_config">model_config</a></code></li>
+<li><code><a title="app.schemas.fine.FineCreate.model_fields" href="#app.schemas.fine.FineCreate.model_fields">model_fields</a></code></li>
+<li><code><a title="app.schemas.fine.FineCreate.user_id" href="#app.schemas.fine.FineCreate.user_id">user_id</a></code></li>
+<li><code><a title="app.schemas.fine.FineCreate.validate_amount" href="#app.schemas.fine.FineCreate.validate_amount">validate_amount</a></code></li>
+<li><code><a title="app.schemas.fine.FineCreate.validate_user_id" href="#app.schemas.fine.FineCreate.validate_user_id">validate_user_id</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="app.schemas.fine.FinePayment" href="#app.schemas.fine.FinePayment">FinePayment</a></code></h4>
+<ul class="">
+<li><code><a title="app.schemas.fine.FinePayment.Config" href="#app.schemas.fine.FinePayment.Config">Config</a></code></li>
+<li><code><a title="app.schemas.fine.FinePayment.model_computed_fields" href="#app.schemas.fine.FinePayment.model_computed_fields">model_computed_fields</a></code></li>
+<li><code><a title="app.schemas.fine.FinePayment.model_config" href="#app.schemas.fine.FinePayment.model_config">model_config</a></code></li>
+<li><code><a title="app.schemas.fine.FinePayment.model_fields" href="#app.schemas.fine.FinePayment.model_fields">model_fields</a></code></li>
+<li><code><a title="app.schemas.fine.FinePayment.payment_method" href="#app.schemas.fine.FinePayment.payment_method">payment_method</a></code></li>
+<li><code><a title="app.schemas.fine.FinePayment.validate_payment_method" href="#app.schemas.fine.FinePayment.validate_payment_method">validate_payment_method</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="app.schemas.fine.FineResponse" href="#app.schemas.fine.FineResponse">FineResponse</a></code></h4>
+<ul class="">
+<li><code><a title="app.schemas.fine.FineResponse.Config" href="#app.schemas.fine.FineResponse.Config">Config</a></code></li>
+<li><code><a title="app.schemas.fine.FineResponse.amount" href="#app.schemas.fine.FineResponse.amount">amount</a></code></li>
+<li><code><a title="app.schemas.fine.FineResponse.created_at" href="#app.schemas.fine.FineResponse.created_at">created_at</a></code></li>
+<li><code><a title="app.schemas.fine.FineResponse.id" href="#app.schemas.fine.FineResponse.id">id</a></code></li>
+<li><code><a title="app.schemas.fine.FineResponse.loan_id" href="#app.schemas.fine.FineResponse.loan_id">loan_id</a></code></li>
+<li><code><a title="app.schemas.fine.FineResponse.model_computed_fields" href="#app.schemas.fine.FineResponse.model_computed_fields">model_computed_fields</a></code></li>
+<li><code><a title="app.schemas.fine.FineResponse.model_config" href="#app.schemas.fine.FineResponse.model_config">model_config</a></code></li>
+<li><code><a title="app.schemas.fine.FineResponse.model_fields" href="#app.schemas.fine.FineResponse.model_fields">model_fields</a></code></li>
+<li><code><a title="app.schemas.fine.FineResponse.paid" href="#app.schemas.fine.FineResponse.paid">paid</a></code></li>
+<li><code><a title="app.schemas.fine.FineResponse.paid_at" href="#app.schemas.fine.FineResponse.paid_at">paid_at</a></code></li>
+<li><code><a title="app.schemas.fine.FineResponse.updated_at" href="#app.schemas.fine.FineResponse.updated_at">updated_at</a></code></li>
+<li><code><a title="app.schemas.fine.FineResponse.user_id" href="#app.schemas.fine.FineResponse.user_id">user_id</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.11.6</a>.</p>
+</footer>
+</body>
+</html>

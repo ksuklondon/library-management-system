@@ -1,0 +1,800 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
+<meta name="generator" content="pdoc3 0.11.6">
+<title>app.schemas API documentation</title>
+<meta name="description" content="Moduł inicjalizujący pakiet schemas …">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/sanitize.min.css" integrity="sha512-y1dtMcuvtTMJc1yPgEqF0ZjQbhnc/bFhyvIyVNb9Zk5mIGtqVaAB1Ttl28su8AvFMOY0EwRbAe+HCLqj6W7/KA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/typography.min.css" integrity="sha512-Y1DYSb995BAfxobCkKepB1BqJJTPrOp3zPL74AWFugHHmmdcvO+C48WLrUOlhGMc0QG7AE3f7gmvvcrmX2fDoA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:1.5em;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:2em 0 .50em 0}h3{font-size:1.4em;margin:1.6em 0 .7em 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .2s ease-in-out}a:visited{color:#503}a:hover{color:#b62}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900;font-weight:bold}pre code{font-size:.8em;line-height:1.4em;padding:1em;display:block}code{background:#f3f3f3;font-family:"DejaVu Sans Mono",monospace;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source > summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible;min-width:max-content}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em 1em;margin:1em 0}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul ul{padding-left:1em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" integrity="sha512-D9gUyxqja7hBtkWpPWGt9wfbfaMGVt9gnyCvYa+jojwwPHLCzUm5i8rpk7vD7wNee9bA35eYIjobYPaQuKS1MQ==" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => {
+hljs.configure({languages: ['bash', 'css', 'diff', 'graphql', 'ini', 'javascript', 'json', 'plaintext', 'python', 'python-repl', 'rust', 'shell', 'sql', 'typescript', 'xml', 'yaml']});
+hljs.highlightAll();
+/* Collapse source docstrings */
+setTimeout(() => {
+[...document.querySelectorAll('.hljs.language-python > .hljs-string')]
+.filter(el => el.innerHTML.length > 200 && ['"""', "'''"].includes(el.innerHTML.substring(0, 3)))
+.forEach(el => {
+let d = document.createElement('details');
+d.classList.add('hljs-string');
+d.innerHTML = '<summary>"""</summary>' + el.innerHTML.substring(3);
+el.replaceWith(d);
+});
+}, 100);
+})</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>app.schemas</code></h1>
+</header>
+<section id="section-intro">
+<p>Moduł inicjalizujący pakiet schemas.</p>
+<p>Zawiera definicje schematów Pydantic używanych w:
+- warstwie API (request/response),
+- walidacji danych przychodzących od klienta,
+- serializacji danych zwracanych do klienta.</p>
+</section>
+<section>
+<h2 class="section-title" id="header-submodules">Sub-modules</h2>
+<dl>
+<dt><code class="name"><a title="app.schemas.auth" href="auth.html">app.schemas.auth</a></code></dt>
+<dd>
+<div class="desc"><p>Schematy Pydantic związane z procesem uwierzytelniania i autoryzacji:
+- logowanie,
+- odświeżanie tokenu,
+- rejestracja użytkownika,
+- odpowiedzi z …</p></div>
+</dd>
+<dt><code class="name"><a title="app.schemas.user" href="user.html">app.schemas.user</a></code></dt>
+<dd>
+<div class="desc"><p>Schematy Pydantic związane z użytkownikiem …</p></div>
+</dd>
+</dl>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="app.schemas.LoginRequest"><code class="flex name class">
+<span>class <span class="ident">LoginRequest</span></span>
+<span>(</span><span>**data: Any)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class LoginRequest(BaseModel):
+    &#34;&#34;&#34;
+    Dane wymagane do zalogowania użytkownika.
+    &#34;&#34;&#34;
+
+    email: EmailStr = Field(..., description=&#34;Email użytkownika&#34;)
+    password: str = Field(..., description=&#34;Hasło&#34;)
+
+    class Config:
+        # Przykładowe dane wyświetlane w dokumentacji Swagger / ReDoc.
+        json_schema_extra = {
+            &#34;example&#34;: {&#34;email&#34;: &#34;user@example.com&#34;, &#34;password&#34;: &#34;SecurePass123&#34;}
+        }</code></pre>
+</details>
+<div class="desc"><p>Dane wymagane do zalogowania użytkownika.</p>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<code>ValidationError</code>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><code>self</code> is explicitly positional-only to allow <code>self</code> as a field name.</p></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>pydantic.main.BaseModel</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="app.schemas.LoginRequest.Config"><code class="name">var <span class="ident">Config</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.LoginRequest.email"><code class="name">var <span class="ident">email</span> : pydantic.networks.EmailStr</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.LoginRequest.model_computed_fields"><code class="name">var <span class="ident">model_computed_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.LoginRequest.model_config"><code class="name">var <span class="ident">model_config</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.LoginRequest.model_fields"><code class="name">var <span class="ident">model_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.LoginRequest.password"><code class="name">var <span class="ident">password</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="app.schemas.LoginResponse"><code class="flex name class">
+<span>class <span class="ident">LoginResponse</span></span>
+<span>(</span><span>**data: Any)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class LoginResponse(BaseModel):
+    &#34;&#34;&#34;
+    Odpowiedź zwracana po udanym logowaniu:
+    - access token i refresh token,
+    - podstawowe dane zalogowanego użytkownika.
+    &#34;&#34;&#34;
+
+    access_token: str = Field(..., description=&#34;JWT access token&#34;)
+    refresh_token: str = Field(..., description=&#34;JWT refresh token&#34;)
+    token_type: str = Field(&#34;bearer&#34;, description=&#34;Typ tokenu&#34;)
+    user_id: str = Field(..., description=&#34;UUID użytkownika&#34;)
+    email: str = Field(..., description=&#34;Email użytkownika&#34;)
+    role: str = Field(..., description=&#34;Rola użytkownika&#34;)  # ZMIANA: UserRoleEnum → str
+
+    class Config:
+        json_schema_extra = {
+            &#34;example&#34;: {
+                &#34;access_token&#34;: &#34;eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...&#34;,
+                &#34;refresh_token&#34;: &#34;eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...&#34;,
+                &#34;token_type&#34;: &#34;bearer&#34;,
+                &#34;user_id&#34;: &#34;123e4567-e89b-12d3-a456-426614174000&#34;,
+                &#34;email&#34;: &#34;user@example.com&#34;,
+                &#34;role&#34;: &#34;READER&#34;,
+            }
+        }</code></pre>
+</details>
+<div class="desc"><p>Odpowiedź zwracana po udanym logowaniu:
+- access token i refresh token,
+- podstawowe dane zalogowanego użytkownika.</p>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<code>ValidationError</code>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><code>self</code> is explicitly positional-only to allow <code>self</code> as a field name.</p></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>pydantic.main.BaseModel</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="app.schemas.LoginResponse.Config"><code class="name">var <span class="ident">Config</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.LoginResponse.access_token"><code class="name">var <span class="ident">access_token</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.LoginResponse.email"><code class="name">var <span class="ident">email</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.LoginResponse.model_computed_fields"><code class="name">var <span class="ident">model_computed_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.LoginResponse.model_config"><code class="name">var <span class="ident">model_config</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.LoginResponse.model_fields"><code class="name">var <span class="ident">model_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.LoginResponse.refresh_token"><code class="name">var <span class="ident">refresh_token</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.LoginResponse.role"><code class="name">var <span class="ident">role</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.LoginResponse.token_type"><code class="name">var <span class="ident">token_type</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.LoginResponse.user_id"><code class="name">var <span class="ident">user_id</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="app.schemas.RefreshTokenRequest"><code class="flex name class">
+<span>class <span class="ident">RefreshTokenRequest</span></span>
+<span>(</span><span>**data: Any)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class RefreshTokenRequest(BaseModel):
+    &#34;&#34;&#34;
+    Żądanie odświeżenia access tokena – klient przesyła refresh token.
+    &#34;&#34;&#34;
+
+    refresh_token: str = Field(..., description=&#34;Refresh token&#34;)
+
+    class Config:
+        json_schema_extra = {
+            &#34;example&#34;: {&#34;refresh_token&#34;: &#34;eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...&#34;}
+        }</code></pre>
+</details>
+<div class="desc"><p>Żądanie odświeżenia access tokena – klient przesyła refresh token.</p>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<code>ValidationError</code>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><code>self</code> is explicitly positional-only to allow <code>self</code> as a field name.</p></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>pydantic.main.BaseModel</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="app.schemas.RefreshTokenRequest.Config"><code class="name">var <span class="ident">Config</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.RefreshTokenRequest.model_computed_fields"><code class="name">var <span class="ident">model_computed_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.RefreshTokenRequest.model_config"><code class="name">var <span class="ident">model_config</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.RefreshTokenRequest.model_fields"><code class="name">var <span class="ident">model_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.RefreshTokenRequest.refresh_token"><code class="name">var <span class="ident">refresh_token</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="app.schemas.TokenResponse"><code class="flex name class">
+<span>class <span class="ident">TokenResponse</span></span>
+<span>(</span><span>**data: Any)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class TokenResponse(BaseModel):
+    &#34;&#34;&#34;
+    Prostsza odpowiedź zawierająca wyłącznie token dostępu.
+    Używana np. w endpointcie odświeżania access tokena.
+    &#34;&#34;&#34;
+
+    access_token: str = Field(..., description=&#34;JWT access token&#34;)
+    token_type: str = Field(&#34;bearer&#34;, description=&#34;Typ tokenu&#34;)
+    expires_in: int = Field(..., description=&#34;Czas wygaśnięcia w sekundach&#34;)</code></pre>
+</details>
+<div class="desc"><p>Prostsza odpowiedź zawierająca wyłącznie token dostępu.
+Używana np. w endpointcie odświeżania access tokena.</p>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<code>ValidationError</code>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><code>self</code> is explicitly positional-only to allow <code>self</code> as a field name.</p></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>pydantic.main.BaseModel</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="app.schemas.TokenResponse.access_token"><code class="name">var <span class="ident">access_token</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.TokenResponse.expires_in"><code class="name">var <span class="ident">expires_in</span> : int</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.TokenResponse.model_computed_fields"><code class="name">var <span class="ident">model_computed_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.TokenResponse.model_config"><code class="name">var <span class="ident">model_config</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.TokenResponse.model_fields"><code class="name">var <span class="ident">model_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.TokenResponse.token_type"><code class="name">var <span class="ident">token_type</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="app.schemas.UserBase"><code class="flex name class">
+<span>class <span class="ident">UserBase</span></span>
+<span>(</span><span>**data: Any)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class UserBase(BaseModel):
+    &#34;&#34;&#34;
+    Podstawowy schemat użytkownika, wspólny dla wielu odpowiedzi API.
+    &#34;&#34;&#34;
+    email: EmailStr = Field(..., description=&#34;Email użytkownika&#34;)
+    full_name: Optional[str] = Field(None, max_length=255, description=&#34;Imię i nazwisko&#34;)
+    role: UserRoleEnum = Field(UserRoleEnum.READER, description=&#34;Rola użytkownika&#34;)</code></pre>
+</details>
+<div class="desc"><p>Podstawowy schemat użytkownika, wspólny dla wielu odpowiedzi API.</p>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<code>ValidationError</code>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><code>self</code> is explicitly positional-only to allow <code>self</code> as a field name.</p></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>pydantic.main.BaseModel</li>
+</ul>
+<h3>Subclasses</h3>
+<ul class="hlist">
+<li><a title="app.schemas.user.UserResponse" href="user.html#app.schemas.user.UserResponse">UserResponse</a></li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="app.schemas.UserBase.email"><code class="name">var <span class="ident">email</span> : pydantic.networks.EmailStr</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.UserBase.full_name"><code class="name">var <span class="ident">full_name</span> : str | None</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.UserBase.model_computed_fields"><code class="name">var <span class="ident">model_computed_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.UserBase.model_config"><code class="name">var <span class="ident">model_config</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.UserBase.model_fields"><code class="name">var <span class="ident">model_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.UserBase.role"><code class="name">var <span class="ident">role</span> : <a title="app.schemas.user.UserRoleEnum" href="user.html#app.schemas.user.UserRoleEnum">UserRoleEnum</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="app.schemas.UserCreate"><code class="flex name class">
+<span>class <span class="ident">UserCreate</span></span>
+<span>(</span><span>**data: Any)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class UserCreate(BaseModel):
+    &#34;&#34;&#34;
+    Schemat danych wymaganych do utworzenia nowego użytkownika.
+    Używany np. w endpointach rejestracji lub tworzenia użytkownika przez admina.
+    &#34;&#34;&#34;
+    email: EmailStr = Field(..., description=&#34;Email użytkownika&#34;)
+    password: str = Field(..., min_length=8, max_length=100, description=&#34;Hasło (min 8 znaków)&#34;)
+    full_name: Optional[str] = Field(None, max_length=255, description=&#34;Imię i nazwisko&#34;)
+
+    @field_validator(&#39;password&#39;)
+    @classmethod
+    def validate_password(cls, v: str) -&gt; str:
+        &#34;&#34;&#34;
+        Walidator hasła – wymusza minimalne wymagania bezpieczeństwa:
+        - co najmniej 8 znaków,
+        - przynajmniej jedna wielka litera,
+        - przynajmniej jedna mała litera,
+        - przynajmniej jedna cyfra.
+        &#34;&#34;&#34;
+        if len(v) &lt; 8:
+            raise ValueError(&#34;Hasło musi mieć minimum 8 znaków&#34;)
+
+        if not any(c.isupper() for c in v):
+            raise ValueError(&#34;Hasło musi zawierać wielką literę&#34;)
+
+        if not any(c.islower() for c in v):
+            raise ValueError(&#34;Hasło musi zawierać małą literę&#34;)
+
+        if not any(c.isdigit() for c in v):
+            raise ValueError(&#34;Hasło musi zawierać cyfrę&#34;)
+
+        return v</code></pre>
+</details>
+<div class="desc"><p>Schemat danych wymaganych do utworzenia nowego użytkownika.
+Używany np. w endpointach rejestracji lub tworzenia użytkownika przez admina.</p>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<code>ValidationError</code>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><code>self</code> is explicitly positional-only to allow <code>self</code> as a field name.</p></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>pydantic.main.BaseModel</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="app.schemas.UserCreate.email"><code class="name">var <span class="ident">email</span> : pydantic.networks.EmailStr</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.UserCreate.full_name"><code class="name">var <span class="ident">full_name</span> : str | None</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.UserCreate.model_computed_fields"><code class="name">var <span class="ident">model_computed_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.UserCreate.model_config"><code class="name">var <span class="ident">model_config</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.UserCreate.model_fields"><code class="name">var <span class="ident">model_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.UserCreate.password"><code class="name">var <span class="ident">password</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Static methods</h3>
+<dl>
+<dt id="app.schemas.UserCreate.validate_password"><code class="name flex">
+<span>def <span class="ident">validate_password</span></span>(<span>v: str) ‑> str</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Walidator hasła – wymusza minimalne wymagania bezpieczeństwa:
+- co najmniej 8 znaków,
+- przynajmniej jedna wielka litera,
+- przynajmniej jedna mała litera,
+- przynajmniej jedna cyfra.</p></div>
+</dd>
+</dl>
+</dd>
+<dt id="app.schemas.UserInDB"><code class="flex name class">
+<span>class <span class="ident">UserInDB</span></span>
+<span>(</span><span>**data: Any)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class UserInDB(UserResponse):
+    &#34;&#34;&#34;
+    Schemat użytkownika używany wewnętrznie (np. w logice domenowej),
+    zawiera również zahashowane hasło.
+    Nie powinien być zwracany bezpośrednio do klienta.
+    &#34;&#34;&#34;
+    hashed_password: str</code></pre>
+</details>
+<div class="desc"><p>Schemat użytkownika używany wewnętrznie (np. w logice domenowej),
+zawiera również zahashowane hasło.
+Nie powinien być zwracany bezpośrednio do klienta.</p>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<code>ValidationError</code>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><code>self</code> is explicitly positional-only to allow <code>self</code> as a field name.</p></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="app.schemas.user.UserResponse" href="user.html#app.schemas.user.UserResponse">UserResponse</a></li>
+<li><a title="app.schemas.user.UserBase" href="user.html#app.schemas.user.UserBase">UserBase</a></li>
+<li>pydantic.main.BaseModel</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="app.schemas.UserInDB.hashed_password"><code class="name">var <span class="ident">hashed_password</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.UserInDB.model_computed_fields"><code class="name">var <span class="ident">model_computed_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.UserInDB.model_config"><code class="name">var <span class="ident">model_config</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.UserInDB.model_fields"><code class="name">var <span class="ident">model_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="app.schemas.UserResponse"><code class="flex name class">
+<span>class <span class="ident">UserResponse</span></span>
+<span>(</span><span>**data: Any)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class UserResponse(UserBase):
+    &#34;&#34;&#34;
+    Schemat użytkownika zwracanego w odpowiedziach API.
+    Rozszerza UserBase o pola techniczne i statusowe.
+    &#34;&#34;&#34;
+    id: UUID
+    is_active: bool
+    is_blocked: bool
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        # Pozwala tworzyć instancje na podstawie obiektów ORM (np. modeli SQLAlchemy).
+        from_attributes = True</code></pre>
+</details>
+<div class="desc"><p>Schemat użytkownika zwracanego w odpowiedziach API.
+Rozszerza UserBase o pola techniczne i statusowe.</p>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<code>ValidationError</code>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><code>self</code> is explicitly positional-only to allow <code>self</code> as a field name.</p></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="app.schemas.user.UserBase" href="user.html#app.schemas.user.UserBase">UserBase</a></li>
+<li>pydantic.main.BaseModel</li>
+</ul>
+<h3>Subclasses</h3>
+<ul class="hlist">
+<li><a title="app.schemas.user.UserInDB" href="user.html#app.schemas.user.UserInDB">UserInDB</a></li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="app.schemas.UserResponse.Config"><code class="name">var <span class="ident">Config</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.UserResponse.created_at"><code class="name">var <span class="ident">created_at</span> : datetime.datetime</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.UserResponse.id"><code class="name">var <span class="ident">id</span> : uuid.UUID</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.UserResponse.is_active"><code class="name">var <span class="ident">is_active</span> : bool</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.UserResponse.is_blocked"><code class="name">var <span class="ident">is_blocked</span> : bool</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.UserResponse.model_computed_fields"><code class="name">var <span class="ident">model_computed_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.UserResponse.model_config"><code class="name">var <span class="ident">model_config</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.UserResponse.model_fields"><code class="name">var <span class="ident">model_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.UserResponse.updated_at"><code class="name">var <span class="ident">updated_at</span> : datetime.datetime</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="app.schemas.UserUpdate"><code class="flex name class">
+<span>class <span class="ident">UserUpdate</span></span>
+<span>(</span><span>**data: Any)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class UserUpdate(BaseModel):
+    &#34;&#34;&#34;
+    Schemat danych do aktualizacji profilu użytkownika.
+    Wszystkie pola są opcjonalne – można zmienić tylko wybrane.
+    &#34;&#34;&#34;
+    email: Optional[EmailStr] = Field(None)
+    full_name: Optional[str] = Field(None, max_length=255)
+    password: Optional[str] = Field(None, min_length=8, max_length=100)</code></pre>
+</details>
+<div class="desc"><p>Schemat danych do aktualizacji profilu użytkownika.
+Wszystkie pola są opcjonalne – można zmienić tylko wybrane.</p>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<code>ValidationError</code>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><code>self</code> is explicitly positional-only to allow <code>self</code> as a field name.</p></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>pydantic.main.BaseModel</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="app.schemas.UserUpdate.email"><code class="name">var <span class="ident">email</span> : pydantic.networks.EmailStr | None</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.UserUpdate.full_name"><code class="name">var <span class="ident">full_name</span> : str | None</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.UserUpdate.model_computed_fields"><code class="name">var <span class="ident">model_computed_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.UserUpdate.model_config"><code class="name">var <span class="ident">model_config</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.UserUpdate.model_fields"><code class="name">var <span class="ident">model_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.UserUpdate.password"><code class="name">var <span class="ident">password</span> : str | None</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="app" href="../index.html">app</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-submodules">Sub-modules</a></h3>
+<ul>
+<li><code><a title="app.schemas.auth" href="auth.html">app.schemas.auth</a></code></li>
+<li><code><a title="app.schemas.user" href="user.html">app.schemas.user</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="app.schemas.LoginRequest" href="#app.schemas.LoginRequest">LoginRequest</a></code></h4>
+<ul class="">
+<li><code><a title="app.schemas.LoginRequest.Config" href="#app.schemas.LoginRequest.Config">Config</a></code></li>
+<li><code><a title="app.schemas.LoginRequest.email" href="#app.schemas.LoginRequest.email">email</a></code></li>
+<li><code><a title="app.schemas.LoginRequest.model_computed_fields" href="#app.schemas.LoginRequest.model_computed_fields">model_computed_fields</a></code></li>
+<li><code><a title="app.schemas.LoginRequest.model_config" href="#app.schemas.LoginRequest.model_config">model_config</a></code></li>
+<li><code><a title="app.schemas.LoginRequest.model_fields" href="#app.schemas.LoginRequest.model_fields">model_fields</a></code></li>
+<li><code><a title="app.schemas.LoginRequest.password" href="#app.schemas.LoginRequest.password">password</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="app.schemas.LoginResponse" href="#app.schemas.LoginResponse">LoginResponse</a></code></h4>
+<ul class="">
+<li><code><a title="app.schemas.LoginResponse.Config" href="#app.schemas.LoginResponse.Config">Config</a></code></li>
+<li><code><a title="app.schemas.LoginResponse.access_token" href="#app.schemas.LoginResponse.access_token">access_token</a></code></li>
+<li><code><a title="app.schemas.LoginResponse.email" href="#app.schemas.LoginResponse.email">email</a></code></li>
+<li><code><a title="app.schemas.LoginResponse.model_computed_fields" href="#app.schemas.LoginResponse.model_computed_fields">model_computed_fields</a></code></li>
+<li><code><a title="app.schemas.LoginResponse.model_config" href="#app.schemas.LoginResponse.model_config">model_config</a></code></li>
+<li><code><a title="app.schemas.LoginResponse.model_fields" href="#app.schemas.LoginResponse.model_fields">model_fields</a></code></li>
+<li><code><a title="app.schemas.LoginResponse.refresh_token" href="#app.schemas.LoginResponse.refresh_token">refresh_token</a></code></li>
+<li><code><a title="app.schemas.LoginResponse.role" href="#app.schemas.LoginResponse.role">role</a></code></li>
+<li><code><a title="app.schemas.LoginResponse.token_type" href="#app.schemas.LoginResponse.token_type">token_type</a></code></li>
+<li><code><a title="app.schemas.LoginResponse.user_id" href="#app.schemas.LoginResponse.user_id">user_id</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="app.schemas.RefreshTokenRequest" href="#app.schemas.RefreshTokenRequest">RefreshTokenRequest</a></code></h4>
+<ul class="">
+<li><code><a title="app.schemas.RefreshTokenRequest.Config" href="#app.schemas.RefreshTokenRequest.Config">Config</a></code></li>
+<li><code><a title="app.schemas.RefreshTokenRequest.model_computed_fields" href="#app.schemas.RefreshTokenRequest.model_computed_fields">model_computed_fields</a></code></li>
+<li><code><a title="app.schemas.RefreshTokenRequest.model_config" href="#app.schemas.RefreshTokenRequest.model_config">model_config</a></code></li>
+<li><code><a title="app.schemas.RefreshTokenRequest.model_fields" href="#app.schemas.RefreshTokenRequest.model_fields">model_fields</a></code></li>
+<li><code><a title="app.schemas.RefreshTokenRequest.refresh_token" href="#app.schemas.RefreshTokenRequest.refresh_token">refresh_token</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="app.schemas.TokenResponse" href="#app.schemas.TokenResponse">TokenResponse</a></code></h4>
+<ul class="">
+<li><code><a title="app.schemas.TokenResponse.access_token" href="#app.schemas.TokenResponse.access_token">access_token</a></code></li>
+<li><code><a title="app.schemas.TokenResponse.expires_in" href="#app.schemas.TokenResponse.expires_in">expires_in</a></code></li>
+<li><code><a title="app.schemas.TokenResponse.model_computed_fields" href="#app.schemas.TokenResponse.model_computed_fields">model_computed_fields</a></code></li>
+<li><code><a title="app.schemas.TokenResponse.model_config" href="#app.schemas.TokenResponse.model_config">model_config</a></code></li>
+<li><code><a title="app.schemas.TokenResponse.model_fields" href="#app.schemas.TokenResponse.model_fields">model_fields</a></code></li>
+<li><code><a title="app.schemas.TokenResponse.token_type" href="#app.schemas.TokenResponse.token_type">token_type</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="app.schemas.UserBase" href="#app.schemas.UserBase">UserBase</a></code></h4>
+<ul class="">
+<li><code><a title="app.schemas.UserBase.email" href="#app.schemas.UserBase.email">email</a></code></li>
+<li><code><a title="app.schemas.UserBase.full_name" href="#app.schemas.UserBase.full_name">full_name</a></code></li>
+<li><code><a title="app.schemas.UserBase.model_computed_fields" href="#app.schemas.UserBase.model_computed_fields">model_computed_fields</a></code></li>
+<li><code><a title="app.schemas.UserBase.model_config" href="#app.schemas.UserBase.model_config">model_config</a></code></li>
+<li><code><a title="app.schemas.UserBase.model_fields" href="#app.schemas.UserBase.model_fields">model_fields</a></code></li>
+<li><code><a title="app.schemas.UserBase.role" href="#app.schemas.UserBase.role">role</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="app.schemas.UserCreate" href="#app.schemas.UserCreate">UserCreate</a></code></h4>
+<ul class="">
+<li><code><a title="app.schemas.UserCreate.email" href="#app.schemas.UserCreate.email">email</a></code></li>
+<li><code><a title="app.schemas.UserCreate.full_name" href="#app.schemas.UserCreate.full_name">full_name</a></code></li>
+<li><code><a title="app.schemas.UserCreate.model_computed_fields" href="#app.schemas.UserCreate.model_computed_fields">model_computed_fields</a></code></li>
+<li><code><a title="app.schemas.UserCreate.model_config" href="#app.schemas.UserCreate.model_config">model_config</a></code></li>
+<li><code><a title="app.schemas.UserCreate.model_fields" href="#app.schemas.UserCreate.model_fields">model_fields</a></code></li>
+<li><code><a title="app.schemas.UserCreate.password" href="#app.schemas.UserCreate.password">password</a></code></li>
+<li><code><a title="app.schemas.UserCreate.validate_password" href="#app.schemas.UserCreate.validate_password">validate_password</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="app.schemas.UserInDB" href="#app.schemas.UserInDB">UserInDB</a></code></h4>
+<ul class="">
+<li><code><a title="app.schemas.UserInDB.hashed_password" href="#app.schemas.UserInDB.hashed_password">hashed_password</a></code></li>
+<li><code><a title="app.schemas.UserInDB.model_computed_fields" href="#app.schemas.UserInDB.model_computed_fields">model_computed_fields</a></code></li>
+<li><code><a title="app.schemas.UserInDB.model_config" href="#app.schemas.UserInDB.model_config">model_config</a></code></li>
+<li><code><a title="app.schemas.UserInDB.model_fields" href="#app.schemas.UserInDB.model_fields">model_fields</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="app.schemas.UserResponse" href="#app.schemas.UserResponse">UserResponse</a></code></h4>
+<ul class="">
+<li><code><a title="app.schemas.UserResponse.Config" href="#app.schemas.UserResponse.Config">Config</a></code></li>
+<li><code><a title="app.schemas.UserResponse.created_at" href="#app.schemas.UserResponse.created_at">created_at</a></code></li>
+<li><code><a title="app.schemas.UserResponse.id" href="#app.schemas.UserResponse.id">id</a></code></li>
+<li><code><a title="app.schemas.UserResponse.is_active" href="#app.schemas.UserResponse.is_active">is_active</a></code></li>
+<li><code><a title="app.schemas.UserResponse.is_blocked" href="#app.schemas.UserResponse.is_blocked">is_blocked</a></code></li>
+<li><code><a title="app.schemas.UserResponse.model_computed_fields" href="#app.schemas.UserResponse.model_computed_fields">model_computed_fields</a></code></li>
+<li><code><a title="app.schemas.UserResponse.model_config" href="#app.schemas.UserResponse.model_config">model_config</a></code></li>
+<li><code><a title="app.schemas.UserResponse.model_fields" href="#app.schemas.UserResponse.model_fields">model_fields</a></code></li>
+<li><code><a title="app.schemas.UserResponse.updated_at" href="#app.schemas.UserResponse.updated_at">updated_at</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="app.schemas.UserUpdate" href="#app.schemas.UserUpdate">UserUpdate</a></code></h4>
+<ul class="">
+<li><code><a title="app.schemas.UserUpdate.email" href="#app.schemas.UserUpdate.email">email</a></code></li>
+<li><code><a title="app.schemas.UserUpdate.full_name" href="#app.schemas.UserUpdate.full_name">full_name</a></code></li>
+<li><code><a title="app.schemas.UserUpdate.model_computed_fields" href="#app.schemas.UserUpdate.model_computed_fields">model_computed_fields</a></code></li>
+<li><code><a title="app.schemas.UserUpdate.model_config" href="#app.schemas.UserUpdate.model_config">model_config</a></code></li>
+<li><code><a title="app.schemas.UserUpdate.model_fields" href="#app.schemas.UserUpdate.model_fields">model_fields</a></code></li>
+<li><code><a title="app.schemas.UserUpdate.password" href="#app.schemas.UserUpdate.password">password</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.11.6</a>.</p>
+</footer>
+</body>
+</html>

@@ -1,0 +1,727 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
+<meta name="generator" content="pdoc3 0.11.6">
+<title>app.schemas.loan API documentation</title>
+<meta name="description" content="Schemas dla Loan - wypożyczenia książek …">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/sanitize.min.css" integrity="sha512-y1dtMcuvtTMJc1yPgEqF0ZjQbhnc/bFhyvIyVNb9Zk5mIGtqVaAB1Ttl28su8AvFMOY0EwRbAe+HCLqj6W7/KA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/typography.min.css" integrity="sha512-Y1DYSb995BAfxobCkKepB1BqJJTPrOp3zPL74AWFugHHmmdcvO+C48WLrUOlhGMc0QG7AE3f7gmvvcrmX2fDoA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:1.5em;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:2em 0 .50em 0}h3{font-size:1.4em;margin:1.6em 0 .7em 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .2s ease-in-out}a:visited{color:#503}a:hover{color:#b62}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900;font-weight:bold}pre code{font-size:.8em;line-height:1.4em;padding:1em;display:block}code{background:#f3f3f3;font-family:"DejaVu Sans Mono",monospace;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source > summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible;min-width:max-content}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em 1em;margin:1em 0}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul ul{padding-left:1em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" integrity="sha512-D9gUyxqja7hBtkWpPWGt9wfbfaMGVt9gnyCvYa+jojwwPHLCzUm5i8rpk7vD7wNee9bA35eYIjobYPaQuKS1MQ==" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => {
+hljs.configure({languages: ['bash', 'css', 'diff', 'graphql', 'ini', 'javascript', 'json', 'plaintext', 'python', 'python-repl', 'rust', 'shell', 'sql', 'typescript', 'xml', 'yaml']});
+hljs.highlightAll();
+/* Collapse source docstrings */
+setTimeout(() => {
+[...document.querySelectorAll('.hljs.language-python > .hljs-string')]
+.filter(el => el.innerHTML.length > 200 && ['"""', "'''"].includes(el.innerHTML.substring(0, 3)))
+.forEach(el => {
+let d = document.createElement('details');
+d.classList.add('hljs-string');
+d.innerHTML = '<summary>"""</summary>' + el.innerHTML.substring(3);
+el.replaceWith(d);
+});
+}, 100);
+})</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>app.schemas.loan</code></h1>
+</header>
+<section id="section-intro">
+<p>Schemas dla Loan - wypożyczenia książek.</p>
+<p>Wymaganie: F11-F14 - Wypożyczenia
+Wymaganie: F8 - Realizacja rezerwacji (NOWE - checkout)
+Wymaganie: NF7 - Walidacja danych wejściowych</p>
+<p>Schematy Pydantic używane do:
+- przyjmowania żądań tworzenia / aktualizacji wypożyczeń,
+- walidacji danych wejściowych z API,
+- zwracania ustrukturyzowanych odpowiedzi z danymi wypożyczeń.</p>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="app.schemas.loan.LoanCheckout"><code class="flex name class">
+<span>class <span class="ident">LoanCheckout</span></span>
+<span>(</span><span>**data: Any)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class LoanCheckout(BaseModel):
+    &#34;&#34;&#34;
+    Schema do wypożyczenia książki na podstawie rezerwacji (F8 + F11).
+
+    NOWE - endpoint POST /checkout
+
+    Wymagania:
+    - F8: Realizacja rezerwacji
+    - F11: Utworzenie wypożyczenia
+    - NF7: Walidacja danych
+
+    Proces:
+    1. Bibliotekarz otrzymuje reservation_id od czytelnika
+    2. System weryfikuje rezerwację (czy istnieje, czy ACTIVE)
+    3. Tworzy wypożyczenie na podstawie danych z rezerwacji
+    4. Zmienia status rezerwacji na COMPLETED
+    &#34;&#34;&#34;
+
+    reservation_id: uuid.UUID = Field(..., description=&#34;ID rezerwacji do realizacji&#34;)
+    due_days: int = Field(
+        default=14, ge=1, le=30, description=&#34;Liczba dni wypożyczenia (domyślnie 14)&#34;
+    )
+    book_copy_id: Optional[uuid.UUID] = Field(
+        None,
+        description=&#34;ID konkretnego egzemplarza (opcjonalne - jeśli nie podano, system wybierze z rezerwacji)&#34;,
+    )
+
+    @field_validator(&#34;reservation_id&#34;)
+    @classmethod
+    def validate_reservation_id(cls, v):
+        &#34;&#34;&#34;Walidacja reservation_id (NF7).&#34;&#34;&#34;
+        if v is None:
+            raise ValueError(&#34;ID rezerwacji jest wymagane&#34;)
+        return v
+
+    @field_validator(&#34;due_days&#34;)
+    @classmethod
+    def validate_due_days(cls, v):
+        &#34;&#34;&#34;Walidacja liczby dni (NF7).&#34;&#34;&#34;
+        if v &lt; 1 or v &gt; 30:
+            raise ValueError(&#34;Liczba dni wypożyczenia musi być między 1 a 30&#34;)
+        return v
+
+    class Config:
+        json_schema_extra = {
+            &#34;example&#34;: {
+                &#34;reservation_id&#34;: &#34;123e4567-e89b-12d3-a456-426614174000&#34;,
+                &#34;due_days&#34;: 14,
+                &#34;book_copy_id&#34;: &#34;copy-uuid-456&#34;,
+            }
+        }</code></pre>
+</details>
+<div class="desc"><p>Schema do wypożyczenia książki na podstawie rezerwacji (F8 + F11).</p>
+<p>NOWE - endpoint POST /checkout</p>
+<p>Wymagania:
+- F8: Realizacja rezerwacji
+- F11: Utworzenie wypożyczenia
+- NF7: Walidacja danych</p>
+<p>Proces:
+1. Bibliotekarz otrzymuje reservation_id od czytelnika
+2. System weryfikuje rezerwację (czy istnieje, czy ACTIVE)
+3. Tworzy wypożyczenie na podstawie danych z rezerwacji
+4. Zmienia status rezerwacji na COMPLETED</p>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<code>ValidationError</code>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><code>self</code> is explicitly positional-only to allow <code>self</code> as a field name.</p></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>pydantic.main.BaseModel</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="app.schemas.loan.LoanCheckout.Config"><code class="name">var <span class="ident">Config</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.loan.LoanCheckout.book_copy_id"><code class="name">var <span class="ident">book_copy_id</span> : uuid.UUID | None</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.loan.LoanCheckout.due_days"><code class="name">var <span class="ident">due_days</span> : int</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.loan.LoanCheckout.model_computed_fields"><code class="name">var <span class="ident">model_computed_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.loan.LoanCheckout.model_config"><code class="name">var <span class="ident">model_config</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.loan.LoanCheckout.model_fields"><code class="name">var <span class="ident">model_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.loan.LoanCheckout.reservation_id"><code class="name">var <span class="ident">reservation_id</span> : uuid.UUID</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Static methods</h3>
+<dl>
+<dt id="app.schemas.loan.LoanCheckout.validate_due_days"><code class="name flex">
+<span>def <span class="ident">validate_due_days</span></span>(<span>v)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Walidacja liczby dni (NF7).</p></div>
+</dd>
+<dt id="app.schemas.loan.LoanCheckout.validate_reservation_id"><code class="name flex">
+<span>def <span class="ident">validate_reservation_id</span></span>(<span>v)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Walidacja reservation_id (NF7).</p></div>
+</dd>
+</dl>
+</dd>
+<dt id="app.schemas.loan.LoanCreate"><code class="flex name class">
+<span>class <span class="ident">LoanCreate</span></span>
+<span>(</span><span>**data: Any)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class LoanCreate(BaseModel):
+    &#34;&#34;&#34;
+    Schema do tworzenia wypożyczenia (F11).
+
+    Wymaganie: F11 - Wypożyczenie książki (LIBRARIAN)
+    Wymaganie: NF7 - Walidacja danych
+
+    Używana w endpointach tworzących nowe wypożyczenie:
+    - sprawdzamy, czy przekazano user_id i book_copy_id,
+    - opcjonalnie można podać własny due_date (termin zwrotu),
+      w przeciwnym wypadku model domenowy ustawi domyślnie +14 dni.
+    &#34;&#34;&#34;
+
+    user_id: str = Field(..., description=&#34;ID użytkownika wypożyczającego&#34;)
+    book_copy_id: uuid.UUID = Field(..., description=&#34;ID egzemplarza książki&#34;)
+    due_date: Optional[datetime] = Field(
+        None, description=&#34;Termin zwrotu (domyślnie +14 dni, jeśli nie podano)&#34;
+    )
+
+    @field_validator(&#34;user_id&#34;)
+    @classmethod
+    def validate_user_id(cls, v):
+        &#34;&#34;&#34;Walidacja user_id (NF7) – nie może być puste.&#34;&#34;&#34;
+        if not v or not v.strip():
+            raise ValueError(&#34;ID użytkownika jest wymagane&#34;)
+        return v
+
+    @field_validator(&#34;book_copy_id&#34;)
+    @classmethod
+    def validate_book_copy_id(cls, v):
+        &#34;&#34;&#34;Walidacja book_copy_id (NF7) – musi zostać przekazane poprawne UUID.&#34;&#34;&#34;
+        if v is None:
+            raise ValueError(&#34;ID egzemplarza książki jest wymagane&#34;)
+        return v
+
+    class Config:
+        # Przykład ułatwia testowanie i dokumentację w Swagger / ReDoc.
+        json_schema_extra = {
+            &#34;example&#34;: {
+                &#34;user_id&#34;: &#34;user-uuid-123&#34;,
+                &#34;book_copy_id&#34;: &#34;123e4567-e89b-12d3-a456-426614174000&#34;,
+                &#34;due_date&#34;: &#34;2024-11-29T23:59:59&#34;,
+            }
+        }</code></pre>
+</details>
+<div class="desc"><p>Schema do tworzenia wypożyczenia (F11).</p>
+<p>Wymaganie: F11 - Wypożyczenie książki (LIBRARIAN)
+Wymaganie: NF7 - Walidacja danych</p>
+<p>Używana w endpointach tworzących nowe wypożyczenie:
+- sprawdzamy, czy przekazano user_id i book_copy_id,
+- opcjonalnie można podać własny due_date (termin zwrotu),
+w przeciwnym wypadku model domenowy ustawi domyślnie +14 dni.</p>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<code>ValidationError</code>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><code>self</code> is explicitly positional-only to allow <code>self</code> as a field name.</p></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>pydantic.main.BaseModel</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="app.schemas.loan.LoanCreate.Config"><code class="name">var <span class="ident">Config</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.loan.LoanCreate.book_copy_id"><code class="name">var <span class="ident">book_copy_id</span> : uuid.UUID</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.loan.LoanCreate.due_date"><code class="name">var <span class="ident">due_date</span> : datetime.datetime | None</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.loan.LoanCreate.model_computed_fields"><code class="name">var <span class="ident">model_computed_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.loan.LoanCreate.model_config"><code class="name">var <span class="ident">model_config</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.loan.LoanCreate.model_fields"><code class="name">var <span class="ident">model_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.loan.LoanCreate.user_id"><code class="name">var <span class="ident">user_id</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Static methods</h3>
+<dl>
+<dt id="app.schemas.loan.LoanCreate.validate_book_copy_id"><code class="name flex">
+<span>def <span class="ident">validate_book_copy_id</span></span>(<span>v)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Walidacja book_copy_id (NF7) – musi zostać przekazane poprawne UUID.</p></div>
+</dd>
+<dt id="app.schemas.loan.LoanCreate.validate_user_id"><code class="name flex">
+<span>def <span class="ident">validate_user_id</span></span>(<span>v)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Walidacja user_id (NF7) – nie może być puste.</p></div>
+</dd>
+</dl>
+</dd>
+<dt id="app.schemas.loan.LoanExtend"><code class="flex name class">
+<span>class <span class="ident">LoanExtend</span></span>
+<span>(</span><span>**data: Any)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class LoanExtend(BaseModel):
+    &#34;&#34;&#34;
+    Schema do przedłużenia wypożyczenia (F14).
+
+    Wymaganie: F14 - Przedłużenie wypożyczenia
+
+    Używana np. w dedykowanym endpointcie:
+    - użytkownik/bibliotekarz podaje liczbę dni przedłużenia,
+    - serwis sprawdza reguły biznesowe i wywołuje metodę extend_loan w modelu Loan.
+    &#34;&#34;&#34;
+
+    days: int = Field(
+        default=7, ge=1, le=14, description=&#34;Liczba dni przedłużenia (1-14)&#34;
+    )
+
+    @field_validator(&#34;days&#34;)
+    @classmethod
+    def validate_days(cls, v):
+        &#34;&#34;&#34;Walidacja liczby dni (NF7) – tylko wartości z zakresu 1–14 są akceptowane.&#34;&#34;&#34;
+        if v &lt; 1 or v &gt; 14:
+            raise ValueError(&#34;Można przedłużyć od 1 do 14 dni&#34;)
+        return v
+
+    class Config:
+        json_schema_extra = {&#34;example&#34;: {&#34;days&#34;: 7}}</code></pre>
+</details>
+<div class="desc"><p>Schema do przedłużenia wypożyczenia (F14).</p>
+<p>Wymaganie: F14 - Przedłużenie wypożyczenia</p>
+<p>Używana np. w dedykowanym endpointcie:
+- użytkownik/bibliotekarz podaje liczbę dni przedłużenia,
+- serwis sprawdza reguły biznesowe i wywołuje metodę extend_loan w modelu Loan.</p>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<code>ValidationError</code>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><code>self</code> is explicitly positional-only to allow <code>self</code> as a field name.</p></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>pydantic.main.BaseModel</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="app.schemas.loan.LoanExtend.Config"><code class="name">var <span class="ident">Config</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.loan.LoanExtend.days"><code class="name">var <span class="ident">days</span> : int</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.loan.LoanExtend.model_computed_fields"><code class="name">var <span class="ident">model_computed_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.loan.LoanExtend.model_config"><code class="name">var <span class="ident">model_config</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.loan.LoanExtend.model_fields"><code class="name">var <span class="ident">model_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Static methods</h3>
+<dl>
+<dt id="app.schemas.loan.LoanExtend.validate_days"><code class="name flex">
+<span>def <span class="ident">validate_days</span></span>(<span>v)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Walidacja liczby dni (NF7) – tylko wartości z zakresu 1–14 są akceptowane.</p></div>
+</dd>
+</dl>
+</dd>
+<dt id="app.schemas.loan.LoanResponse"><code class="flex name class">
+<span>class <span class="ident">LoanResponse</span></span>
+<span>(</span><span>**data: Any)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class LoanResponse(BaseModel):
+    &#34;&#34;&#34;
+    Schema odpowiedzi z danymi wypożyczenia (F13).
+
+    Wymaganie: F13 - Historia wypożyczeń
+
+    Zawiera pełne informacje potrzebne do wyświetlenia historii:
+    - daty wypożyczenia, terminu zwrotu, ewentualnego zwrotu,
+    - status wypożyczenia,
+    - aktualną kwotę kary (jeśli istnieje),
+    - znaczniki czasowe utworzenia i aktualizacji rekordu.
+    &#34;&#34;&#34;
+
+    id: uuid.UUID
+    user_id: str
+    book_copy_id: uuid.UUID
+    borrowed_at: datetime
+    due_date: datetime
+    returned_at: Optional[datetime] = None
+    status: LoanStatus
+    fine_amount: Optional[float] = 0.0
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        # Pozwala tworzyć obiekty bezpośrednio z modeli ORM (np. SQLAlchemy).
+        from_attributes = True
+        json_schema_extra = {
+            &#34;example&#34;: {
+                &#34;id&#34;: &#34;123e4567-e89b-12d3-a456-426614174000&#34;,
+                &#34;user_id&#34;: &#34;user-uuid-123&#34;,
+                &#34;book_copy_id&#34;: &#34;copy-uuid-456&#34;,
+                &#34;borrowed_at&#34;: &#34;2024-11-15T10:00:00&#34;,
+                &#34;due_date&#34;: &#34;2024-11-29T23:59:59&#34;,
+                &#34;returned_at&#34;: None,
+                &#34;status&#34;: &#34;ACTIVE&#34;,
+                &#34;fine_amount&#34;: 0.0,
+                &#34;created_at&#34;: &#34;2024-11-15T10:00:00&#34;,
+                &#34;updated_at&#34;: &#34;2024-11-15T10:00:00&#34;,
+            }
+        }</code></pre>
+</details>
+<div class="desc"><p>Schema odpowiedzi z danymi wypożyczenia (F13).</p>
+<p>Wymaganie: F13 - Historia wypożyczeń</p>
+<p>Zawiera pełne informacje potrzebne do wyświetlenia historii:
+- daty wypożyczenia, terminu zwrotu, ewentualnego zwrotu,
+- status wypożyczenia,
+- aktualną kwotę kary (jeśli istnieje),
+- znaczniki czasowe utworzenia i aktualizacji rekordu.</p>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<code>ValidationError</code>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><code>self</code> is explicitly positional-only to allow <code>self</code> as a field name.</p></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>pydantic.main.BaseModel</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="app.schemas.loan.LoanResponse.Config"><code class="name">var <span class="ident">Config</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.loan.LoanResponse.book_copy_id"><code class="name">var <span class="ident">book_copy_id</span> : uuid.UUID</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.loan.LoanResponse.borrowed_at"><code class="name">var <span class="ident">borrowed_at</span> : datetime.datetime</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.loan.LoanResponse.created_at"><code class="name">var <span class="ident">created_at</span> : datetime.datetime</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.loan.LoanResponse.due_date"><code class="name">var <span class="ident">due_date</span> : datetime.datetime</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.loan.LoanResponse.fine_amount"><code class="name">var <span class="ident">fine_amount</span> : float | None</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.loan.LoanResponse.id"><code class="name">var <span class="ident">id</span> : uuid.UUID</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.loan.LoanResponse.model_computed_fields"><code class="name">var <span class="ident">model_computed_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.loan.LoanResponse.model_config"><code class="name">var <span class="ident">model_config</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.loan.LoanResponse.model_fields"><code class="name">var <span class="ident">model_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.loan.LoanResponse.returned_at"><code class="name">var <span class="ident">returned_at</span> : datetime.datetime | None</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.loan.LoanResponse.status"><code class="name">var <span class="ident">status</span> : <a title="app.schemas.loan.LoanStatus" href="#app.schemas.loan.LoanStatus">LoanStatus</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.loan.LoanResponse.updated_at"><code class="name">var <span class="ident">updated_at</span> : datetime.datetime</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.loan.LoanResponse.user_id"><code class="name">var <span class="ident">user_id</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="app.schemas.loan.LoanStatus"><code class="flex name class">
+<span>class <span class="ident">LoanStatus</span></span>
+<span>(</span><span>*args, **kwds)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class LoanStatus(str, Enum):
+    &#34;&#34;&#34;Status wypożyczenia (F11-F14).&#34;&#34;&#34;
+
+    ACTIVE = &#34;ACTIVE&#34;
+    RETURNED = &#34;RETURNED&#34;
+    OVERDUE = &#34;OVERDUE&#34;</code></pre>
+</details>
+<div class="desc"><p>Status wypożyczenia (F11-F14).</p></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>builtins.str</li>
+<li>enum.Enum</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="app.schemas.loan.LoanStatus.ACTIVE"><code class="name">var <span class="ident">ACTIVE</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.loan.LoanStatus.OVERDUE"><code class="name">var <span class="ident">OVERDUE</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.loan.LoanStatus.RETURNED"><code class="name">var <span class="ident">RETURNED</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="app.schemas.loan.LoanUpdate"><code class="flex name class">
+<span>class <span class="ident">LoanUpdate</span></span>
+<span>(</span><span>**data: Any)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class LoanUpdate(BaseModel):
+    &#34;&#34;&#34;
+    Schema do aktualizacji wypożyczenia (F12, F14).
+
+    Wymaganie: F12 - Zwrot książki
+    Wymaganie: F14 - Przedłużenie wypożyczenia (opcjonalne)
+
+    Wszystkie pola są opcjonalne – można zaktualizować tylko wybrane:
+    - returned_at – data faktycznego zwrotu,
+    - due_date – nowy termin zwrotu (np. ręczne przedłużenie),
+    - status – zmiana statusu (np. na RETURNED).
+    &#34;&#34;&#34;
+
+    returned_at: Optional[datetime] = Field(None, description=&#34;Data zwrotu książki&#34;)
+    due_date: Optional[datetime] = Field(
+        None, description=&#34;Nowy termin zwrotu (przedłużenie)&#34;
+    )
+    status: Optional[LoanStatus] = Field(None, description=&#34;Nowy status wypożyczenia&#34;)
+
+    class Config:
+        json_schema_extra = {
+            &#34;example&#34;: {&#34;returned_at&#34;: &#34;2024-11-20T15:30:00&#34;, &#34;status&#34;: &#34;RETURNED&#34;}
+        }</code></pre>
+</details>
+<div class="desc"><p>Schema do aktualizacji wypożyczenia (F12, F14).</p>
+<p>Wymaganie: F12 - Zwrot książki
+Wymaganie: F14 - Przedłużenie wypożyczenia (opcjonalne)</p>
+<p>Wszystkie pola są opcjonalne – można zaktualizować tylko wybrane:
+- returned_at – data faktycznego zwrotu,
+- due_date – nowy termin zwrotu (np. ręczne przedłużenie),
+- status – zmiana statusu (np. na RETURNED).</p>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<code>ValidationError</code>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><code>self</code> is explicitly positional-only to allow <code>self</code> as a field name.</p></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>pydantic.main.BaseModel</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="app.schemas.loan.LoanUpdate.Config"><code class="name">var <span class="ident">Config</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.loan.LoanUpdate.due_date"><code class="name">var <span class="ident">due_date</span> : datetime.datetime | None</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.loan.LoanUpdate.model_computed_fields"><code class="name">var <span class="ident">model_computed_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.loan.LoanUpdate.model_config"><code class="name">var <span class="ident">model_config</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.loan.LoanUpdate.model_fields"><code class="name">var <span class="ident">model_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.loan.LoanUpdate.returned_at"><code class="name">var <span class="ident">returned_at</span> : datetime.datetime | None</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.loan.LoanUpdate.status"><code class="name">var <span class="ident">status</span> : <a title="app.schemas.loan.LoanStatus" href="#app.schemas.loan.LoanStatus">LoanStatus</a> | None</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="app.schemas" href="index.html">app.schemas</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="app.schemas.loan.LoanCheckout" href="#app.schemas.loan.LoanCheckout">LoanCheckout</a></code></h4>
+<ul class="">
+<li><code><a title="app.schemas.loan.LoanCheckout.Config" href="#app.schemas.loan.LoanCheckout.Config">Config</a></code></li>
+<li><code><a title="app.schemas.loan.LoanCheckout.book_copy_id" href="#app.schemas.loan.LoanCheckout.book_copy_id">book_copy_id</a></code></li>
+<li><code><a title="app.schemas.loan.LoanCheckout.due_days" href="#app.schemas.loan.LoanCheckout.due_days">due_days</a></code></li>
+<li><code><a title="app.schemas.loan.LoanCheckout.model_computed_fields" href="#app.schemas.loan.LoanCheckout.model_computed_fields">model_computed_fields</a></code></li>
+<li><code><a title="app.schemas.loan.LoanCheckout.model_config" href="#app.schemas.loan.LoanCheckout.model_config">model_config</a></code></li>
+<li><code><a title="app.schemas.loan.LoanCheckout.model_fields" href="#app.schemas.loan.LoanCheckout.model_fields">model_fields</a></code></li>
+<li><code><a title="app.schemas.loan.LoanCheckout.reservation_id" href="#app.schemas.loan.LoanCheckout.reservation_id">reservation_id</a></code></li>
+<li><code><a title="app.schemas.loan.LoanCheckout.validate_due_days" href="#app.schemas.loan.LoanCheckout.validate_due_days">validate_due_days</a></code></li>
+<li><code><a title="app.schemas.loan.LoanCheckout.validate_reservation_id" href="#app.schemas.loan.LoanCheckout.validate_reservation_id">validate_reservation_id</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="app.schemas.loan.LoanCreate" href="#app.schemas.loan.LoanCreate">LoanCreate</a></code></h4>
+<ul class="">
+<li><code><a title="app.schemas.loan.LoanCreate.Config" href="#app.schemas.loan.LoanCreate.Config">Config</a></code></li>
+<li><code><a title="app.schemas.loan.LoanCreate.book_copy_id" href="#app.schemas.loan.LoanCreate.book_copy_id">book_copy_id</a></code></li>
+<li><code><a title="app.schemas.loan.LoanCreate.due_date" href="#app.schemas.loan.LoanCreate.due_date">due_date</a></code></li>
+<li><code><a title="app.schemas.loan.LoanCreate.model_computed_fields" href="#app.schemas.loan.LoanCreate.model_computed_fields">model_computed_fields</a></code></li>
+<li><code><a title="app.schemas.loan.LoanCreate.model_config" href="#app.schemas.loan.LoanCreate.model_config">model_config</a></code></li>
+<li><code><a title="app.schemas.loan.LoanCreate.model_fields" href="#app.schemas.loan.LoanCreate.model_fields">model_fields</a></code></li>
+<li><code><a title="app.schemas.loan.LoanCreate.user_id" href="#app.schemas.loan.LoanCreate.user_id">user_id</a></code></li>
+<li><code><a title="app.schemas.loan.LoanCreate.validate_book_copy_id" href="#app.schemas.loan.LoanCreate.validate_book_copy_id">validate_book_copy_id</a></code></li>
+<li><code><a title="app.schemas.loan.LoanCreate.validate_user_id" href="#app.schemas.loan.LoanCreate.validate_user_id">validate_user_id</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="app.schemas.loan.LoanExtend" href="#app.schemas.loan.LoanExtend">LoanExtend</a></code></h4>
+<ul class="">
+<li><code><a title="app.schemas.loan.LoanExtend.Config" href="#app.schemas.loan.LoanExtend.Config">Config</a></code></li>
+<li><code><a title="app.schemas.loan.LoanExtend.days" href="#app.schemas.loan.LoanExtend.days">days</a></code></li>
+<li><code><a title="app.schemas.loan.LoanExtend.model_computed_fields" href="#app.schemas.loan.LoanExtend.model_computed_fields">model_computed_fields</a></code></li>
+<li><code><a title="app.schemas.loan.LoanExtend.model_config" href="#app.schemas.loan.LoanExtend.model_config">model_config</a></code></li>
+<li><code><a title="app.schemas.loan.LoanExtend.model_fields" href="#app.schemas.loan.LoanExtend.model_fields">model_fields</a></code></li>
+<li><code><a title="app.schemas.loan.LoanExtend.validate_days" href="#app.schemas.loan.LoanExtend.validate_days">validate_days</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="app.schemas.loan.LoanResponse" href="#app.schemas.loan.LoanResponse">LoanResponse</a></code></h4>
+<ul class="">
+<li><code><a title="app.schemas.loan.LoanResponse.Config" href="#app.schemas.loan.LoanResponse.Config">Config</a></code></li>
+<li><code><a title="app.schemas.loan.LoanResponse.book_copy_id" href="#app.schemas.loan.LoanResponse.book_copy_id">book_copy_id</a></code></li>
+<li><code><a title="app.schemas.loan.LoanResponse.borrowed_at" href="#app.schemas.loan.LoanResponse.borrowed_at">borrowed_at</a></code></li>
+<li><code><a title="app.schemas.loan.LoanResponse.created_at" href="#app.schemas.loan.LoanResponse.created_at">created_at</a></code></li>
+<li><code><a title="app.schemas.loan.LoanResponse.due_date" href="#app.schemas.loan.LoanResponse.due_date">due_date</a></code></li>
+<li><code><a title="app.schemas.loan.LoanResponse.fine_amount" href="#app.schemas.loan.LoanResponse.fine_amount">fine_amount</a></code></li>
+<li><code><a title="app.schemas.loan.LoanResponse.id" href="#app.schemas.loan.LoanResponse.id">id</a></code></li>
+<li><code><a title="app.schemas.loan.LoanResponse.model_computed_fields" href="#app.schemas.loan.LoanResponse.model_computed_fields">model_computed_fields</a></code></li>
+<li><code><a title="app.schemas.loan.LoanResponse.model_config" href="#app.schemas.loan.LoanResponse.model_config">model_config</a></code></li>
+<li><code><a title="app.schemas.loan.LoanResponse.model_fields" href="#app.schemas.loan.LoanResponse.model_fields">model_fields</a></code></li>
+<li><code><a title="app.schemas.loan.LoanResponse.returned_at" href="#app.schemas.loan.LoanResponse.returned_at">returned_at</a></code></li>
+<li><code><a title="app.schemas.loan.LoanResponse.status" href="#app.schemas.loan.LoanResponse.status">status</a></code></li>
+<li><code><a title="app.schemas.loan.LoanResponse.updated_at" href="#app.schemas.loan.LoanResponse.updated_at">updated_at</a></code></li>
+<li><code><a title="app.schemas.loan.LoanResponse.user_id" href="#app.schemas.loan.LoanResponse.user_id">user_id</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="app.schemas.loan.LoanStatus" href="#app.schemas.loan.LoanStatus">LoanStatus</a></code></h4>
+<ul class="">
+<li><code><a title="app.schemas.loan.LoanStatus.ACTIVE" href="#app.schemas.loan.LoanStatus.ACTIVE">ACTIVE</a></code></li>
+<li><code><a title="app.schemas.loan.LoanStatus.OVERDUE" href="#app.schemas.loan.LoanStatus.OVERDUE">OVERDUE</a></code></li>
+<li><code><a title="app.schemas.loan.LoanStatus.RETURNED" href="#app.schemas.loan.LoanStatus.RETURNED">RETURNED</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="app.schemas.loan.LoanUpdate" href="#app.schemas.loan.LoanUpdate">LoanUpdate</a></code></h4>
+<ul class="">
+<li><code><a title="app.schemas.loan.LoanUpdate.Config" href="#app.schemas.loan.LoanUpdate.Config">Config</a></code></li>
+<li><code><a title="app.schemas.loan.LoanUpdate.due_date" href="#app.schemas.loan.LoanUpdate.due_date">due_date</a></code></li>
+<li><code><a title="app.schemas.loan.LoanUpdate.model_computed_fields" href="#app.schemas.loan.LoanUpdate.model_computed_fields">model_computed_fields</a></code></li>
+<li><code><a title="app.schemas.loan.LoanUpdate.model_config" href="#app.schemas.loan.LoanUpdate.model_config">model_config</a></code></li>
+<li><code><a title="app.schemas.loan.LoanUpdate.model_fields" href="#app.schemas.loan.LoanUpdate.model_fields">model_fields</a></code></li>
+<li><code><a title="app.schemas.loan.LoanUpdate.returned_at" href="#app.schemas.loan.LoanUpdate.returned_at">returned_at</a></code></li>
+<li><code><a title="app.schemas.loan.LoanUpdate.status" href="#app.schemas.loan.LoanUpdate.status">status</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.11.6</a>.</p>
+</footer>
+</body>
+</html>

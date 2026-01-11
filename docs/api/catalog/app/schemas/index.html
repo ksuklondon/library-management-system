@@ -1,0 +1,1266 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
+<meta name="generator" content="pdoc3 0.11.6">
+<title>app.schemas API documentation</title>
+<meta name="description" content="Schemas - Pydantic models dla walidacji i serializacji danych …">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/sanitize.min.css" integrity="sha512-y1dtMcuvtTMJc1yPgEqF0ZjQbhnc/bFhyvIyVNb9Zk5mIGtqVaAB1Ttl28su8AvFMOY0EwRbAe+HCLqj6W7/KA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/typography.min.css" integrity="sha512-Y1DYSb995BAfxobCkKepB1BqJJTPrOp3zPL74AWFugHHmmdcvO+C48WLrUOlhGMc0QG7AE3f7gmvvcrmX2fDoA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:1.5em;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:2em 0 .50em 0}h3{font-size:1.4em;margin:1.6em 0 .7em 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .2s ease-in-out}a:visited{color:#503}a:hover{color:#b62}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900;font-weight:bold}pre code{font-size:.8em;line-height:1.4em;padding:1em;display:block}code{background:#f3f3f3;font-family:"DejaVu Sans Mono",monospace;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source > summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible;min-width:max-content}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em 1em;margin:1em 0}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul ul{padding-left:1em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" integrity="sha512-D9gUyxqja7hBtkWpPWGt9wfbfaMGVt9gnyCvYa+jojwwPHLCzUm5i8rpk7vD7wNee9bA35eYIjobYPaQuKS1MQ==" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => {
+hljs.configure({languages: ['bash', 'css', 'diff', 'graphql', 'ini', 'javascript', 'json', 'plaintext', 'python', 'python-repl', 'rust', 'shell', 'sql', 'typescript', 'xml', 'yaml']});
+hljs.highlightAll();
+/* Collapse source docstrings */
+setTimeout(() => {
+[...document.querySelectorAll('.hljs.language-python > .hljs-string')]
+.filter(el => el.innerHTML.length > 200 && ['"""', "'''"].includes(el.innerHTML.substring(0, 3)))
+.forEach(el => {
+let d = document.createElement('details');
+d.classList.add('hljs-string');
+d.innerHTML = '<summary>"""</summary>' + el.innerHTML.substring(3);
+el.replaceWith(d);
+});
+}, 100);
+})</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>app.schemas</code></h1>
+</header>
+<section id="section-intro">
+<p>Schemas - Pydantic models dla walidacji i serializacji danych.</p>
+<p>Eksportuje wszystkie schematy używane w Catalog Service.</p>
+</section>
+<section>
+<h2 class="section-title" id="header-submodules">Sub-modules</h2>
+<dl>
+<dt><code class="name"><a title="app.schemas.book" href="book.html">app.schemas.book</a></code></dt>
+<dd>
+<div class="desc"><p>Schemas dla modelu Book - walidacja i serializacja danych książek …</p></div>
+</dd>
+<dt><code class="name"><a title="app.schemas.book_copy" href="book_copy.html">app.schemas.book_copy</a></code></dt>
+<dd>
+<div class="desc"><p>Schemas dla modelu BookCopy - walidacja i serializacja egzemplarzy …</p></div>
+</dd>
+<dt><code class="name"><a title="app.schemas.catalog" href="catalog.html">app.schemas.catalog</a></code></dt>
+<dd>
+<div class="desc"><p>Schemas dla operacji katalogowych - wyszukiwanie, filtrowanie, paginacja …</p></div>
+</dd>
+</dl>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="app.schemas.BookBase"><code class="flex name class">
+<span>class <span class="ident">BookBase</span></span>
+<span>(</span><span>**data: Any)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class BookBase(BaseModel):
+    &#34;&#34;&#34;
+    Bazowy schemat książki - wspólne pola dla wszystkich operacji.
+    &#34;&#34;&#34;
+
+    title: str = Field(..., min_length=1, max_length=500, description=&#34;Tytuł książki&#34;)
+    authors: str = Field(
+        ...,
+        min_length=1,
+        max_length=500,
+        description=&#34;Autorzy (rozdzieleni przecinkami)&#34;,
+    )
+    # ZMIENIONE: Usunięte min_length i max_length - custom validator sprawdzi to
+    isbn: Optional[str] = Field(None, description=&#34;Numer ISBN&#34;)
+    publisher: Optional[str] = Field(None, max_length=255, description=&#34;Wydawca&#34;)
+    pages: Optional[int] = Field(None, gt=0, description=&#34;Liczba stron&#34;)
+    language: Optional[str] = Field(&#34;pl&#34;, max_length=50, description=&#34;Język publikacji&#34;)
+    cover_url: Optional[str] = Field(None, max_length=500, description=&#34;URL okładki&#34;)
+    description: Optional[str] = Field(None, description=&#34;Opis książki&#34;)
+    genre: Optional[str] = Field(None, max_length=100, description=&#34;Gatunek literacki&#34;)
+
+    @field_validator(&#34;isbn&#34;)
+    @classmethod
+    def validate_isbn(cls, v: Optional[str]) -&gt; Optional[str]:
+        &#34;&#34;&#34;
+        Walidacja numeru ISBN.
+
+        Wymaganie NF7: Walidacja danych wejściowych
+        &#34;&#34;&#34;
+        if v is None:
+            return v
+
+        cleaned = v.replace(&#34;-&#34;, &#34;&#34;).replace(&#34; &#34;, &#34;&#34;)
+
+        if len(cleaned) not in [10, 13]:
+            raise ValueError(&#34;ISBN musi mieć 10 lub 13 cyfr&#34;)
+
+        if not cleaned.isdigit():
+            raise ValueError(&#34;ISBN może zawierać tylko cyfry&#34;)
+
+        return v</code></pre>
+</details>
+<div class="desc"><p>Bazowy schemat książki - wspólne pola dla wszystkich operacji.</p>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<code>ValidationError</code>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><code>self</code> is explicitly positional-only to allow <code>self</code> as a field name.</p></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>pydantic.main.BaseModel</li>
+</ul>
+<h3>Subclasses</h3>
+<ul class="hlist">
+<li><a title="app.schemas.book.BookCreate" href="book.html#app.schemas.book.BookCreate">BookCreate</a></li>
+<li><a title="app.schemas.book.BookResponse" href="book.html#app.schemas.book.BookResponse">BookResponse</a></li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="app.schemas.BookBase.authors"><code class="name">var <span class="ident">authors</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.BookBase.cover_url"><code class="name">var <span class="ident">cover_url</span> : str | None</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.BookBase.description"><code class="name">var <span class="ident">description</span> : str | None</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.BookBase.genre"><code class="name">var <span class="ident">genre</span> : str | None</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.BookBase.isbn"><code class="name">var <span class="ident">isbn</span> : str | None</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.BookBase.language"><code class="name">var <span class="ident">language</span> : str | None</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.BookBase.model_computed_fields"><code class="name">var <span class="ident">model_computed_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.BookBase.model_config"><code class="name">var <span class="ident">model_config</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.BookBase.model_fields"><code class="name">var <span class="ident">model_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.BookBase.pages"><code class="name">var <span class="ident">pages</span> : int | None</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.BookBase.publisher"><code class="name">var <span class="ident">publisher</span> : str | None</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.BookBase.title"><code class="name">var <span class="ident">title</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Static methods</h3>
+<dl>
+<dt id="app.schemas.BookBase.validate_isbn"><code class="name flex">
+<span>def <span class="ident">validate_isbn</span></span>(<span>v: str | None) ‑> str | None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Walidacja numeru ISBN.</p>
+<p>Wymaganie NF7: Walidacja danych wejściowych</p></div>
+</dd>
+</dl>
+</dd>
+<dt id="app.schemas.BookCopyBase"><code class="flex name class">
+<span>class <span class="ident">BookCopyBase</span></span>
+<span>(</span><span>**data: Any)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class BookCopyBase(BaseModel):
+    &#34;&#34;&#34;
+    Bazowy schemat egzemplarza książki.
+    &#34;&#34;&#34;
+
+    inventory_no: str = Field(
+        ..., min_length=1, max_length=50, description=&#34;Numer inwentarzowy (unikalny)&#34;
+    )
+    location: Optional[str] = Field(
+        None, max_length=100, description=&#34;Lokalizacja w bibliotece&#34;
+    )</code></pre>
+</details>
+<div class="desc"><p>Bazowy schemat egzemplarza książki.</p>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<code>ValidationError</code>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><code>self</code> is explicitly positional-only to allow <code>self</code> as a field name.</p></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>pydantic.main.BaseModel</li>
+</ul>
+<h3>Subclasses</h3>
+<ul class="hlist">
+<li><a title="app.schemas.book_copy.BookCopyResponse" href="book_copy.html#app.schemas.book_copy.BookCopyResponse">BookCopyResponse</a></li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="app.schemas.BookCopyBase.inventory_no"><code class="name">var <span class="ident">inventory_no</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.BookCopyBase.location"><code class="name">var <span class="ident">location</span> : str | None</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.BookCopyBase.model_computed_fields"><code class="name">var <span class="ident">model_computed_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.BookCopyBase.model_config"><code class="name">var <span class="ident">model_config</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.BookCopyBase.model_fields"><code class="name">var <span class="ident">model_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="app.schemas.BookCopyCreate"><code class="flex name class">
+<span>class <span class="ident">BookCopyCreate</span></span>
+<span>(</span><span>**data: Any)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class BookCopyCreate(BaseModel):
+    &#34;&#34;&#34;
+    Schemat do tworzenia nowego egzemplarza.
+
+    Wymaganie F16: Dodawanie egzemplarzy (LIBRARIAN/ADMIN)
+    &#34;&#34;&#34;
+
+    book_id: UUID = Field(..., description=&#34;UUID książki&#34;)
+    inventory_no: str = Field(
+        ..., min_length=1, max_length=50, description=&#34;Numer inwentarzowy&#34;
+    )
+    location: Optional[str] = Field(None, max_length=100, description=&#34;Lokalizacja&#34;)</code></pre>
+</details>
+<div class="desc"><p>Schemat do tworzenia nowego egzemplarza.</p>
+<p>Wymaganie F16: Dodawanie egzemplarzy (LIBRARIAN/ADMIN)</p>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<code>ValidationError</code>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><code>self</code> is explicitly positional-only to allow <code>self</code> as a field name.</p></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>pydantic.main.BaseModel</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="app.schemas.BookCopyCreate.book_id"><code class="name">var <span class="ident">book_id</span> : uuid.UUID</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.BookCopyCreate.inventory_no"><code class="name">var <span class="ident">inventory_no</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.BookCopyCreate.location"><code class="name">var <span class="ident">location</span> : str | None</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.BookCopyCreate.model_computed_fields"><code class="name">var <span class="ident">model_computed_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.BookCopyCreate.model_config"><code class="name">var <span class="ident">model_config</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.BookCopyCreate.model_fields"><code class="name">var <span class="ident">model_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="app.schemas.BookCopyResponse"><code class="flex name class">
+<span>class <span class="ident">BookCopyResponse</span></span>
+<span>(</span><span>**data: Any)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class BookCopyResponse(BookCopyBase):
+    &#34;&#34;&#34;
+    Schemat odpowiedzi - egzemplarz z dodatkowymi polami.
+
+    Wymaganie F16: Wyświetlanie informacji o egzemplarzach
+    &#34;&#34;&#34;
+
+    id: UUID
+    book_id: UUID
+    status: str = Field(..., description=&#34;Status egzemplarza&#34;)
+    book_title: Optional[str] = Field(None, description=&#34;Tytuł książki (dla wygody)&#34;)
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True</code></pre>
+</details>
+<div class="desc"><p>Schemat odpowiedzi - egzemplarz z dodatkowymi polami.</p>
+<p>Wymaganie F16: Wyświetlanie informacji o egzemplarzach</p>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<code>ValidationError</code>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><code>self</code> is explicitly positional-only to allow <code>self</code> as a field name.</p></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="app.schemas.book_copy.BookCopyBase" href="book_copy.html#app.schemas.book_copy.BookCopyBase">BookCopyBase</a></li>
+<li>pydantic.main.BaseModel</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="app.schemas.BookCopyResponse.Config"><code class="name">var <span class="ident">Config</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.BookCopyResponse.book_id"><code class="name">var <span class="ident">book_id</span> : uuid.UUID</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.BookCopyResponse.book_title"><code class="name">var <span class="ident">book_title</span> : str | None</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.BookCopyResponse.created_at"><code class="name">var <span class="ident">created_at</span> : datetime.datetime</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.BookCopyResponse.id"><code class="name">var <span class="ident">id</span> : uuid.UUID</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.BookCopyResponse.model_computed_fields"><code class="name">var <span class="ident">model_computed_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.BookCopyResponse.model_config"><code class="name">var <span class="ident">model_config</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.BookCopyResponse.model_fields"><code class="name">var <span class="ident">model_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.BookCopyResponse.status"><code class="name">var <span class="ident">status</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.BookCopyResponse.updated_at"><code class="name">var <span class="ident">updated_at</span> : datetime.datetime</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="app.schemas.BookCopyUpdate"><code class="flex name class">
+<span>class <span class="ident">BookCopyUpdate</span></span>
+<span>(</span><span>**data: Any)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class BookCopyUpdate(BaseModel):
+    &#34;&#34;&#34;
+    Schemat do aktualizacji egzemplarza - wszystkie pola opcjonalne.
+
+    Wymaganie F16: Edycja egzemplarzy (LIBRARIAN/ADMIN)
+    &#34;&#34;&#34;
+
+    inventory_no: Optional[str] = Field(None, min_length=1, max_length=50)
+    location: Optional[str] = Field(None, max_length=100)
+    status: Optional[str] = Field(None)  # ZMIANA: CopyStatusEnum → str</code></pre>
+</details>
+<div class="desc"><p>Schemat do aktualizacji egzemplarza - wszystkie pola opcjonalne.</p>
+<p>Wymaganie F16: Edycja egzemplarzy (LIBRARIAN/ADMIN)</p>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<code>ValidationError</code>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><code>self</code> is explicitly positional-only to allow <code>self</code> as a field name.</p></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>pydantic.main.BaseModel</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="app.schemas.BookCopyUpdate.inventory_no"><code class="name">var <span class="ident">inventory_no</span> : str | None</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.BookCopyUpdate.location"><code class="name">var <span class="ident">location</span> : str | None</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.BookCopyUpdate.model_computed_fields"><code class="name">var <span class="ident">model_computed_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.BookCopyUpdate.model_config"><code class="name">var <span class="ident">model_config</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.BookCopyUpdate.model_fields"><code class="name">var <span class="ident">model_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.BookCopyUpdate.status"><code class="name">var <span class="ident">status</span> : str | None</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="app.schemas.BookCreate"><code class="flex name class">
+<span>class <span class="ident">BookCreate</span></span>
+<span>(</span><span>**data: Any)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class BookCreate(BookBase):
+    &#34;&#34;&#34;
+    Schemat do tworzenia nowej książki.
+
+    Wymaganie F15: Dodawanie książek (LIBRARIAN/ADMIN)
+    &#34;&#34;&#34;
+
+    pass</code></pre>
+</details>
+<div class="desc"><p>Schemat do tworzenia nowej książki.</p>
+<p>Wymaganie F15: Dodawanie książek (LIBRARIAN/ADMIN)</p>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<code>ValidationError</code>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><code>self</code> is explicitly positional-only to allow <code>self</code> as a field name.</p></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="app.schemas.book.BookBase" href="book.html#app.schemas.book.BookBase">BookBase</a></li>
+<li>pydantic.main.BaseModel</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="app.schemas.BookCreate.model_computed_fields"><code class="name">var <span class="ident">model_computed_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.BookCreate.model_config"><code class="name">var <span class="ident">model_config</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.BookCreate.model_fields"><code class="name">var <span class="ident">model_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="app.schemas.book.BookBase" href="book.html#app.schemas.book.BookBase">BookBase</a></b></code>:
+<ul class="hlist">
+<li><code><a title="app.schemas.book.BookBase.validate_isbn" href="book.html#app.schemas.book.BookBase.validate_isbn">validate_isbn</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt id="app.schemas.BookListResponse"><code class="flex name class">
+<span>class <span class="ident">BookListResponse</span></span>
+<span>(</span><span>**data: Any)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class BookListResponse(BaseModel):
+    &#34;&#34;&#34;
+    Schemat odpowiedzi dla listy książek z paginacją.
+
+    Wymaganie F4: Przeglądanie katalogu
+    Wymaganie NF20: Paginacja (max 50 wyników na stronę)
+    &#34;&#34;&#34;
+
+    books: List[BookResponse]
+    total: int = Field(..., description=&#34;Całkowita liczba książek&#34;)
+    page: int = Field(..., ge=1, description=&#34;Numer strony&#34;)
+    page_size: int = Field(..., ge=1, le=50, description=&#34;Rozmiar strony&#34;)
+    total_pages: int = Field(..., description=&#34;Całkowita liczba stron&#34;)</code></pre>
+</details>
+<div class="desc"><p>Schemat odpowiedzi dla listy książek z paginacją.</p>
+<p>Wymaganie F4: Przeglądanie katalogu
+Wymaganie NF20: Paginacja (max 50 wyników na stronę)</p>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<code>ValidationError</code>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><code>self</code> is explicitly positional-only to allow <code>self</code> as a field name.</p></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>pydantic.main.BaseModel</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="app.schemas.BookListResponse.books"><code class="name">var <span class="ident">books</span> : List[<a title="app.schemas.book.BookResponse" href="book.html#app.schemas.book.BookResponse">BookResponse</a>]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.BookListResponse.model_computed_fields"><code class="name">var <span class="ident">model_computed_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.BookListResponse.model_config"><code class="name">var <span class="ident">model_config</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.BookListResponse.model_fields"><code class="name">var <span class="ident">model_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.BookListResponse.page"><code class="name">var <span class="ident">page</span> : int</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.BookListResponse.page_size"><code class="name">var <span class="ident">page_size</span> : int</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.BookListResponse.total"><code class="name">var <span class="ident">total</span> : int</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.BookListResponse.total_pages"><code class="name">var <span class="ident">total_pages</span> : int</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="app.schemas.BookResponse"><code class="flex name class">
+<span>class <span class="ident">BookResponse</span></span>
+<span>(</span><span>**data: Any)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class BookResponse(BookBase):
+    &#34;&#34;&#34;
+    Schemat odpowiedzi - książka z dodatkowymi polami.
+
+    Wymaganie F7: Szczegóły książki
+    &#34;&#34;&#34;
+
+    id: UUID
+    available_copies: int = Field(..., description=&#34;Liczba dostępnych egzemplarzy&#34;)
+    total_copies: int = Field(..., description=&#34;Całkowita liczba egzemplarzy&#34;)
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True</code></pre>
+</details>
+<div class="desc"><p>Schemat odpowiedzi - książka z dodatkowymi polami.</p>
+<p>Wymaganie F7: Szczegóły książki</p>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<code>ValidationError</code>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><code>self</code> is explicitly positional-only to allow <code>self</code> as a field name.</p></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="app.schemas.book.BookBase" href="book.html#app.schemas.book.BookBase">BookBase</a></li>
+<li>pydantic.main.BaseModel</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="app.schemas.BookResponse.Config"><code class="name">var <span class="ident">Config</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.BookResponse.available_copies"><code class="name">var <span class="ident">available_copies</span> : int</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.BookResponse.created_at"><code class="name">var <span class="ident">created_at</span> : datetime.datetime</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.BookResponse.id"><code class="name">var <span class="ident">id</span> : uuid.UUID</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.BookResponse.model_computed_fields"><code class="name">var <span class="ident">model_computed_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.BookResponse.model_config"><code class="name">var <span class="ident">model_config</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.BookResponse.model_fields"><code class="name">var <span class="ident">model_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.BookResponse.total_copies"><code class="name">var <span class="ident">total_copies</span> : int</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.BookResponse.updated_at"><code class="name">var <span class="ident">updated_at</span> : datetime.datetime</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="app.schemas.book.BookBase" href="book.html#app.schemas.book.BookBase">BookBase</a></b></code>:
+<ul class="hlist">
+<li><code><a title="app.schemas.book.BookBase.validate_isbn" href="book.html#app.schemas.book.BookBase.validate_isbn">validate_isbn</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt id="app.schemas.BookUpdate"><code class="flex name class">
+<span>class <span class="ident">BookUpdate</span></span>
+<span>(</span><span>**data: Any)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class BookUpdate(BaseModel):
+    &#34;&#34;&#34;
+    Schemat do aktualizacji książki - wszystkie pola opcjonalne.
+
+    Wymaganie F15: Edycja książek (LIBRARIAN/ADMIN)
+    &#34;&#34;&#34;
+
+    title: Optional[str] = Field(None, min_length=1, max_length=500)
+    authors: Optional[str] = Field(None, min_length=1, max_length=500)
+    # ZMIENIONE: Usunięte min_length i max_length
+    isbn: Optional[str] = Field(None, description=&#34;Numer ISBN&#34;)
+    publisher: Optional[str] = Field(None, max_length=255)
+    pages: Optional[int] = Field(None, gt=0)
+    language: Optional[str] = Field(None, max_length=50)
+    cover_url: Optional[str] = Field(None, max_length=500)
+    description: Optional[str] = Field(None)
+    genre: Optional[str] = Field(None, max_length=100)
+
+    @field_validator(&#34;isbn&#34;)
+    @classmethod
+    def validate_isbn(cls, v: Optional[str]) -&gt; Optional[str]:
+        &#34;&#34;&#34;Walidacja ISBN dla update - ta sama logika jak w BookBase.&#34;&#34;&#34;
+        if v is None:
+            return v
+
+        cleaned = v.replace(&#34;-&#34;, &#34;&#34;).replace(&#34; &#34;, &#34;&#34;)
+
+        if len(cleaned) not in [10, 13]:
+            raise ValueError(&#34;ISBN musi mieć 10 lub 13 cyfr&#34;)
+
+        if not cleaned.isdigit():
+            raise ValueError(&#34;ISBN może zawierać tylko cyfry&#34;)
+
+        return v</code></pre>
+</details>
+<div class="desc"><p>Schemat do aktualizacji książki - wszystkie pola opcjonalne.</p>
+<p>Wymaganie F15: Edycja książek (LIBRARIAN/ADMIN)</p>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<code>ValidationError</code>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><code>self</code> is explicitly positional-only to allow <code>self</code> as a field name.</p></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>pydantic.main.BaseModel</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="app.schemas.BookUpdate.authors"><code class="name">var <span class="ident">authors</span> : str | None</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.BookUpdate.cover_url"><code class="name">var <span class="ident">cover_url</span> : str | None</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.BookUpdate.description"><code class="name">var <span class="ident">description</span> : str | None</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.BookUpdate.genre"><code class="name">var <span class="ident">genre</span> : str | None</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.BookUpdate.isbn"><code class="name">var <span class="ident">isbn</span> : str | None</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.BookUpdate.language"><code class="name">var <span class="ident">language</span> : str | None</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.BookUpdate.model_computed_fields"><code class="name">var <span class="ident">model_computed_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.BookUpdate.model_config"><code class="name">var <span class="ident">model_config</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.BookUpdate.model_fields"><code class="name">var <span class="ident">model_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.BookUpdate.pages"><code class="name">var <span class="ident">pages</span> : int | None</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.BookUpdate.publisher"><code class="name">var <span class="ident">publisher</span> : str | None</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.BookUpdate.title"><code class="name">var <span class="ident">title</span> : str | None</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Static methods</h3>
+<dl>
+<dt id="app.schemas.BookUpdate.validate_isbn"><code class="name flex">
+<span>def <span class="ident">validate_isbn</span></span>(<span>v: str | None) ‑> str | None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Walidacja ISBN dla update - ta sama logika jak w BookBase.</p></div>
+</dd>
+</dl>
+</dd>
+<dt id="app.schemas.CatalogFilter"><code class="flex name class">
+<span>class <span class="ident">CatalogFilter</span></span>
+<span>(</span><span>**data: Any)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class CatalogFilter(BaseModel):
+    &#34;&#34;&#34;
+    Schemat filtrów dla katalogu książek.
+
+    Wymaganie F6: Filtrowanie książek według autora, gatunku, języka
+    &#34;&#34;&#34;
+
+    authors: Optional[str] = Field(
+        None, max_length=500, description=&#34;Filtruj po autorze&#34;
+    )
+    genre: Optional[str] = Field(None, max_length=100, description=&#34;Filtruj po gatunku&#34;)
+    language: Optional[str] = Field(
+        None, max_length=50, description=&#34;Filtruj po języku&#34;
+    )
+    publisher: Optional[str] = Field(
+        None, max_length=255, description=&#34;Filtruj po wydawcy&#34;
+    )
+    available_only: Optional[bool] = Field(
+        False, description=&#34;Tylko książki z dostępnymi egzemplarzami&#34;
+    )
+
+    class Config:
+        json_schema_extra = {
+            &#34;example&#34;: {&#34;genre&#34;: &#34;Fantasy&#34;, &#34;language&#34;: &#34;pl&#34;, &#34;available_only&#34;: True}
+        }</code></pre>
+</details>
+<div class="desc"><p>Schemat filtrów dla katalogu książek.</p>
+<p>Wymaganie F6: Filtrowanie książek według autora, gatunku, języka</p>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<code>ValidationError</code>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><code>self</code> is explicitly positional-only to allow <code>self</code> as a field name.</p></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>pydantic.main.BaseModel</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="app.schemas.CatalogFilter.Config"><code class="name">var <span class="ident">Config</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.CatalogFilter.authors"><code class="name">var <span class="ident">authors</span> : str | None</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.CatalogFilter.available_only"><code class="name">var <span class="ident">available_only</span> : bool | None</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.CatalogFilter.genre"><code class="name">var <span class="ident">genre</span> : str | None</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.CatalogFilter.language"><code class="name">var <span class="ident">language</span> : str | None</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.CatalogFilter.model_computed_fields"><code class="name">var <span class="ident">model_computed_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.CatalogFilter.model_config"><code class="name">var <span class="ident">model_config</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.CatalogFilter.model_fields"><code class="name">var <span class="ident">model_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.CatalogFilter.publisher"><code class="name">var <span class="ident">publisher</span> : str | None</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="app.schemas.CopyStatusUpdate"><code class="flex name class">
+<span>class <span class="ident">CopyStatusUpdate</span></span>
+<span>(</span><span>**data: Any)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class CopyStatusUpdate(BaseModel):
+    &#34;&#34;&#34;
+    Schemat do zmiany tylko statusu egzemplarza.
+
+    Wymaganie F16: Zmiana statusu egzemplarza
+    &#34;&#34;&#34;
+
+    status: str = Field(
+        ..., description=&#34;Nowy status egzemplarza&#34;
+    )  # ZMIANA: CopyStatusEnum → str</code></pre>
+</details>
+<div class="desc"><p>Schemat do zmiany tylko statusu egzemplarza.</p>
+<p>Wymaganie F16: Zmiana statusu egzemplarza</p>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<code>ValidationError</code>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><code>self</code> is explicitly positional-only to allow <code>self</code> as a field name.</p></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>pydantic.main.BaseModel</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="app.schemas.CopyStatusUpdate.model_computed_fields"><code class="name">var <span class="ident">model_computed_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.CopyStatusUpdate.model_config"><code class="name">var <span class="ident">model_config</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.CopyStatusUpdate.model_fields"><code class="name">var <span class="ident">model_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.CopyStatusUpdate.status"><code class="name">var <span class="ident">status</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="app.schemas.PaginationParams"><code class="flex name class">
+<span>class <span class="ident">PaginationParams</span></span>
+<span>(</span><span>**data: Any)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class PaginationParams(BaseModel):
+    &#34;&#34;&#34;
+    Parametry paginacji.
+
+    Wymaganie F4: Przeglądanie katalogu z paginacją
+    Wymaganie NF20: Maksymalnie 50 wyników na stronę
+    &#34;&#34;&#34;
+
+    page: int = Field(1, ge=1, description=&#34;Numer strony (od 1)&#34;)
+    page_size: int = Field(
+        20, ge=1, le=50, description=&#34;Liczba wyników na stronę (max 50)&#34;
+    )
+
+    def get_offset(self) -&gt; int:
+        &#34;&#34;&#34;
+        Oblicza offset dla SQL query.
+
+        Returns:
+            int: Offset dla paginacji
+        &#34;&#34;&#34;
+        return (self.page - 1) * self.page_size
+
+    class Config:
+        json_schema_extra = {&#34;example&#34;: {&#34;page&#34;: 1, &#34;page_size&#34;: 20}}</code></pre>
+</details>
+<div class="desc"><p>Parametry paginacji.</p>
+<p>Wymaganie F4: Przeglądanie katalogu z paginacją
+Wymaganie NF20: Maksymalnie 50 wyników na stronę</p>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<code>ValidationError</code>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><code>self</code> is explicitly positional-only to allow <code>self</code> as a field name.</p></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>pydantic.main.BaseModel</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="app.schemas.PaginationParams.Config"><code class="name">var <span class="ident">Config</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.PaginationParams.model_computed_fields"><code class="name">var <span class="ident">model_computed_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.PaginationParams.model_config"><code class="name">var <span class="ident">model_config</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.PaginationParams.model_fields"><code class="name">var <span class="ident">model_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.PaginationParams.page"><code class="name">var <span class="ident">page</span> : int</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.PaginationParams.page_size"><code class="name">var <span class="ident">page_size</span> : int</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="app.schemas.PaginationParams.get_offset"><code class="name flex">
+<span>def <span class="ident">get_offset</span></span>(<span>self) ‑> int</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_offset(self) -&gt; int:
+    &#34;&#34;&#34;
+    Oblicza offset dla SQL query.
+
+    Returns:
+        int: Offset dla paginacji
+    &#34;&#34;&#34;
+    return (self.page - 1) * self.page_size</code></pre>
+</details>
+<div class="desc"><p>Oblicza offset dla SQL query.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>int</code></dt>
+<dd>Offset dla paginacji</dd>
+</dl></div>
+</dd>
+</dl>
+</dd>
+<dt id="app.schemas.SearchQuery"><code class="flex name class">
+<span>class <span class="ident">SearchQuery</span></span>
+<span>(</span><span>**data: Any)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class SearchQuery(BaseModel):
+    &#34;&#34;&#34;
+    Schemat zapytania wyszukiwania.
+
+    Wymaganie F5: Wyszukiwanie książek
+    &#34;&#34;&#34;
+
+    query: str = Field(
+        ..., min_length=1, max_length=200, description=&#34;Fraza do wyszukania&#34;
+    )
+    search_in: Optional[str] = Field(
+        &#34;all&#34;, description=&#34;Gdzie szukać: &#39;title&#39;, &#39;authors&#39;, &#39;isbn&#39;, &#39;all&#39;&#34;
+    )
+
+    class Config:
+        json_schema_extra = {&#34;example&#34;: {&#34;query&#34;: &#34;Tolkien&#34;, &#34;search_in&#34;: &#34;authors&#34;}}</code></pre>
+</details>
+<div class="desc"><p>Schemat zapytania wyszukiwania.</p>
+<p>Wymaganie F5: Wyszukiwanie książek</p>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<code>ValidationError</code>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><code>self</code> is explicitly positional-only to allow <code>self</code> as a field name.</p></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>pydantic.main.BaseModel</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="app.schemas.SearchQuery.Config"><code class="name">var <span class="ident">Config</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.SearchQuery.model_computed_fields"><code class="name">var <span class="ident">model_computed_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.SearchQuery.model_config"><code class="name">var <span class="ident">model_config</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.SearchQuery.model_fields"><code class="name">var <span class="ident">model_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.SearchQuery.query"><code class="name">var <span class="ident">query</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.schemas.SearchQuery.search_in"><code class="name">var <span class="ident">search_in</span> : str | None</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="app" href="../index.html">app</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-submodules">Sub-modules</a></h3>
+<ul>
+<li><code><a title="app.schemas.book" href="book.html">app.schemas.book</a></code></li>
+<li><code><a title="app.schemas.book_copy" href="book_copy.html">app.schemas.book_copy</a></code></li>
+<li><code><a title="app.schemas.catalog" href="catalog.html">app.schemas.catalog</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="app.schemas.BookBase" href="#app.schemas.BookBase">BookBase</a></code></h4>
+<ul class="">
+<li><code><a title="app.schemas.BookBase.authors" href="#app.schemas.BookBase.authors">authors</a></code></li>
+<li><code><a title="app.schemas.BookBase.cover_url" href="#app.schemas.BookBase.cover_url">cover_url</a></code></li>
+<li><code><a title="app.schemas.BookBase.description" href="#app.schemas.BookBase.description">description</a></code></li>
+<li><code><a title="app.schemas.BookBase.genre" href="#app.schemas.BookBase.genre">genre</a></code></li>
+<li><code><a title="app.schemas.BookBase.isbn" href="#app.schemas.BookBase.isbn">isbn</a></code></li>
+<li><code><a title="app.schemas.BookBase.language" href="#app.schemas.BookBase.language">language</a></code></li>
+<li><code><a title="app.schemas.BookBase.model_computed_fields" href="#app.schemas.BookBase.model_computed_fields">model_computed_fields</a></code></li>
+<li><code><a title="app.schemas.BookBase.model_config" href="#app.schemas.BookBase.model_config">model_config</a></code></li>
+<li><code><a title="app.schemas.BookBase.model_fields" href="#app.schemas.BookBase.model_fields">model_fields</a></code></li>
+<li><code><a title="app.schemas.BookBase.pages" href="#app.schemas.BookBase.pages">pages</a></code></li>
+<li><code><a title="app.schemas.BookBase.publisher" href="#app.schemas.BookBase.publisher">publisher</a></code></li>
+<li><code><a title="app.schemas.BookBase.title" href="#app.schemas.BookBase.title">title</a></code></li>
+<li><code><a title="app.schemas.BookBase.validate_isbn" href="#app.schemas.BookBase.validate_isbn">validate_isbn</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="app.schemas.BookCopyBase" href="#app.schemas.BookCopyBase">BookCopyBase</a></code></h4>
+<ul class="">
+<li><code><a title="app.schemas.BookCopyBase.inventory_no" href="#app.schemas.BookCopyBase.inventory_no">inventory_no</a></code></li>
+<li><code><a title="app.schemas.BookCopyBase.location" href="#app.schemas.BookCopyBase.location">location</a></code></li>
+<li><code><a title="app.schemas.BookCopyBase.model_computed_fields" href="#app.schemas.BookCopyBase.model_computed_fields">model_computed_fields</a></code></li>
+<li><code><a title="app.schemas.BookCopyBase.model_config" href="#app.schemas.BookCopyBase.model_config">model_config</a></code></li>
+<li><code><a title="app.schemas.BookCopyBase.model_fields" href="#app.schemas.BookCopyBase.model_fields">model_fields</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="app.schemas.BookCopyCreate" href="#app.schemas.BookCopyCreate">BookCopyCreate</a></code></h4>
+<ul class="">
+<li><code><a title="app.schemas.BookCopyCreate.book_id" href="#app.schemas.BookCopyCreate.book_id">book_id</a></code></li>
+<li><code><a title="app.schemas.BookCopyCreate.inventory_no" href="#app.schemas.BookCopyCreate.inventory_no">inventory_no</a></code></li>
+<li><code><a title="app.schemas.BookCopyCreate.location" href="#app.schemas.BookCopyCreate.location">location</a></code></li>
+<li><code><a title="app.schemas.BookCopyCreate.model_computed_fields" href="#app.schemas.BookCopyCreate.model_computed_fields">model_computed_fields</a></code></li>
+<li><code><a title="app.schemas.BookCopyCreate.model_config" href="#app.schemas.BookCopyCreate.model_config">model_config</a></code></li>
+<li><code><a title="app.schemas.BookCopyCreate.model_fields" href="#app.schemas.BookCopyCreate.model_fields">model_fields</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="app.schemas.BookCopyResponse" href="#app.schemas.BookCopyResponse">BookCopyResponse</a></code></h4>
+<ul class="">
+<li><code><a title="app.schemas.BookCopyResponse.Config" href="#app.schemas.BookCopyResponse.Config">Config</a></code></li>
+<li><code><a title="app.schemas.BookCopyResponse.book_id" href="#app.schemas.BookCopyResponse.book_id">book_id</a></code></li>
+<li><code><a title="app.schemas.BookCopyResponse.book_title" href="#app.schemas.BookCopyResponse.book_title">book_title</a></code></li>
+<li><code><a title="app.schemas.BookCopyResponse.created_at" href="#app.schemas.BookCopyResponse.created_at">created_at</a></code></li>
+<li><code><a title="app.schemas.BookCopyResponse.id" href="#app.schemas.BookCopyResponse.id">id</a></code></li>
+<li><code><a title="app.schemas.BookCopyResponse.model_computed_fields" href="#app.schemas.BookCopyResponse.model_computed_fields">model_computed_fields</a></code></li>
+<li><code><a title="app.schemas.BookCopyResponse.model_config" href="#app.schemas.BookCopyResponse.model_config">model_config</a></code></li>
+<li><code><a title="app.schemas.BookCopyResponse.model_fields" href="#app.schemas.BookCopyResponse.model_fields">model_fields</a></code></li>
+<li><code><a title="app.schemas.BookCopyResponse.status" href="#app.schemas.BookCopyResponse.status">status</a></code></li>
+<li><code><a title="app.schemas.BookCopyResponse.updated_at" href="#app.schemas.BookCopyResponse.updated_at">updated_at</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="app.schemas.BookCopyUpdate" href="#app.schemas.BookCopyUpdate">BookCopyUpdate</a></code></h4>
+<ul class="">
+<li><code><a title="app.schemas.BookCopyUpdate.inventory_no" href="#app.schemas.BookCopyUpdate.inventory_no">inventory_no</a></code></li>
+<li><code><a title="app.schemas.BookCopyUpdate.location" href="#app.schemas.BookCopyUpdate.location">location</a></code></li>
+<li><code><a title="app.schemas.BookCopyUpdate.model_computed_fields" href="#app.schemas.BookCopyUpdate.model_computed_fields">model_computed_fields</a></code></li>
+<li><code><a title="app.schemas.BookCopyUpdate.model_config" href="#app.schemas.BookCopyUpdate.model_config">model_config</a></code></li>
+<li><code><a title="app.schemas.BookCopyUpdate.model_fields" href="#app.schemas.BookCopyUpdate.model_fields">model_fields</a></code></li>
+<li><code><a title="app.schemas.BookCopyUpdate.status" href="#app.schemas.BookCopyUpdate.status">status</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="app.schemas.BookCreate" href="#app.schemas.BookCreate">BookCreate</a></code></h4>
+<ul class="">
+<li><code><a title="app.schemas.BookCreate.model_computed_fields" href="#app.schemas.BookCreate.model_computed_fields">model_computed_fields</a></code></li>
+<li><code><a title="app.schemas.BookCreate.model_config" href="#app.schemas.BookCreate.model_config">model_config</a></code></li>
+<li><code><a title="app.schemas.BookCreate.model_fields" href="#app.schemas.BookCreate.model_fields">model_fields</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="app.schemas.BookListResponse" href="#app.schemas.BookListResponse">BookListResponse</a></code></h4>
+<ul class="">
+<li><code><a title="app.schemas.BookListResponse.books" href="#app.schemas.BookListResponse.books">books</a></code></li>
+<li><code><a title="app.schemas.BookListResponse.model_computed_fields" href="#app.schemas.BookListResponse.model_computed_fields">model_computed_fields</a></code></li>
+<li><code><a title="app.schemas.BookListResponse.model_config" href="#app.schemas.BookListResponse.model_config">model_config</a></code></li>
+<li><code><a title="app.schemas.BookListResponse.model_fields" href="#app.schemas.BookListResponse.model_fields">model_fields</a></code></li>
+<li><code><a title="app.schemas.BookListResponse.page" href="#app.schemas.BookListResponse.page">page</a></code></li>
+<li><code><a title="app.schemas.BookListResponse.page_size" href="#app.schemas.BookListResponse.page_size">page_size</a></code></li>
+<li><code><a title="app.schemas.BookListResponse.total" href="#app.schemas.BookListResponse.total">total</a></code></li>
+<li><code><a title="app.schemas.BookListResponse.total_pages" href="#app.schemas.BookListResponse.total_pages">total_pages</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="app.schemas.BookResponse" href="#app.schemas.BookResponse">BookResponse</a></code></h4>
+<ul class="">
+<li><code><a title="app.schemas.BookResponse.Config" href="#app.schemas.BookResponse.Config">Config</a></code></li>
+<li><code><a title="app.schemas.BookResponse.available_copies" href="#app.schemas.BookResponse.available_copies">available_copies</a></code></li>
+<li><code><a title="app.schemas.BookResponse.created_at" href="#app.schemas.BookResponse.created_at">created_at</a></code></li>
+<li><code><a title="app.schemas.BookResponse.id" href="#app.schemas.BookResponse.id">id</a></code></li>
+<li><code><a title="app.schemas.BookResponse.model_computed_fields" href="#app.schemas.BookResponse.model_computed_fields">model_computed_fields</a></code></li>
+<li><code><a title="app.schemas.BookResponse.model_config" href="#app.schemas.BookResponse.model_config">model_config</a></code></li>
+<li><code><a title="app.schemas.BookResponse.model_fields" href="#app.schemas.BookResponse.model_fields">model_fields</a></code></li>
+<li><code><a title="app.schemas.BookResponse.total_copies" href="#app.schemas.BookResponse.total_copies">total_copies</a></code></li>
+<li><code><a title="app.schemas.BookResponse.updated_at" href="#app.schemas.BookResponse.updated_at">updated_at</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="app.schemas.BookUpdate" href="#app.schemas.BookUpdate">BookUpdate</a></code></h4>
+<ul class="">
+<li><code><a title="app.schemas.BookUpdate.authors" href="#app.schemas.BookUpdate.authors">authors</a></code></li>
+<li><code><a title="app.schemas.BookUpdate.cover_url" href="#app.schemas.BookUpdate.cover_url">cover_url</a></code></li>
+<li><code><a title="app.schemas.BookUpdate.description" href="#app.schemas.BookUpdate.description">description</a></code></li>
+<li><code><a title="app.schemas.BookUpdate.genre" href="#app.schemas.BookUpdate.genre">genre</a></code></li>
+<li><code><a title="app.schemas.BookUpdate.isbn" href="#app.schemas.BookUpdate.isbn">isbn</a></code></li>
+<li><code><a title="app.schemas.BookUpdate.language" href="#app.schemas.BookUpdate.language">language</a></code></li>
+<li><code><a title="app.schemas.BookUpdate.model_computed_fields" href="#app.schemas.BookUpdate.model_computed_fields">model_computed_fields</a></code></li>
+<li><code><a title="app.schemas.BookUpdate.model_config" href="#app.schemas.BookUpdate.model_config">model_config</a></code></li>
+<li><code><a title="app.schemas.BookUpdate.model_fields" href="#app.schemas.BookUpdate.model_fields">model_fields</a></code></li>
+<li><code><a title="app.schemas.BookUpdate.pages" href="#app.schemas.BookUpdate.pages">pages</a></code></li>
+<li><code><a title="app.schemas.BookUpdate.publisher" href="#app.schemas.BookUpdate.publisher">publisher</a></code></li>
+<li><code><a title="app.schemas.BookUpdate.title" href="#app.schemas.BookUpdate.title">title</a></code></li>
+<li><code><a title="app.schemas.BookUpdate.validate_isbn" href="#app.schemas.BookUpdate.validate_isbn">validate_isbn</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="app.schemas.CatalogFilter" href="#app.schemas.CatalogFilter">CatalogFilter</a></code></h4>
+<ul class="">
+<li><code><a title="app.schemas.CatalogFilter.Config" href="#app.schemas.CatalogFilter.Config">Config</a></code></li>
+<li><code><a title="app.schemas.CatalogFilter.authors" href="#app.schemas.CatalogFilter.authors">authors</a></code></li>
+<li><code><a title="app.schemas.CatalogFilter.available_only" href="#app.schemas.CatalogFilter.available_only">available_only</a></code></li>
+<li><code><a title="app.schemas.CatalogFilter.genre" href="#app.schemas.CatalogFilter.genre">genre</a></code></li>
+<li><code><a title="app.schemas.CatalogFilter.language" href="#app.schemas.CatalogFilter.language">language</a></code></li>
+<li><code><a title="app.schemas.CatalogFilter.model_computed_fields" href="#app.schemas.CatalogFilter.model_computed_fields">model_computed_fields</a></code></li>
+<li><code><a title="app.schemas.CatalogFilter.model_config" href="#app.schemas.CatalogFilter.model_config">model_config</a></code></li>
+<li><code><a title="app.schemas.CatalogFilter.model_fields" href="#app.schemas.CatalogFilter.model_fields">model_fields</a></code></li>
+<li><code><a title="app.schemas.CatalogFilter.publisher" href="#app.schemas.CatalogFilter.publisher">publisher</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="app.schemas.CopyStatusUpdate" href="#app.schemas.CopyStatusUpdate">CopyStatusUpdate</a></code></h4>
+<ul class="">
+<li><code><a title="app.schemas.CopyStatusUpdate.model_computed_fields" href="#app.schemas.CopyStatusUpdate.model_computed_fields">model_computed_fields</a></code></li>
+<li><code><a title="app.schemas.CopyStatusUpdate.model_config" href="#app.schemas.CopyStatusUpdate.model_config">model_config</a></code></li>
+<li><code><a title="app.schemas.CopyStatusUpdate.model_fields" href="#app.schemas.CopyStatusUpdate.model_fields">model_fields</a></code></li>
+<li><code><a title="app.schemas.CopyStatusUpdate.status" href="#app.schemas.CopyStatusUpdate.status">status</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="app.schemas.PaginationParams" href="#app.schemas.PaginationParams">PaginationParams</a></code></h4>
+<ul class="">
+<li><code><a title="app.schemas.PaginationParams.Config" href="#app.schemas.PaginationParams.Config">Config</a></code></li>
+<li><code><a title="app.schemas.PaginationParams.get_offset" href="#app.schemas.PaginationParams.get_offset">get_offset</a></code></li>
+<li><code><a title="app.schemas.PaginationParams.model_computed_fields" href="#app.schemas.PaginationParams.model_computed_fields">model_computed_fields</a></code></li>
+<li><code><a title="app.schemas.PaginationParams.model_config" href="#app.schemas.PaginationParams.model_config">model_config</a></code></li>
+<li><code><a title="app.schemas.PaginationParams.model_fields" href="#app.schemas.PaginationParams.model_fields">model_fields</a></code></li>
+<li><code><a title="app.schemas.PaginationParams.page" href="#app.schemas.PaginationParams.page">page</a></code></li>
+<li><code><a title="app.schemas.PaginationParams.page_size" href="#app.schemas.PaginationParams.page_size">page_size</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="app.schemas.SearchQuery" href="#app.schemas.SearchQuery">SearchQuery</a></code></h4>
+<ul class="">
+<li><code><a title="app.schemas.SearchQuery.Config" href="#app.schemas.SearchQuery.Config">Config</a></code></li>
+<li><code><a title="app.schemas.SearchQuery.model_computed_fields" href="#app.schemas.SearchQuery.model_computed_fields">model_computed_fields</a></code></li>
+<li><code><a title="app.schemas.SearchQuery.model_config" href="#app.schemas.SearchQuery.model_config">model_config</a></code></li>
+<li><code><a title="app.schemas.SearchQuery.model_fields" href="#app.schemas.SearchQuery.model_fields">model_fields</a></code></li>
+<li><code><a title="app.schemas.SearchQuery.query" href="#app.schemas.SearchQuery.query">query</a></code></li>
+<li><code><a title="app.schemas.SearchQuery.search_in" href="#app.schemas.SearchQuery.search_in">search_in</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.11.6</a>.</p>
+</footer>
+</body>
+</html>

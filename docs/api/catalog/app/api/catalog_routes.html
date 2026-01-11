@@ -1,0 +1,321 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
+<meta name="generator" content="pdoc3 0.11.6">
+<title>app.api.catalog_routes API documentation</title>
+<meta name="description" content="Trasy API katalogu (Catalog Routes) – endpointy do przeglądania i wyszukiwania książek …">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/sanitize.min.css" integrity="sha512-y1dtMcuvtTMJc1yPgEqF0ZjQbhnc/bFhyvIyVNb9Zk5mIGtqVaAB1Ttl28su8AvFMOY0EwRbAe+HCLqj6W7/KA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/typography.min.css" integrity="sha512-Y1DYSb995BAfxobCkKepB1BqJJTPrOp3zPL74AWFugHHmmdcvO+C48WLrUOlhGMc0QG7AE3f7gmvvcrmX2fDoA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:1.5em;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:2em 0 .50em 0}h3{font-size:1.4em;margin:1.6em 0 .7em 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .2s ease-in-out}a:visited{color:#503}a:hover{color:#b62}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900;font-weight:bold}pre code{font-size:.8em;line-height:1.4em;padding:1em;display:block}code{background:#f3f3f3;font-family:"DejaVu Sans Mono",monospace;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source > summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible;min-width:max-content}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em 1em;margin:1em 0}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul ul{padding-left:1em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" integrity="sha512-D9gUyxqja7hBtkWpPWGt9wfbfaMGVt9gnyCvYa+jojwwPHLCzUm5i8rpk7vD7wNee9bA35eYIjobYPaQuKS1MQ==" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => {
+hljs.configure({languages: ['bash', 'css', 'diff', 'graphql', 'ini', 'javascript', 'json', 'plaintext', 'python', 'python-repl', 'rust', 'shell', 'sql', 'typescript', 'xml', 'yaml']});
+hljs.highlightAll();
+/* Collapse source docstrings */
+setTimeout(() => {
+[...document.querySelectorAll('.hljs.language-python > .hljs-string')]
+.filter(el => el.innerHTML.length > 200 && ['"""', "'''"].includes(el.innerHTML.substring(0, 3)))
+.forEach(el => {
+let d = document.createElement('details');
+d.classList.add('hljs-string');
+d.innerHTML = '<summary>"""</summary>' + el.innerHTML.substring(3);
+el.replaceWith(d);
+});
+}, 100);
+})</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>app.api.catalog_routes</code></h1>
+</header>
+<section id="section-intro">
+<p>Trasy API katalogu (Catalog Routes) – endpointy do przeglądania i wyszukiwania książek.</p>
+<p>Realizowane wymagania funkcjonalne:
+- F4: Przeglądanie katalogu
+- F5: Wyszukiwanie książek
+- F6: Filtrowanie katalogu
+- F7: Szczegóły książki</p>
+<p>Realizowane wymagania niefunkcjonalne:
+- NF20: Paginacja wyników (limit do 50 pozycji na stronę)</p>
+<p>Dostęp:
+- otwarte dla wszystkich zalogowanych ról (READER, LIBRARIAN, ADMIN).</p>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="app.api.catalog_routes.browse_catalog"><code class="name flex">
+<span>def <span class="ident">browse_catalog</span></span>(<span>page: int = Query(1),<br>page_size: int = Query(20),<br>authors: str | None = Query(None),<br>genre: str | None = Query(None),<br>language: str | None = Query(None),<br>publisher: str | None = Query(None),<br>available_only: bool = Query(False),<br>db: sqlalchemy.orm.session.Session = Depends(get_db))</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@router.get(&#34;/browse&#34;, response_model=BookListResponse)
+def browse_catalog(
+    page: int = Query(1, ge=1, description=&#34;Numer strony&#34;),
+    page_size: int = Query(20, ge=1, le=50, description=&#34;Rozmiar strony (max 50)&#34;),
+    authors: Optional[str] = Query(None, description=&#34;Filtruj po autorze&#34;),
+    genre: Optional[str] = Query(None, description=&#34;Filtruj po gatunku&#34;),
+    language: Optional[str] = Query(None, description=&#34;Filtruj po języku&#34;),
+    publisher: Optional[str] = Query(None, description=&#34;Filtruj po wydawcy&#34;),
+    available_only: bool = Query(False, description=&#34;Tylko dostępne książki&#34;),
+    db: Session = Depends(get_db),
+):
+    &#34;&#34;&#34;
+    Przeglądanie katalogu książek z filtrowaniem i paginacją.
+
+    Wymaganie F4: Przeglądanie katalogu.
+    Wymaganie F6: Filtrowanie według autora, gatunku, języka, wydawcy.
+    Wymaganie NF20: Paginacja (maks. 50 wyników na stronę).
+
+    Parametr available_only pozwala wyświetlić tylko te pozycje,
+    które mają co najmniej jeden egzemplarz o statusie AVAILABLE.
+    &#34;&#34;&#34;
+    query = db.query(Book).filter(~Book.is_deleted)
+
+    if authors:
+        query = query.filter(Book.authors.ilike(f&#34;%{authors}%&#34;))
+
+    if genre:
+        query = query.filter(Book.genre.ilike(f&#34;%{genre}%&#34;))
+
+    if language:
+        query = query.filter(Book.language == language)
+
+    if publisher:
+        query = query.filter(Book.publisher.ilike(f&#34;%{publisher}%&#34;))
+
+    if available_only:
+        query = (
+            query.join(BookCopy)
+            .filter(
+                and_(
+                    BookCopy.status == CopyStatus.AVAILABLE,
+                    ~BookCopy.is_deleted,
+                )
+            )
+            .distinct()
+        )
+
+    total = query.count()
+
+    offset = (page - 1) * page_size
+    books = query.offset(offset).limit(page_size).all()
+
+    books_response = []
+    for book in books:
+        book_data = BookResponse(
+            id=book.id,
+            title=book.title,
+            authors=book.authors,
+            isbn=book.isbn,
+            publisher=book.publisher,
+            pages=book.pages,
+            language=book.language,
+            cover_url=book.cover_url,
+            description=book.description,
+            genre=book.genre,
+            available_copies=book.get_available_copies_count(),
+            total_copies=book.get_total_copies_count(),
+            created_at=book.created_at,
+            updated_at=book.updated_at,
+        )
+        books_response.append(book_data)
+
+    total_pages = (total + page_size - 1) // page_size
+
+    return BookListResponse(
+        books=books_response,
+        total=total,
+        page=page,
+        page_size=page_size,
+        total_pages=total_pages,
+    )</code></pre>
+</details>
+<div class="desc"><p>Przeglądanie katalogu książek z filtrowaniem i paginacją.</p>
+<p>Wymaganie F4: Przeglądanie katalogu.
+Wymaganie F6: Filtrowanie według autora, gatunku, języka, wydawcy.
+Wymaganie NF20: Paginacja (maks. 50 wyników na stronę).</p>
+<p>Parametr available_only pozwala wyświetlić tylko te pozycje,
+które mają co najmniej jeden egzemplarz o statusie AVAILABLE.</p></div>
+</dd>
+<dt id="app.api.catalog_routes.get_book_details"><code class="name flex">
+<span>def <span class="ident">get_book_details</span></span>(<span>book_id: uuid.UUID, db: sqlalchemy.orm.session.Session = Depends(get_db))</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@router.get(&#34;/{book_id}&#34;, response_model=BookResponse)
+def get_book_details(book_id: UUID, db: Session = Depends(get_db)):
+    &#34;&#34;&#34;
+    Szczegóły konkretnej książki.
+
+    Wymaganie F7: Szczegóły książki (tytuł, autor, dane wydawnicze, dostępność).
+    Zwracane są m.in. liczby dostępnych egzemplarzy (available_copies)
+    oraz wszystkich egzemplarzy danej książki (total_copies).
+    &#34;&#34;&#34;
+    book = db.query(Book).filter(and_(Book.id == book_id, ~Book.is_deleted)).first()
+
+    if not book:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=&#34;Książka nie znaleziona&#34;
+        )
+
+    return BookResponse(
+        id=book.id,
+        title=book.title,
+        authors=book.authors,
+        isbn=book.isbn,
+        publisher=book.publisher,
+        pages=book.pages,
+        language=book.language,
+        cover_url=book.cover_url,
+        description=book.description,
+        genre=book.genre,
+        available_copies=book.get_available_copies_count(),
+        total_copies=book.get_total_copies_count(),
+        created_at=book.created_at,
+        updated_at=book.updated_at,
+    )</code></pre>
+</details>
+<div class="desc"><p>Szczegóły konkretnej książki.</p>
+<p>Wymaganie F7: Szczegóły książki (tytuł, autor, dane wydawnicze, dostępność).
+Zwracane są m.in. liczby dostępnych egzemplarzy (available_copies)
+oraz wszystkich egzemplarzy danej książki (total_copies).</p></div>
+</dd>
+<dt id="app.api.catalog_routes.search_books"><code class="name flex">
+<span>def <span class="ident">search_books</span></span>(<span>search: <a title="app.schemas.catalog.SearchQuery" href="../schemas/catalog.html#app.schemas.catalog.SearchQuery">SearchQuery</a>,<br>page: int = Query(1),<br>page_size: int = Query(20),<br>db: sqlalchemy.orm.session.Session = Depends(get_db))</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@router.post(&#34;/search&#34;, response_model=BookListResponse)
+def search_books(
+    search: SearchQuery,
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=1, le=50),
+    db: Session = Depends(get_db),
+):
+    &#34;&#34;&#34;
+    Wyszukiwanie książek według tytułu, autora lub ISBN.
+
+    Wymaganie F5: Wyszukiwanie książek.
+
+    Pole search.search_in określa, w którym polu szukać:
+    - &#39;title&#39;   – tylko tytuł,
+    - &#39;authors&#39; – tylko autorzy,
+    - &#39;isbn&#39;    – tylko ISBN,
+    - inne / brak – wyszukiwanie we wszystkich trzech polach jednocześnie.
+    Wyniki są paginowane (NF20) tak jak w przeglądaniu katalogu.
+    &#34;&#34;&#34;
+    query = db.query(Book).filter(~Book.is_deleted)
+
+    search_term = f&#34;%{search.query}%&#34;
+
+    if search.search_in == &#34;title&#34;:
+        query = query.filter(Book.title.ilike(search_term))
+    elif search.search_in == &#34;authors&#34;:
+        query = query.filter(Book.authors.ilike(search_term))
+    elif search.search_in == &#34;isbn&#34;:
+        query = query.filter(Book.isbn.ilike(search_term))
+    else:
+        query = query.filter(
+            or_(
+                Book.title.ilike(search_term),
+                Book.authors.ilike(search_term),
+                Book.isbn.ilike(search_term),
+            )
+        )
+
+    total = query.count()
+
+    offset = (page - 1) * page_size
+    books = query.offset(offset).limit(page_size).all()
+
+    books_response = []
+    for book in books:
+        book_data = BookResponse(
+            id=book.id,
+            title=book.title,
+            authors=book.authors,
+            isbn=book.isbn,
+            publisher=book.publisher,
+            pages=book.pages,
+            language=book.language,
+            cover_url=book.cover_url,
+            description=book.description,
+            genre=book.genre,
+            available_copies=book.get_available_copies_count(),
+            total_copies=book.get_total_copies_count(),
+            created_at=book.created_at,
+            updated_at=book.updated_at,
+        )
+        books_response.append(book_data)
+
+    total_pages = (total + page_size - 1) // page_size
+
+    return BookListResponse(
+        books=books_response,
+        total=total,
+        page=page,
+        page_size=page_size,
+        total_pages=total_pages,
+    )</code></pre>
+</details>
+<div class="desc"><p>Wyszukiwanie książek według tytułu, autora lub ISBN.</p>
+<p>Wymaganie F5: Wyszukiwanie książek.</p>
+<p>Pole search.search_in określa, w którym polu szukać:
+- 'title'
+– tylko tytuł,
+- 'authors' – tylko autorzy,
+- 'isbn'
+– tylko ISBN,
+- inne / brak – wyszukiwanie we wszystkich trzech polach jednocześnie.
+Wyniki są paginowane (NF20) tak jak w przeglądaniu katalogu.</p></div>
+</dd>
+</dl>
+</section>
+<section>
+</section>
+</article>
+<nav id="sidebar">
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="app.api" href="index.html">app.api</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="app.api.catalog_routes.browse_catalog" href="#app.api.catalog_routes.browse_catalog">browse_catalog</a></code></li>
+<li><code><a title="app.api.catalog_routes.get_book_details" href="#app.api.catalog_routes.get_book_details">get_book_details</a></code></li>
+<li><code><a title="app.api.catalog_routes.search_books" href="#app.api.catalog_routes.search_books">search_books</a></code></li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.11.6</a>.</p>
+</footer>
+</body>
+</html>
