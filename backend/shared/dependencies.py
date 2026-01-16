@@ -213,6 +213,7 @@ async def get_current_user_payload(
 ) -> Dict[str, Any]:
     """
     Dependency - pobiera pełny payload tokenu JWT (sub, email, role).
+    Automatyczna weryfikacja JWT i zwrócenie danych użytkownika.
 
     Args:
         credentials: Token Bearer z nagłówka Authorization
@@ -226,10 +227,10 @@ async def get_current_user_payload(
             # user = {"sub": "...", "email": "...", "role": "READER"}
             return user
     """
-    token = credentials.credentials
-    payload = verify_token(token)
+    token = credentials.credentials  # Wyciąga token z header Authorization
+    payload = verify_token(token)  # Dekoduje i weryfikuje JWT
 
-    return payload
+    return payload  # {"sub": "uuid", "email": "...", "role": "READER"}
 
 
 # ==========================================

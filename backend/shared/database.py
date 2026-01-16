@@ -81,6 +81,7 @@ Base = declarative_base()
 def get_db() -> Generator:
     """
     Dependency dla FastAPI - dostarcza sesję bazodanową.
+    Automatyczne zarządzanie cyklem życia sesji (create → use → close).
     """
     db = SessionLocal()
     try:

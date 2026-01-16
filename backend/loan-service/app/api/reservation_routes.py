@@ -47,6 +47,14 @@ async def create_reservation(
     - F8: Rezerwacja książki (użytkownik zgłasza chęć zarezerwowania wybranej pozycji)
     - NF29: Max 3 aktywne rezerwacje na użytkownika
     - NF5: Dostęp dla READER, LIBRARIAN, ADMIN (kontrola przez get_current_user + reguły)
+      Wymaga autentykacji - każdy zalogowany użytkownik może rezerwować.
+
+    DI automatycznie:
+    1. Weryfikuje JWT token (NF4)
+    2. Pobiera user_id z tokenu
+    3. Tworzy sesję bazodanową
+    4. Zamyka sesję po zakończeniu
+
     """
     current_user_id = current_user.get("sub")
 
@@ -249,6 +257,12 @@ async def delete_reservation(
     Wymagania:
     - NF19: Soft delete zamiast fizycznego usuwania z bazy
     - NF5: RBAC – tylko LIBRARIAN/ADMIN mogą fizycznie "usuwać" rezerwacje (logicznie)
+    DI automatycznie:
+    1. Weryfikuje JWT token
+    2. Sprawdza czy user.role in ["LIBRARIAN", "ADMIN"]
+    3. Jeśli NIE → 403 Forbidden
+    4. Jeśli TAK → pozwala wykonać endpoint
+
     """
     # Pobierz rezerwację, jeśli jeszcze istnieje logicznie
     reservation = (
