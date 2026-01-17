@@ -3,16 +3,26 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
+# ⭐ DODAJ - Przyjmij argumenty z docker-compose
+ARG VITE_AUTH_API_URL
+ARG VITE_CATALOG_API_URL
+ARG VITE_LOAN_API_URL
+
+# ⭐ DODAJ - Ustaw jako zmienne środowiskowe
+ENV VITE_AUTH_API_URL=$VITE_AUTH_API_URL
+ENV VITE_CATALOG_API_URL=$VITE_CATALOG_API_URL
+ENV VITE_LOAN_API_URL=$VITE_LOAN_API_URL
+
 # Kopiujemy zależności
 COPY package*.json ./
 
 # Instalujemy zależności
 RUN npm install
 
-# Kopiujemy pliki projektu (w tym .env)
+# Kopiujemy pliki projektu
 COPY . .
 
-# Tworzymy build produkcyjny – Vite przeczyta zmienne z .env
+# Tworzymy build produkcyjny – Vite użyje zmiennych ENV
 RUN npm run build
 
 # Etap 2: Serwowanie przez nginx

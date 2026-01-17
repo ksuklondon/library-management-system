@@ -76,6 +76,11 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      args:
+        # ⭐ DODAJ TO - przekazuje URL-e podczas budowania
+        - VITE_AUTH_API_URL=http://auth-service:8001
+        - VITE_CATALOG_API_URL=http://catalog-service:8002
+        - VITE_LOAN_API_URL=http://loan-service:8003
     container_name: frontend
     depends_on:
       - auth-service

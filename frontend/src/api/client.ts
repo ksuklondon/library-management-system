@@ -12,25 +12,14 @@ import type { AxiosError, AxiosInstance, InternalAxiosRequestConfig } from "axio
 import axios from "axios";
 
 /**
- * Bazowy URL dla API (z .env).
+ * Bazowe URL-e dla serwisów (z .env).
  */
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
 const AUTH_SERVICE_URL = import.meta.env.VITE_AUTH_SERVICE_URL || "http://localhost:8001";
+const CATALOG_SERVICE_URL = import.meta.env.VITE_CATALOG_SERVICE_URL || "http://localhost:8002";
+const LOAN_SERVICE_URL = import.meta.env.VITE_LOAN_SERVICE_URL || "http://localhost:8003";
 
 /**
- * Główny klient Axios dla wszystkich requestów.
- * Zawiera automatyczne dołączanie JWT tokenów i refresh logic.
- */
-export const apiClient: AxiosInstance = axios.create({
-  baseURL: API_BASE_URL,
-  timeout: 5000, // NF12: timeout 5s (bezpieczny margines)
-  headers: {
-    "Content-Type": "application/json",
-  },
-});
-
-/**
- * Klient Axios specjalnie dla auth-service.
+ * Klient dla auth-service.
  */
 export const authClient: AxiosInstance = axios.create({
   baseURL: AUTH_SERVICE_URL,
@@ -39,6 +28,33 @@ export const authClient: AxiosInstance = axios.create({
     "Content-Type": "application/json",
   },
 });
+
+/**
+ * Klient dla catalog-service.
+ */
+export const catalogClient: AxiosInstance = axios.create({
+  baseURL: CATALOG_SERVICE_URL,
+  timeout: 5000,
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
+
+/**
+ * Klient dla loan-service.
+ */
+export const loanClient: AxiosInstance = axios.create({
+  baseURL: LOAN_SERVICE_URL,
+  timeout: 5000,
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
+
+/**
+ * Główny klient (dla kompatybilności wstecznej).
+ */
+export const apiClient = authClient;
 
 /**
  * Pobierz access token z localStorage (NF4 - JWT).
@@ -72,76 +88,86 @@ export const clearTokens = (): void => {
 };
 
 /**
- * Request interceptor - automatycznie dołącza JWT token do każdego requesta (NF4).
+ * Dodaj interceptory do klienta.
  */
-apiClient.interceptors.request.use(
-  (config: InternalAxiosRequestConfig) => {
-    const token = getAccessToken();
+const addInterceptors = (client: AxiosInstance) => {
+  /**
+   * Request interceptor - automatycznie dołącza JWT token do każdego requesta (NF4).
+   */
+  client.interceptors.request.use(
+    (config: InternalAxiosRequestConfig) => {
+      const token = getAccessToken();
 
-    // Jeśli jest token, dodaj do headers
-    if (token && config.headers) {
-      config.headers.Authorization = `Bearer ${token}`;
+      // Jeśli jest token, dodaj do headers
+      if (token && config.headers) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+
+      return config;
+    },
+    (error: AxiosError) => {
+      return Promise.reject(error);
     }
+  );
 
-    return config;
-  },
-  (error: AxiosError) => {
-    return Promise.reject(error);
-  }
-);
+  /**
+   * Response interceptor - automatyczne odświeżanie tokenu gdy wygaśnie (F2a).
+   */
+  client.interceptors.response.use(
+    (response) => {
+      // Jeśli response OK, zwróć go normalnie
+      return response;
+    },
+    async (error: AxiosError) => {
+      const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
 
-/**
- * Response interceptor - automatyczne odświeżanie tokenu gdy wygaśnie (F2a).
- */
-apiClient.interceptors.response.use(
-  (response) => {
-    // Jeśli response OK, zwróć go normalnie
-    return response;
-  },
-  async (error: AxiosError) => {
-    const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
+      // Jeśli błąd 401 (unauthorized) i nie próbowaliśmy jeszcze odświeżyć tokenu
+      if (error.response?.status === 401 && !originalRequest._retry) {
+        originalRequest._retry = true;
 
-    // Jeśli błąd 401 (unauthorized) i nie próbowaliśmy jeszcze odświeżyć tokenu
-    if (error.response?.status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true;
+        const refreshToken = getRefreshToken();
 
-      const refreshToken = getRefreshToken();
+        if (refreshToken) {
+          try {
+            // Spróbuj odświeżyć token (F2a)
+            const response = await authClient.post("/api/auth/refresh", {
+              refresh_token: refreshToken,
+            });
 
-      if (refreshToken) {
-        try {
-          // Spróbuj odświeżyć token (F2a)
-          const response = await authClient.post("/api/auth/refresh", {
-            refresh_token: refreshToken,
-          });
+            const { access_token } = response.data;
 
-          const { access_token } = response.data;
+            // Zapisz nowy token
+            localStorage.setItem("access_token", access_token);
 
-          // Zapisz nowy token
-          localStorage.setItem("access_token", access_token);
+            // Zaktualizuj header w oryginalnym requeście
+            if (originalRequest.headers) {
+              originalRequest.headers.Authorization = `Bearer ${access_token}`;
+            }
 
-          // Zaktualizuj header w oryginalnym requeście
-          if (originalRequest.headers) {
-            originalRequest.headers.Authorization = `Bearer ${access_token}`;
+            // Wyślij ponownie oryginalny request z nowym tokenem
+            return client(originalRequest);
+          } catch (refreshError) {
+            // Jeśli refresh nie działa, wyloguj użytkownika
+            clearTokens();
+            window.location.href = "/login";
+            return Promise.reject(refreshError);
           }
-
-          // Wyślij ponownie oryginalny request z nowym tokenem
-          return apiClient(originalRequest);
-        } catch (refreshError) {
-          // Jeśli refresh nie działa, wyloguj użytkownika
+        } else {
+          // Brak refresh tokenu - przekieruj na login
           clearTokens();
           window.location.href = "/login";
-          return Promise.reject(refreshError);
         }
-      } else {
-        // Brak refresh tokenu - przekieruj na login
-        clearTokens();
-        window.location.href = "/login";
       }
-    }
 
-    return Promise.reject(error);
-  }
-);
+      return Promise.reject(error);
+    }
+  );
+};
+
+// Dodaj interceptory do wszystkich klientów
+addInterceptors(authClient);
+addInterceptors(catalogClient);
+addInterceptors(loanClient);
 
 /**
  * Helper do obsługi błędów API.

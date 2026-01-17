@@ -23,12 +23,7 @@ import type {
   PaginationParams,
   SearchQuery,
 } from "../types/book";
-import apiClient, { getErrorMessage } from "./client";
-
-/**
- * Bazowy URL dla catalog-service.
- */
-const CATALOG_SERVICE_URL = import.meta.env.VITE_CATALOG_SERVICE_URL || "http://localhost:8002";
+import { catalogClient, getErrorMessage } from "./client";
 
 /**
  * Przeglądanie katalogu książek z paginacją (F4).
@@ -39,16 +34,13 @@ export const browseCatalog = async (
   filter?: CatalogFilter
 ): Promise<CatalogResponse> => {
   try {
-    const response = await apiClient.get<CatalogResponse>(
-      `${CATALOG_SERVICE_URL}/api/catalog/browse`,
-      {
-        params: {
-          page: pagination?.page || 1,
-          page_size: pagination?.page_size || 20,
-          ...filter,
-        },
-      }
-    );
+    const response = await catalogClient.get<CatalogResponse>("/api/catalog/browse", {
+      params: {
+        page: pagination?.page || 1,
+        page_size: pagination?.page_size || 20,
+        ...filter,
+      },
+    });
     return response.data;
   } catch (error) {
     throw new Error(getErrorMessage(error));
@@ -64,16 +56,12 @@ export const searchBooks = async (
   pagination?: PaginationParams
 ): Promise<CatalogResponse> => {
   try {
-    const response = await apiClient.post<CatalogResponse>(
-      `${CATALOG_SERVICE_URL}/api/catalog/search`,
-      query,
-      {
-        params: {
-          page: pagination?.page || 1,
-          page_size: pagination?.page_size || 20,
-        },
-      }
-    );
+    const response = await catalogClient.post<CatalogResponse>("/api/catalog/search", query, {
+      params: {
+        page: pagination?.page || 1,
+        page_size: pagination?.page_size || 20,
+      },
+    });
     return response.data;
   } catch (error) {
     throw new Error(getErrorMessage(error));
@@ -86,7 +74,7 @@ export const searchBooks = async (
  */
 export const getBookDetails = async (bookId: string): Promise<Book> => {
   try {
-    const response = await apiClient.get<Book>(`${CATALOG_SERVICE_URL}/api/catalog/${bookId}`);
+    const response = await catalogClient.get<Book>(`/api/catalog/${bookId}`);
     return response.data;
   } catch (error) {
     throw new Error(getErrorMessage(error));
@@ -98,7 +86,7 @@ export const getBookDetails = async (bookId: string): Promise<Book> => {
  */
 export const createBook = async (data: BookCreateRequest): Promise<Book> => {
   try {
-    const response = await apiClient.post<Book>(`${CATALOG_SERVICE_URL}/api/books/`, data);
+    const response = await catalogClient.post<Book>("/api/books/", data);
     return response.data;
   } catch (error) {
     throw new Error(getErrorMessage(error));
@@ -110,7 +98,7 @@ export const createBook = async (data: BookCreateRequest): Promise<Book> => {
  */
 export const updateBook = async (bookId: string, data: BookUpdateRequest): Promise<Book> => {
   try {
-    const response = await apiClient.put<Book>(`${CATALOG_SERVICE_URL}/api/books/${bookId}`, data);
+    const response = await catalogClient.put<Book>(`/api/books/${bookId}`, data);
     return response.data;
   } catch (error) {
     throw new Error(getErrorMessage(error));
@@ -122,7 +110,7 @@ export const updateBook = async (bookId: string, data: BookUpdateRequest): Promi
  */
 export const deleteBook = async (bookId: string): Promise<void> => {
   try {
-    await apiClient.delete(`${CATALOG_SERVICE_URL}/api/books/${bookId}`);
+    await catalogClient.delete(`/api/books/${bookId}`);
   } catch (error) {
     throw new Error(getErrorMessage(error));
   }
@@ -133,7 +121,7 @@ export const deleteBook = async (bookId: string): Promise<void> => {
  */
 export const getAllBooks = async (skip = 0, limit = 50): Promise<Book[]> => {
   try {
-    const response = await apiClient.get<Book[]>(`${CATALOG_SERVICE_URL}/api/books/`, {
+    const response = await catalogClient.get<Book[]>("/api/books/", {
       params: { skip, limit },
     });
     return response.data;
@@ -147,9 +135,7 @@ export const getAllBooks = async (skip = 0, limit = 50): Promise<Book[]> => {
  */
 export const getBookCopies = async (bookId: string): Promise<BookCopy[]> => {
   try {
-    const response = await apiClient.get<BookCopy[]>(
-      `${CATALOG_SERVICE_URL}/api/copies/book/${bookId}`
-    );
+    const response = await catalogClient.get<BookCopy[]>(`/api/copies/book/${bookId}`);
     return response.data;
   } catch (error) {
     throw new Error(getErrorMessage(error));
@@ -161,7 +147,7 @@ export const getBookCopies = async (bookId: string): Promise<BookCopy[]> => {
  */
 export const getCopyDetails = async (copyId: string): Promise<BookCopy> => {
   try {
-    const response = await apiClient.get<BookCopy>(`${CATALOG_SERVICE_URL}/api/copies/${copyId}`);
+    const response = await catalogClient.get<BookCopy>(`/api/copies/${copyId}`);
     return response.data;
   } catch (error) {
     throw new Error(getErrorMessage(error));
@@ -173,7 +159,7 @@ export const getCopyDetails = async (copyId: string): Promise<BookCopy> => {
  */
 export const createBookCopy = async (data: BookCopyCreateRequest): Promise<BookCopy> => {
   try {
-    const response = await apiClient.post<BookCopy>(`${CATALOG_SERVICE_URL}/api/copies/`, data);
+    const response = await catalogClient.post<BookCopy>("/api/copies/", data);
     return response.data;
   } catch (error) {
     throw new Error(getErrorMessage(error));
@@ -188,10 +174,7 @@ export const updateBookCopy = async (
   data: BookCopyUpdateRequest
 ): Promise<BookCopy> => {
   try {
-    const response = await apiClient.put<BookCopy>(
-      `${CATALOG_SERVICE_URL}/api/copies/${copyId}`,
-      data
-    );
+    const response = await catalogClient.put<BookCopy>(`/api/copies/${copyId}`, data);
     return response.data;
   } catch (error) {
     throw new Error(getErrorMessage(error));
@@ -203,10 +186,9 @@ export const updateBookCopy = async (
  */
 export const updateCopyStatus = async (copyId: string, status: CopyStatus): Promise<BookCopy> => {
   try {
-    const response = await apiClient.patch<BookCopy>(
-      `${CATALOG_SERVICE_URL}/api/copies/${copyId}/status`,
-      { status }
-    );
+    const response = await catalogClient.patch<BookCopy>(`/api/copies/${copyId}/status`, {
+      status,
+    });
     return response.data;
   } catch (error) {
     throw new Error(getErrorMessage(error));
@@ -218,7 +200,7 @@ export const updateCopyStatus = async (copyId: string, status: CopyStatus): Prom
  */
 export const deleteBookCopy = async (copyId: string): Promise<void> => {
   try {
-    await apiClient.delete(`${CATALOG_SERVICE_URL}/api/copies/${copyId}`);
+    await catalogClient.delete(`/api/copies/${copyId}`);
   } catch (error) {
     throw new Error(getErrorMessage(error));
   }

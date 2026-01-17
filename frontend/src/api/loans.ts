@@ -31,12 +31,7 @@ import type {
   CheckReservationEligibilityRequest,
   ReservationEligibilityResponse,
 } from "../types/reservation";
-import apiClient, { getErrorMessage } from "./client";
-
-/**
- * Bazowy URL dla loan-service.
- */
-const LOAN_SERVICE_URL = import.meta.env.VITE_LOAN_SERVICE_URL || "http://localhost:8003";
+import { getErrorMessage, loanClient } from "./client";
 
 // ==================== REZERWACJE (F8-F10) ====================
 
@@ -45,10 +40,7 @@ const LOAN_SERVICE_URL = import.meta.env.VITE_LOAN_SERVICE_URL || "http://localh
  */
 export const createReservation = async (data: ReservationCreateRequest): Promise<Reservation> => {
   try {
-    const response = await apiClient.post<Reservation>(
-      `${LOAN_SERVICE_URL}/api/reservations/`,
-      data
-    );
+    const response = await loanClient.post<Reservation>("/api/reservations/", data);
     return response.data;
   } catch (error) {
     throw new Error(getErrorMessage(error));
@@ -60,9 +52,7 @@ export const createReservation = async (data: ReservationCreateRequest): Promise
  */
 export const getMyReservations = async (): Promise<ReservationsResponse> => {
   try {
-    const response = await apiClient.get<ReservationsResponse>(
-      `${LOAN_SERVICE_URL}/api/reservations/my`
-    );
+    const response = await loanClient.get<ReservationsResponse>("/api/reservations/my");
     return response.data;
   } catch (error) {
     throw new Error(getErrorMessage(error));
@@ -74,9 +64,19 @@ export const getMyReservations = async (): Promise<ReservationsResponse> => {
  */
 export const getAllReservations = async (): Promise<AllReservationsResponse> => {
   try {
-    const response = await apiClient.get<AllReservationsResponse>(
-      `${LOAN_SERVICE_URL}/api/reservations/`
-    );
+    const response = await loanClient.get<AllReservationsResponse>("/api/reservations/");
+    return response.data;
+  } catch (error) {
+    throw new Error(getErrorMessage(error));
+  }
+};
+
+/**
+ * Pobranie rezerwacji użytkownika po user_id (LIBRARIAN/ADMIN).
+ */
+export const getUserReservations = async (userId: string): Promise<Reservation[]> => {
+  try {
+    const response = await loanClient.get<Reservation[]>(`/api/reservations/user/${userId}`);
     return response.data;
   } catch (error) {
     throw new Error(getErrorMessage(error));
@@ -88,9 +88,7 @@ export const getAllReservations = async (): Promise<AllReservationsResponse> => 
  */
 export const getReservationDetails = async (reservationId: string): Promise<Reservation> => {
   try {
-    const response = await apiClient.get<Reservation>(
-      `${LOAN_SERVICE_URL}/api/reservations/${reservationId}`
-    );
+    const response = await loanClient.get<Reservation>(`/api/reservations/${reservationId}`);
     return response.data;
   } catch (error) {
     throw new Error(getErrorMessage(error));
@@ -102,8 +100,8 @@ export const getReservationDetails = async (reservationId: string): Promise<Rese
  */
 export const cancelReservation = async (reservationId: string): Promise<Reservation> => {
   try {
-    const response = await apiClient.post<Reservation>(
-      `${LOAN_SERVICE_URL}/api/reservations/${reservationId}/cancel`
+    const response = await loanClient.post<Reservation>(
+      `/api/reservations/${reservationId}/cancel`
     );
     return response.data;
   } catch (error) {
@@ -118,8 +116,8 @@ export const checkReservationEligibility = async (
   data: CheckReservationEligibilityRequest
 ): Promise<ReservationEligibilityResponse> => {
   try {
-    const response = await apiClient.post<ReservationEligibilityResponse>(
-      `${LOAN_SERVICE_URL}/api/reservations/check-eligibility`,
+    const response = await loanClient.post<ReservationEligibilityResponse>(
+      "/api/reservations/check-eligibility",
       data
     );
     return response.data;
@@ -133,8 +131,8 @@ export const checkReservationEligibility = async (
  */
 export const checkBookAvailability = async (bookId: string): Promise<BookAvailability> => {
   try {
-    const response = await apiClient.get<BookAvailability>(
-      `${LOAN_SERVICE_URL}/api/reservations/availability/${bookId}`
+    const response = await loanClient.get<BookAvailability>(
+      `/api/reservations/availability/${bookId}`
     );
     return response.data;
   } catch (error) {
@@ -149,7 +147,7 @@ export const checkBookAvailability = async (bookId: string): Promise<BookAvailab
  */
 export const createLoan = async (data: LoanCreateRequest): Promise<Loan> => {
   try {
-    const response = await apiClient.post<Loan>(`${LOAN_SERVICE_URL}/api/loans/`, data);
+    const response = await loanClient.post<Loan>("/api/loans/", data);
     return response.data;
   } catch (error) {
     throw new Error(getErrorMessage(error));
@@ -161,7 +159,7 @@ export const createLoan = async (data: LoanCreateRequest): Promise<Loan> => {
  */
 export const getMyLoans = async (): Promise<LoansResponse> => {
   try {
-    const response = await apiClient.get<LoansResponse>(`${LOAN_SERVICE_URL}/api/loans/my`);
+    const response = await loanClient.get<LoansResponse>("/api/loans/my");
     return response.data;
   } catch (error) {
     throw new Error(getErrorMessage(error));
@@ -173,7 +171,7 @@ export const getMyLoans = async (): Promise<LoansResponse> => {
  */
 export const getAllLoans = async (): Promise<LoansResponse> => {
   try {
-    const response = await apiClient.get<LoansResponse>(`${LOAN_SERVICE_URL}/api/loans/`);
+    const response = await loanClient.get<LoansResponse>("/api/loans/");
     return response.data;
   } catch (error) {
     throw new Error(getErrorMessage(error));
@@ -185,7 +183,7 @@ export const getAllLoans = async (): Promise<LoansResponse> => {
  */
 export const getLoanDetails = async (loanId: string): Promise<Loan> => {
   try {
-    const response = await apiClient.get<Loan>(`${LOAN_SERVICE_URL}/api/loans/${loanId}`);
+    const response = await loanClient.get<Loan>(`/api/loans/${loanId}`);
     return response.data;
   } catch (error) {
     throw new Error(getErrorMessage(error));
@@ -197,10 +195,7 @@ export const getLoanDetails = async (loanId: string): Promise<Loan> => {
  */
 export const returnLoan = async (data: LoanReturnRequest): Promise<Loan> => {
   try {
-    const response = await apiClient.post<Loan>(
-      `${LOAN_SERVICE_URL}/api/loans/${data.loan_id}/return`,
-      data
-    );
+    const response = await loanClient.post<Loan>(`/api/loans/${data.loan_id}/return`, data);
     return response.data;
   } catch (error) {
     throw new Error(getErrorMessage(error));
@@ -212,10 +207,7 @@ export const returnLoan = async (data: LoanReturnRequest): Promise<Loan> => {
  */
 export const extendLoan = async (data: LoanExtendRequest): Promise<Loan> => {
   try {
-    const response = await apiClient.post<Loan>(
-      `${LOAN_SERVICE_URL}/api/loans/${data.loan_id}/extend`,
-      data
-    );
+    const response = await loanClient.post<Loan>(`/api/loans/${data.loan_id}/extend`, data);
     return response.data;
   } catch (error) {
     throw new Error(getErrorMessage(error));
@@ -229,7 +221,7 @@ export const extendLoan = async (data: LoanExtendRequest): Promise<Loan> => {
  */
 export const getMyFines = async (): Promise<FinesResponse> => {
   try {
-    const response = await apiClient.get<FinesResponse>(`${LOAN_SERVICE_URL}/api/fines/my`);
+    const response = await loanClient.get<FinesResponse>("/api/fines/my");
     return response.data;
   } catch (error) {
     throw new Error(getErrorMessage(error));
@@ -241,7 +233,7 @@ export const getMyFines = async (): Promise<FinesResponse> => {
  */
 export const getAllFines = async (): Promise<FinesResponse> => {
   try {
-    const response = await apiClient.get<FinesResponse>(`${LOAN_SERVICE_URL}/api/fines/`);
+    const response = await loanClient.get<FinesResponse>("/api/fines/");
     return response.data;
   } catch (error) {
     throw new Error(getErrorMessage(error));
@@ -253,10 +245,7 @@ export const getAllFines = async (): Promise<FinesResponse> => {
  */
 export const payFine = async (data: FinePaymentRequest): Promise<Fine> => {
   try {
-    const response = await apiClient.post<Fine>(
-      `${LOAN_SERVICE_URL}/api/fines/${data.fine_id}/pay`,
-      data
-    );
+    const response = await loanClient.post<Fine>(`/api/fines/${data.fine_id}/pay`, data);
     return response.data;
   } catch (error) {
     throw new Error(getErrorMessage(error));
@@ -268,7 +257,7 @@ export const payFine = async (data: FinePaymentRequest): Promise<Fine> => {
  */
 export const getFineDetails = async (fineId: string): Promise<Fine> => {
   try {
-    const response = await apiClient.get<Fine>(`${LOAN_SERVICE_URL}/api/fines/${fineId}`);
+    const response = await loanClient.get<Fine>(`/api/fines/${fineId}`);
     return response.data;
   } catch (error) {
     throw new Error(getErrorMessage(error));
